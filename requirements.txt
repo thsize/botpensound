@@ -1,0 +1,4 @@
+hydrogram
+aiohttp
+aiohttp_cors
+tgcrypto
