@@ -18,7 +18,6 @@ CANAL_ID = -1003997037273
 
 BASE_URL = "https://bot-pensound.onrender.com"
 
-# Inicialização usando apenas sua conta/número de telefone
 app = Client("pensound_user", api_id=API_ID, api_hash=API_HASH)
 
 HTML_PAGE = """
@@ -30,7 +29,7 @@ HTML_PAGE = """
     <title>PenSound Manager</title>
     <style>
         body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; text-align: center; }
-        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; max-width: 420px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; max-width: 440px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         label { display: block; margin-top: 15px; text-align: left; font-weight: bold; color: #aaa; }
         input[type="text"], input[type="file"], select { margin: 8px 0 15px 0; display: block; width: 100%; color: #ccc; box-sizing: border-box; }
         input[type="text"], select { background: #2a2a2a; border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; }
@@ -39,7 +38,7 @@ HTML_PAGE = """
         
         .progress-container { display: none; margin-top: 20px; text-align: left; }
         .progress-bar-bg { background: #333; border-radius: 8px; height: 18px; width: 100%; overflow: hidden; margin-top: 5px; }
-        .progress-bar-fill { background: #00ffcc; height: 100%; width: 0%; transition: width 0.2s; }
+        .progress-bar-fill { background: #00ffcc; height: 100%; width: 0%; transition: width 0.1s; }
         .status-text { font-size: 13px; color: #00ffcc; margin-top: 8px; text-align: center; font-weight: bold; }
     </style>
 </head>
@@ -64,7 +63,7 @@ HTML_PAGE = """
                 <option value="OUTROS">Outros</option>
             </select>
 
-            <label>1. Arquivo do Pacote (.zip):</label>
+            <label>1. Arquivo do Pacote (.zip até 2GB):</label>
             <input type="file" id="zip_file" accept=".zip" required>
             
             <label>2. Imagem da Capa (.jpg / .png):</label>
@@ -74,11 +73,11 @@ HTML_PAGE = """
         </form>
 
         <div class="progress-container" id="progressArea">
-            <label id="progressLabel">Enviando arquivo: 0%</label>
+            <label id="progressLabel">Enviando: 0%</label>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressBar"></div>
             </div>
-            <div class="status-text" id="statusText">Iniciando upload...</div>
+            <div class="status-text" id="statusText">Iniciando upload de velocidade máxima...</div>
         </div>
     </div>
 
@@ -109,28 +108,28 @@ HTML_PAGE = """
                 if (e.lengthComputable) {
                     const percent = Math.round((e.loaded / e.total) * 100);
                     progressBar.style.width = percent + '%';
-                    progressLabel.innerText = 'Enviando do PC/Celular: ' + percent + '%';
+                    progressLabel.innerText = 'Enviando para o Servidor: ' + percent + '%';
                     if (percent === 100) {
-                        statusText.innerText = '⚙️ Processando e registrando no Telegram... Aguarde!';
+                        statusText.innerText = '⚙️ Registrando no Telegram... Quase pronto!';
                     }
                 }
             };
 
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    statusText.innerText = '✅ Card cadastrado com sucesso!';
-                    alert('Pacote enviado e cadastrado com sucesso!');
+                    statusText.innerText = '✅ Cadastrado com Sucesso!';
+                    alert('Pacote cadastrado com sucesso!');
                     window.location.reload();
                 } else {
-                    statusText.innerText = '❌ Erro no envio!';
-                    alert('Erro no servidor ao enviar arquivo.');
+                    statusText.innerText = '❌ Erro no Envio!';
+                    alert('Erro ao enviar o pacote.');
                     btnSubmit.disabled = false;
                 }
             };
 
             xhr.onerror = function() {
-                statusText.innerText = '❌ Erro na conexão!';
-                alert('Falha na rede durante o upload.');
+                statusText.innerText = '❌ Erro de Conexão!';
+                alert('Falha na rede.');
                 btnSubmit.disabled = false;
             };
 
@@ -168,9 +167,11 @@ async def handle_upload(request):
             elif field.name == 'zip_file':
                 orig_filename = field.filename or "pacote.zip"
                 zip_path = os.path.join(home_dir, orig_filename)
+                
+                # Leitura no LIMITE MÁXIMO de 64MB por bloco
                 with open(zip_path, 'wb') as f:
                     while True:
-                        chunk = await field.read_chunk(1024 * 1024 * 2)
+                        chunk = await field.read_chunk(1024 * 1024 * 64)
                         if not chunk:
                             break
                         f.write(chunk)
@@ -180,14 +181,15 @@ async def handle_upload(request):
                 cover_path = os.path.join(home_dir, f"capa_{orig_filename}")
                 with open(cover_path, 'wb') as f:
                     while True:
-                        chunk = await field.read_chunk(1024 * 1024)
+                        chunk = await field.read_chunk(1024 * 1024 * 4)
                         if not chunk:
                             break
                         f.write(chunk)
 
         if not zip_path or not cover_path:
-            return web.Response(text="Erro: Envie todos os dados!", status=400)
+            return web.Response(text="Erro: Arquivos faltando!", status=400)
 
+        # Envia o ZIP para o Telegram
         sent_zip_msg = await app.send_document(
             chat_id=CANAL_ID, 
             document=zip_path, 
@@ -196,6 +198,7 @@ async def handle_upload(request):
         if os.path.exists(zip_path):
             os.remove(zip_path)
 
+        # Envia a Capa para o Telegram
         sent_cover_msg = await app.send_document(
             chat_id=CANAL_ID, 
             document=cover_path,
@@ -207,7 +210,7 @@ async def handle_upload(request):
         return web.Response(text="OK", status=200)
 
     except Exception as e:
-        print(f"❌ Erro de upload: {str(e)}")
+        print(f"❌ Erro no upload: {str(e)}")
         if zip_path and os.path.exists(zip_path):
             os.remove(zip_path)
         if cover_path and os.path.exists(cover_path):
@@ -223,43 +226,38 @@ async def handle_download(request):
         
         if not msg or not msg.media:
             return web.Response(status=404, text="Arquivo nao encontrado")
-
+            
         file_obj = msg.document or msg.photo or msg.audio or msg.video
         file_size = getattr(file_obj, 'file_size', 0)
-
-        # Se for imagem da Capa
+        
         if msg.photo:
-            response = web.StreamResponse(
-                status=200,
-                headers={'Content-Type': 'image/jpeg', 'Content-Length': str(file_size)}
-            )
-            await response.prepare(request)
-            async for chunk in app.stream_media(msg):
-                await response.write(chunk)
-            return response
+            file_name = "capa.jpg"
+            content_type = "image/jpeg"
+            disposition = "inline"
+        else:
+            file_name = getattr(file_obj, 'file_name', 'pacote.zip')
+            content_type = 'application/zip'
+            disposition = f'attachment; filename="{file_name}"'
 
-        # Se for o ZIP grande: Baixa para o disco interno e entrega como FileResponse nativo
-        file_name = getattr(file_obj, 'file_name', 'pacote.zip')
-        temp_dir = os.path.expanduser("~")
-        temp_file_path = os.path.join(temp_dir, f"temp_{message_id}_{file_name}")
-
-        # Se ainda não existe localmente, baixa primeiro pelo Userbot
-        if not os.path.exists(temp_file_path):
-            await app.download_media(msg, file_name=temp_file_path)
-
-        # Entrega o arquivo em alta velocidade diretamente do disco sem corromper
-        response = web.FileResponse(
-            path=temp_file_path,
+        response = web.StreamResponse(
+            status=200,
             headers={
-                'Content-Type': 'application/zip',
-                'Content-Disposition': f'attachment; filename="{file_name}"'
+                'Content-Type': content_type,
+                'Content-Disposition': disposition,
+                'Content-Length': str(file_size),
+                'Accept-Ranges': 'bytes',
+                'Cache-Control': 'no-cache'
             }
         )
-        
+        await response.prepare(request)
+
+        async for chunk in app.stream_media(msg):
+            await response.write(chunk)
+
         return response
 
     except Exception as e:
-        print(f"❌ Erro no download: {e}")
+        print(f"❌ Erro no Stream: {str(e)}")
         return web.Response(status=500, text=str(e))
 
 async def handle_api_pacotes(request):
@@ -318,7 +316,7 @@ async def main():
     runner = web.AppRunner(server)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 8080)
-    print("\n🚀 Servidor Userbot PenSound Pronto!\n")
+    print("\n🚀 Servidor PenSound com Buffer de 64MB Rodando!\n")
     await site.start()
     
     while True:
