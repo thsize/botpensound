@@ -1,5 +1,6 @@
 import asyncio
 import os
+import mimetypes
 from aiohttp import web
 import aiohttp_cors
 
@@ -15,7 +16,8 @@ API_ID = 31285889
 API_HASH = "48fec694d07f2a32566dfe17b66a0d7a"
 CANAL_ID = -1003997037273
 
-BASE_URL = "https://bot-pensound.fly.dev"
+# 1. URL base atualizada para o Render
+BASE_URL = "https://bot-pensound.onrender.com"
 
 app = Client("pensound_user", api_id=API_ID, api_hash=API_HASH)
 
@@ -89,7 +91,8 @@ async def handle_upload(request):
                         f.write(chunk)
                         
             elif field.name == 'cover_file':
-                cover_path = os.path.join(home_dir, "capa_envio.jpg")
+                orig_filename = field.filename or "capa.jpg"
+                cover_path = os.path.join(home_dir, f"capa_{orig_filename}")
                 print(f"📥 Recebendo capa...")
                 with open(cover_path, 'wb') as f:
                     while True:
@@ -175,16 +178,22 @@ async def handle_download(request):
         if msg.photo:
             file_size = msg.photo.file_size
             file_name = "capa.jpg"
+            content_type = "image/jpeg"
         else:
             file_size = getattr(file_obj, 'file_size', 0)
             file_name = getattr(file_obj, 'file_name', 'pacote.zip')
+            
+            # 2. Define o Content-Type dinâmico com base na extensão
+            content_type, _ = mimetypes.guess_type(file_name)
+            if not content_type:
+                content_type = 'application/zip' if file_name.endswith('.zip') else 'application/octet-stream'
 
         response = web.StreamResponse(
             status=200,
             reason='OK',
             headers={
-                'Content-Type': 'application/octet-stream',
-                'Content-Disposition': f'attachment; filename="{file_name}"',
+                'Content-Type': content_type,
+                'Content-Disposition': f'inline; filename="{file_name}"',
                 'Content-Length': str(file_size)
             }
         )
