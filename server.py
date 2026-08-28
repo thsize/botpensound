@@ -29,11 +29,18 @@ HTML_PAGE = """
     <title>PenSound Manager</title>
     <style>
         body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; text-align: center; }
-        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; max-width: 420px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         label { display: block; margin-top: 15px; text-align: left; font-weight: bold; color: #aaa; }
         input[type="text"], input[type="file"], select { margin: 8px 0 15px 0; display: block; width: 100%; color: #ccc; box-sizing: border-box; }
         input[type="text"], select { background: #2a2a2a; border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; }
         button { background: #8a2be2; color: #fff; border: none; padding: 12px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; }
+        button:disabled { background: #555; cursor: not-allowed; }
+        
+        /* Barra de Progresso */
+        .progress-container { display: none; margin-top: 20px; text-align: left; }
+        .progress-bar-bg { background: #333; border-radius: 8px; height: 18px; width: 100%; overflow: hidden; margin-top: 5px; }
+        .progress-bar-fill { background: #00ffcc; height: 100%; width: 0%; transition: width 0.2s; }
+        .status-text { font-size: 13px; color: #00ffcc; margin-top: 8px; text-align: center; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -41,12 +48,12 @@ HTML_PAGE = """
         <h2>PenSound Manager</h2>
         <p>Cadastrar Novo Card de Músicas</p>
         
-        <form action="/upload" method="POST" enctype="multipart/form-data">
+        <form id="uploadForm">
             <label>Nome do Pacote:</label>
-            <input type="text" name="package_name" placeholder="Ex: Paredão do DJ Vini" required>
+            <input type="text" id="package_name" required placeholder="Ex: Paredão do DJ Vini">
 
             <label>Categoria:</label>
-            <select name="category" required>
+            <select id="category" required>
                 <option value="PAGODÃO">Pagodão</option>
                 <option value="REPERTÓRIO">Repertório</option>
                 <option value="ARROCHA">Arrocha</option>
@@ -58,14 +65,79 @@ HTML_PAGE = """
             </select>
 
             <label>1. Arquivo do Pacote (.zip):</label>
-            <input type="file" name="zip_file" required>
+            <input type="file" id="zip_file" accept=".zip" required>
             
             <label>2. Imagem da Capa (.jpg / .png):</label>
-            <input type="file" name="cover_file" required>
+            <input type="file" id="cover_file" accept="image/*" required>
             
-            <button type="submit">Cadastrar no PenSound</button>
+            <button type="submit" id="btnSubmit">Cadastrar no PenSound</button>
         </form>
+
+        <div class="progress-container" id="progressArea">
+            <label id="progressLabel">Enviando arquivo: 0%</label>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="status-text" id="statusText">Iniciando upload...</div>
+        </div>
     </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const progressArea = document.getElementById('progressArea');
+        const progressBar = document.getElementById('progressBar');
+        const progressLabel = document.getElementById('progressLabel');
+        const statusText = document.getElementById('statusText');
+        const btnSubmit = document.getElementById('btnSubmit');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('package_name', document.getElementById('package_name').value);
+            formData.append('category', document.getElementById('category').value);
+            formData.append('zip_file', document.getElementById('zip_file').files[0]);
+            formData.append('cover_file', document.getElementById('cover_file').files[0]);
+
+            btnSubmit.disabled = true;
+            progressArea.style.display = 'block';
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/upload', true);
+
+            // Acompanha a porcentagem do envio do navegador para o Render
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressLabel.innerText = 'Enviando do PC/Celular: ' + percent + '%';
+                    if (percent === 100) {
+                        statusText.innerText = '⚙️ Processando e registrando no Telegram... Aguarde!';
+                    }
+                }
+            };
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    statusText.innerText = '✅ Card cadastrado com sucesso!';
+                    alert('Pacote enviado e cadastrado com sucesso!');
+                    window.location.reload();
+                } else {
+                    statusText.innerText = '❌ Erro no envio!';
+                    alert('Erro no servidor ao enviar arquivo.');
+                    btnSubmit.disabled = false;
+                }
+            };
+
+            xhr.onerror = function() {
+                statusText.innerText = '❌ Erro na conexão!';
+                alert('Falha na rede durante o upload.');
+                btnSubmit.disabled = false;
+            };
+
+            xhr.send(formData);
+        });
+    </script>
 </body>
 </html>
 """
@@ -99,7 +171,7 @@ async def handle_upload(request):
                 zip_path = os.path.join(home_dir, orig_filename)
                 with open(zip_path, 'wb') as f:
                     while True:
-                        chunk = await field.read_chunk(1024 * 1024)
+                        chunk = await field.read_chunk(1024 * 1024 * 2) # Chunks maiores (2MB) para mais velocidade
                         if not chunk:
                             break
                         f.write(chunk)
@@ -115,9 +187,9 @@ async def handle_upload(request):
                         f.write(chunk)
 
         if not zip_path or not cover_path:
-            return web.Response(text="<h1>Erro: Envie todos os dados!</h1>", content_type='text/html')
+            return web.Response(text="Erro: Envie todos os dados!", status=400)
 
-        print(f"📤 Enviando '{package_name}' [{category}] para o Telegram...")
+        # Envia arquivo ZIP pro Telegram
         sent_zip_msg = await app.send_document(
             chat_id=CANAL_ID, 
             document=zip_path, 
@@ -126,7 +198,7 @@ async def handle_upload(request):
         if os.path.exists(zip_path):
             os.remove(zip_path)
 
-        print("🖼️ Enviando imagem da capa para o Telegram...")
+        # Envia imagem da Capa pro Telegram
         sent_cover_msg = await app.send_document(
             chat_id=CANAL_ID, 
             document=cover_path,
@@ -135,37 +207,7 @@ async def handle_upload(request):
         if os.path.exists(cover_path):
             os.remove(cover_path)
 
-        zip_url = f"{BASE_URL}/stream/{CANAL_ID}/{sent_zip_msg.id}"
-        cover_url = f"{BASE_URL}/stream/{CANAL_ID}/{sent_cover_msg.id}"
-
-        response_html = f"""
-        <!DOCTYPE html>
-        <html lang="pt-br">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Resultado do Upload</title>
-            <style>
-                body {{ font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; text-align: center; }}
-                .card {{ background: #1e1e1e; border-radius: 12px; padding: 20px; max-width: 450px; margin: 0 auto; word-break: break-all; }}
-                a {{ color: #00ffcc; text-decoration: underline; }}
-                .btn-back {{ display: inline-block; margin-top: 15px; padding: 10px 15px; background: #8a2be2; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }}
-            </style>
-        </head>
-        <body>
-            <div class="card">
-                <h2 style="color: #00ff00;">✅ Card Cadastrado!</h2>
-                <p><strong>Nome:</strong> {package_name}</p>
-                <p><strong>Categoria:</strong> {category}</p>
-                <p><strong>Link do Pacote (.zip):</strong><br><a href="{zip_url}" target="_blank">{zip_url}</a></p>
-                <p><strong>Link da Capa (Imagem):</strong><br><a href="{cover_url}" target="_blank">{cover_url}</a></p>
-                <br>
-                <a href="/" class="btn-back">⬅ Cadastrar Outro Pacote</a>
-            </div>
-        </body>
-        </html>
-        """
-        return web.Response(text=response_html, content_type='text/html')
+        return web.Response(text="OK", status=200)
 
     except Exception as e:
         print(f"❌ Erro de upload: {str(e)}")
@@ -173,7 +215,7 @@ async def handle_upload(request):
             os.remove(zip_path)
         if cover_path and os.path.exists(cover_path):
             os.remove(cover_path)
-        return web.Response(text=f"<h1>Erro no servidor: {str(e)}</h1>", content_type='text/html', status=500)
+        return web.Response(text=str(e), status=500)
 
 async def handle_download(request):
     try:
@@ -222,8 +264,6 @@ async def handle_api_pacotes(request):
         async for msg in app.get_chat_history(CANAL_ID, limit=50):
             if msg.caption and "📦 Pacote:" in msg.caption:
                 caption = msg.caption
-                
-                # Extrai o Nome e a Categoria da legenda
                 package_name = caption.split("📦 Pacote:")[1].split("|")[0].strip()
                 
                 categoria = "OUTROS"
@@ -274,7 +314,7 @@ async def main():
     runner = web.AppRunner(server)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 8080)
-    print("\n🚀 Servidor PenSound Nativo Rodando na porta 8080!\n")
+    print("\n🚀 Servidor PenSound com Progresso % Rodando!\n")
     await site.start()
     
     while True:
