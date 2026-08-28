@@ -36,7 +36,6 @@ HTML_PAGE = """
         button { background: #8a2be2; color: #fff; border: none; padding: 12px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; }
         button:disabled { background: #555; cursor: not-allowed; }
         
-        /* Barra de Progresso */
         .progress-container { display: none; margin-top: 20px; text-align: left; }
         .progress-bar-bg { background: #333; border-radius: 8px; height: 18px; width: 100%; overflow: hidden; margin-top: 5px; }
         .progress-bar-fill { background: #00ffcc; height: 100%; width: 0%; transition: width 0.2s; }
@@ -105,7 +104,6 @@ HTML_PAGE = """
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/upload', true);
 
-            // Acompanha a porcentagem do envio do navegador para o Render
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
                     const percent = Math.round((e.loaded / e.total) * 100);
@@ -171,7 +169,7 @@ async def handle_upload(request):
                 zip_path = os.path.join(home_dir, orig_filename)
                 with open(zip_path, 'wb') as f:
                     while True:
-                        chunk = await field.read_chunk(1024 * 1024 * 2) # Chunks maiores (2MB) para mais velocidade
+                        chunk = await field.read_chunk(1024 * 1024 * 2)
                         if not chunk:
                             break
                         f.write(chunk)
@@ -189,7 +187,6 @@ async def handle_upload(request):
         if not zip_path or not cover_path:
             return web.Response(text="Erro: Envie todos os dados!", status=400)
 
-        # Envia arquivo ZIP pro Telegram
         sent_zip_msg = await app.send_document(
             chat_id=CANAL_ID, 
             document=zip_path, 
@@ -198,7 +195,6 @@ async def handle_upload(request):
         if os.path.exists(zip_path):
             os.remove(zip_path)
 
-        # Envia imagem da Capa pro Telegram
         sent_cover_msg = await app.send_document(
             chat_id=CANAL_ID, 
             document=cover_path,
@@ -232,10 +228,12 @@ async def handle_download(request):
         if msg.photo:
             file_size = msg.photo.file_size
             file_name = "capa.jpg"
+            disposition = "inline"
             content_type = "image/jpeg"
         else:
             file_size = getattr(file_obj, 'file_size', 0)
             file_name = getattr(file_obj, 'file_name', 'pacote.zip')
+            disposition = f'attachment; filename="{file_name}"'
             content_type, _ = mimetypes.guess_type(file_name)
             if not content_type:
                 content_type = 'application/zip' if file_name.endswith('.zip') else 'application/octet-stream'
@@ -245,12 +243,13 @@ async def handle_download(request):
             reason='OK',
             headers={
                 'Content-Type': content_type,
-                'Content-Disposition': f'inline; filename="{file_name}"',
+                'Content-Disposition': disposition,
                 'Content-Length': str(file_size)
             }
         )
         await response.prepare(request)
         
+        # Faz o streaming direto do Telegram pro App Android
         async for chunk in app.stream_media(msg):
             await response.write(chunk)
             
@@ -284,6 +283,7 @@ async def handle_api_pacotes(request):
 async def main():
     await app.start()
     
+    # Define limite de payload e timeouts altos para streaming longo
     server = web.Application(client_max_size=1024 * 1024 * 1024 * 10)
     
     cors = aiohttp_cors.setup(server, defaults={
@@ -314,7 +314,7 @@ async def main():
     runner = web.AppRunner(server)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 8080)
-    print("\n🚀 Servidor PenSound com Progresso % Rodando!\n")
+    print("\n🚀 Servidor PenSound com Streaming Corrigido Rodando!\n")
     await site.start()
     
     while True:
