@@ -16,7 +16,6 @@ API_ID = 31285889
 API_HASH = "48fec694d07f2a32566dfe17b66a0d7a"
 CANAL_ID = -1003997037273
 
-# 1. URL base atualizada para o Render
 BASE_URL = "https://bot-pensound.onrender.com"
 
 app = Client("pensound_user", api_id=API_ID, api_hash=API_HASH)
@@ -32,8 +31,8 @@ HTML_PAGE = """
         body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; text-align: center; }
         .card { background: #1e1e1e; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         label { display: block; margin-top: 15px; text-align: left; font-weight: bold; color: #aaa; }
-        input[type="text"], input[type="file"] { margin: 8px 0 15px 0; display: block; width: 100%; color: #ccc; box-sizing: border-box; }
-        input[type="text"] { background: #2a2a2a; border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; }
+        input[type="text"], input[type="file"], select { margin: 8px 0 15px 0; display: block; width: 100%; color: #ccc; box-sizing: border-box; }
+        input[type="text"], select { background: #2a2a2a; border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; }
         button { background: #8a2be2; color: #fff; border: none; padding: 12px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; }
     </style>
 </head>
@@ -45,6 +44,18 @@ HTML_PAGE = """
         <form action="/upload" method="POST" enctype="multipart/form-data">
             <label>Nome do Pacote:</label>
             <input type="text" name="package_name" placeholder="Ex: Paredão do DJ Vini" required>
+
+            <label>Categoria:</label>
+            <select name="category" required>
+                <option value="PAGODÃO">Pagodão</option>
+                <option value="REPERTÓRIO">Repertório</option>
+                <option value="ARROCHA">Arrocha</option>
+                <option value="AFRO HOUSE">Afro House</option>
+                <option value="HARD TECHNO">Hard Techno</option>
+                <option value="PHONK">Phonk</option>
+                <option value="TRAP">Trap</option>
+                <option value="OUTROS">Outros</option>
+            </select>
 
             <label>1. Arquivo do Pacote (.zip):</label>
             <input type="file" name="zip_file" required>
@@ -66,6 +77,7 @@ async def handle_upload(request):
     zip_path = None
     cover_path = None
     package_name = "Pacote sem nome"
+    category = "OUTROS"
     
     try:
         reader = await request.multipart()
@@ -78,11 +90,13 @@ async def handle_upload(request):
                 
             if field.name == 'package_name':
                 package_name = await field.text()
+
+            elif field.name == 'category':
+                category = await field.text()
                 
             elif field.name == 'zip_file':
                 orig_filename = field.filename or "pacote.zip"
                 zip_path = os.path.join(home_dir, orig_filename)
-                print(f"\n📥 Recebendo pacote: {orig_filename}...")
                 with open(zip_path, 'wb') as f:
                     while True:
                         chunk = await field.read_chunk(1024 * 1024)
@@ -93,7 +107,6 @@ async def handle_upload(request):
             elif field.name == 'cover_file':
                 orig_filename = field.filename or "capa.jpg"
                 cover_path = os.path.join(home_dir, f"capa_{orig_filename}")
-                print(f"📥 Recebendo capa...")
                 with open(cover_path, 'wb') as f:
                     while True:
                         chunk = await field.read_chunk(1024 * 1024)
@@ -104,11 +117,11 @@ async def handle_upload(request):
         if not zip_path or not cover_path:
             return web.Response(text="<h1>Erro: Envie todos os dados!</h1>", content_type='text/html')
 
-        print(f"📤 Enviando '{package_name}' para o Telegram...")
+        print(f"📤 Enviando '{package_name}' [{category}] para o Telegram...")
         sent_zip_msg = await app.send_document(
             chat_id=CANAL_ID, 
             document=zip_path, 
-            caption=f"📦 Pacote: {package_name}"
+            caption=f"📦 Pacote: {package_name} | Categoria: {category}"
         )
         if os.path.exists(zip_path):
             os.remove(zip_path)
@@ -124,8 +137,6 @@ async def handle_upload(request):
 
         zip_url = f"{BASE_URL}/stream/{CANAL_ID}/{sent_zip_msg.id}"
         cover_url = f"{BASE_URL}/stream/{CANAL_ID}/{sent_cover_msg.id}"
-        
-        print(f"✅ Cadastrado com sucesso: {package_name}\n")
 
         response_html = f"""
         <!DOCTYPE html>
@@ -145,6 +156,7 @@ async def handle_upload(request):
             <div class="card">
                 <h2 style="color: #00ff00;">✅ Card Cadastrado!</h2>
                 <p><strong>Nome:</strong> {package_name}</p>
+                <p><strong>Categoria:</strong> {category}</p>
                 <p><strong>Link do Pacote (.zip):</strong><br><a href="{zip_url}" target="_blank">{zip_url}</a></p>
                 <p><strong>Link da Capa (Imagem):</strong><br><a href="{cover_url}" target="_blank">{cover_url}</a></p>
                 <br>
@@ -182,8 +194,6 @@ async def handle_download(request):
         else:
             file_size = getattr(file_obj, 'file_size', 0)
             file_name = getattr(file_obj, 'file_name', 'pacote.zip')
-            
-            # 2. Define o Content-Type dinâmico com base na extensão
             content_type, _ = mimetypes.guess_type(file_name)
             if not content_type:
                 content_type = 'application/zip' if file_name.endswith('.zip') else 'application/octet-stream'
@@ -211,10 +221,19 @@ async def handle_api_pacotes(request):
     try:
         async for msg in app.get_chat_history(CANAL_ID, limit=50):
             if msg.caption and "📦 Pacote:" in msg.caption:
-                package_name = msg.caption.replace("📦 Pacote:", "").strip()
+                caption = msg.caption
+                
+                # Extrai o Nome e a Categoria da legenda
+                package_name = caption.split("📦 Pacote:")[1].split("|")[0].strip()
+                
+                categoria = "OUTROS"
+                if "Categoria:" in caption:
+                    categoria = caption.split("Categoria:")[1].strip().upper()
+
                 pacotes.append({
                     "id": msg.id,
                     "nome": package_name,
+                    "categoria": categoria,
                     "zip_url": f"{BASE_URL}/stream/{CANAL_ID}/{msg.id}",
                     "cover_url": f"{BASE_URL}/stream/{CANAL_ID}/{msg.id + 1}"
                 })
