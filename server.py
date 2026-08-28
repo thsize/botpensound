@@ -244,17 +244,20 @@ async def handle_download(request):
             headers={
                 'Content-Type': content_type,
                 'Content-Disposition': disposition,
-                'Content-Length': str(file_size)
+                'Content-Length': str(file_size),
+                'Connection': 'keep-alive',
+                'Accept-Ranges': 'bytes'
             }
         )
         await response.prepare(request)
         
-        # Faz o streaming direto do Telegram pro App Android
+        # Transmite em blocos contínuos sem estourar o buffer do Render
         async for chunk in app.stream_media(msg):
             await response.write(chunk)
             
         return response
     except Exception as e:
+        print(f"Erro no stream: {e}")
         return web.Response(status=500, text=str(e))
 
 async def handle_api_pacotes(request):
@@ -283,7 +286,6 @@ async def handle_api_pacotes(request):
 async def main():
     await app.start()
     
-    # Define limite de payload e timeouts altos para streaming longo
     server = web.Application(client_max_size=1024 * 1024 * 1024 * 10)
     
     cors = aiohttp_cors.setup(server, defaults={
@@ -314,7 +316,7 @@ async def main():
     runner = web.AppRunner(server)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 8080)
-    print("\n🚀 Servidor PenSound com Streaming Corrigido Rodando!\n")
+    print("\n🚀 Servidor PenSound Operacional!\n")
     await site.start()
     
     while True:
