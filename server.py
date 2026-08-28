@@ -18,9 +18,7 @@ CANAL_ID = -1003997037273
 
 BASE_URL = "https://bot-pensound.onrender.com"
 
-# IMPORTANTE: Coloque o Token do seu Bot do Telegram aqui
-BOT_TOKEN = "7891234567:AAXxYyZz..." 
-
+# Inicialização usando apenas sua conta/número de telefone
 app = Client("pensound_user", api_id=API_ID, api_hash=API_HASH)
 
 HTML_PAGE = """
@@ -226,9 +224,11 @@ async def handle_download(request):
         if not msg or not msg.media:
             return web.Response(status=404, text="Arquivo nao encontrado")
 
-        # Capa é pequena, responde via stream normal
+        file_obj = msg.document or msg.photo or msg.audio or msg.video
+        file_size = getattr(file_obj, 'file_size', 0)
+
+        # Se for imagem da Capa
         if msg.photo:
-            file_size = msg.photo.file_size
             response = web.StreamResponse(
                 status=200,
                 headers={'Content-Type': 'image/jpeg', 'Content-Length': str(file_size)}
@@ -238,36 +238,28 @@ async def handle_download(request):
                 await response.write(chunk)
             return response
 
-        # Para arquivos ZIP grandes: busca o File Path via Telegram Bot API e Redireciona
-        file_id = msg.document.file_id
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://api.telegram.org/bot{BOT_TOKEN}/getFile?file_id={file_id}") as resp:
-                res_data = await resp.json()
-                if res_data.get("ok"):
-                    file_path = res_data["result"]["file_path"]
-                    telegram_direct_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
-                    
-                    # Redireciona 302 direto para a CDN de alta velocidade do Telegram!
-                    return web.HTTPFound(location=telegram_direct_url)
+        # Se for o ZIP grande: Baixa para o disco interno e entrega como FileResponse nativo
+        file_name = getattr(file_obj, 'file_name', 'pacote.zip')
+        temp_dir = os.path.expanduser("~")
+        temp_file_path = os.path.join(temp_dir, f"temp_{message_id}_{file_name}")
 
-        # Fallback caso não obtenha a URL da Bot API
-        file_size = msg.document.file_size
-        file_name = msg.document.file_name or "pacote.zip"
-        response = web.StreamResponse(
-            status=200,
+        # Se ainda não existe localmente, baixa primeiro pelo Userbot
+        if not os.path.exists(temp_file_path):
+            await app.download_media(msg, file_name=temp_file_path)
+
+        # Entrega o arquivo em alta velocidade diretamente do disco sem corromper
+        response = web.FileResponse(
+            path=temp_file_path,
             headers={
-                'Content-Type': 'application/octet-stream',
-                'Content-Disposition': f'attachment; filename="{file_name}"',
-                'Content-Length': str(file_size)
+                'Content-Type': 'application/zip',
+                'Content-Disposition': f'attachment; filename="{file_name}"'
             }
         )
-        await response.prepare(request)
-        async for chunk in app.stream_media(msg):
-            await response.write(chunk)
+        
         return response
 
     except Exception as e:
-        print(f"Erro download: {e}")
+        print(f"❌ Erro no download: {e}")
         return web.Response(status=500, text=str(e))
 
 async def handle_api_pacotes(request):
@@ -326,7 +318,7 @@ async def main():
     runner = web.AppRunner(server)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 8080)
-    print("\n🚀 Servidor PenSound com Redirecionamento de CDN Rodando!\n")
+    print("\n🚀 Servidor Userbot PenSound Pronto!\n")
     await site.start()
     
     while True:
