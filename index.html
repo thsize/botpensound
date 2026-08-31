@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel PenSound - Lote Flexível</title>
+    <title>Painel PenSound - Envio Multiplo</title>
     <style>
         body { font-family: sans-serif; max-width: 600px; margin: 30px auto; padding: 20px; background: #121212; color: #fff; }
         input, select, button { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 4px; }
@@ -15,15 +15,15 @@
     </style>
 </head>
 <body>
-    <h2>PenSound - Envio em Lote</h2>
+    <h2>PenSound - Envio de Pacotes</h2>
     <form id="packForm">
         
         <div id="cardsContainer">
-            <!-- PACOTE 1 INICIAL -->
-            <div class="pack-card" data-index="1">
+            <!-- PACOTE 1 -->
+            <div class="pack-card">
                 <h3>Pacote 1</h3>
-                <input type="text" class="input-nome" required placeholder="Nome Ex: Pagodão 2026">
-                <select class="input-categoria" required>
+                <input type="text" class="input-nome" placeholder="Nome do Pacote 1">
+                <select class="input-categoria">
                     <option value="PAGODAO">PAGODÃO</option>
                     <option value="ARROCHA">ARROCHA</option>
                     <option value="FORRO">FORRÓ</option>
@@ -31,8 +31,8 @@
                     <option value="REPERTORIO">REPERTÓRIO</option>
                     <option value="OUTROS">OUTROS</option>
                 </select>
-                <input type="file" class="input-capa" accept="image/*" required>
-                <input type="url" class="input-download" required placeholder="Link Direto do ZIP">
+                <input type="file" class="input-capa" accept="image/*">
+                <input type="url" class="input-download" placeholder="Link Direto do ZIP">
             </div>
         </div>
 
@@ -52,13 +52,12 @@
 
         let packCount = 1;
 
-        // Adiciona um novo formulário de pacote na tela
+        // Adiciona novos cards dinamicamente sem reiniciar a pagina
         document.getElementById('btnAddPack').addEventListener('click', () => {
             packCount++;
             const container = document.getElementById('cardsContainer');
             const cardDiv = document.createElement('div');
             cardDiv.className = 'pack-card';
-            cardDiv.setAttribute('data-index', packCount);
             cardDiv.innerHTML = `
                 <h3>Pacote ${packCount}</h3>
                 <input type="text" class="input-nome" placeholder="Nome do Pacote ${packCount}">
@@ -76,7 +75,7 @@
             container.appendChild(cardDiv);
         });
 
-        // Envio do formulário isolando cada elemento
+        // Loop de processamento de múltiplos itens
         document.getElementById('packForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
@@ -84,35 +83,37 @@
 
             try {
                 const token = document.getElementById('ghToken').value;
-                const cards = Array.from(document.querySelectorAll('.pack-card'));
+                const cards = document.querySelectorAll('.pack-card');
                 
                 btn.innerText = "Lendo repositório...";
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
                 const currentData = await fetch(ghUrl).then(r => r.json());
-                const contentText = decodeURIComponent(escape(atob(currentData.content)));
-                const content = JSON.parse(contentText);
+                
+                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                let content = [];
+                try {
+                    content = contentText ? JSON.parse(contentText) : [];
+                } catch (err) {
+                    content = [];
+                }
 
                 let pacotesAdicionados = 0;
 
                 for (let i = 0; i < cards.length; i++) {
                     const card = cards[i];
                     
-                    // Captura os elementos especificamente dentro deste card
-                    const nomeInput = card.querySelector('.input-nome');
-                    const categoriaInput = card.querySelector('.input-categoria');
+                    const nome = card.querySelector('.input-nome').value.trim();
+                    const categoria = card.querySelector('.input-categoria').value;
                     const capaInput = card.querySelector('.input-capa');
-                    const downloadInput = card.querySelector('.input-download');
+                    const file = capaInput.files ? capaInput.files[0] : null;
+                    const download = card.querySelector('.input-download').value.trim();
 
-                    valNome = nomeInput ? nomeInput.value.trim() : "";
-                    valCategoria = categoriaInput ? categoriaInput.value : "OUTROS";
-                    valFile = (capaInput && capaInput.files) ? capaInput.files[0] : null;
-                    valDownload = downloadInput ? downloadInput.value.trim() : "";
-
-                    if (valNome && valFile && valDownload) {
-                        btn.innerText = `Enviando foto do pacote "${valNome}"...`;
+                    // Valida se todos os 3 campos principais foram preenchidos no card
+                    if (nome && file && download) {
+                        btn.innerText = `Enviando capa (${i + 1} de ${cards.length}): ${nome}...`;
 
                         const formData = new FormData();
-                        formData.append('file', valFile);
+                        formData.append('file', file);
                         formData.append('upload_preset', UPLOAD_PRESET);
 
                         const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
@@ -121,19 +122,19 @@
                         }).then(r => r.json());
 
                         if (!resImg.secure_url) {
-                            throw new Error(`Falha no upload da foto do pacote: ${valNome}`);
+                            throw new Error(`Falha no upload da foto do pacote: ${nome}`);
                         }
 
                         content.push({
                             id: (Date.now() + i).toString(),
-                            nome: valNome,
-                            title: valNome,
-                            categoria: valCategoria,
-                            type: valCategoria,
+                            nome: nome,
+                            title: nome,
+                            categoria: categoria,
+                            type: categoria,
                             capa: resImg.secure_url,
                             cover_url: resImg.secure_url,
-                            download: valDownload,
-                            zip_url: valDownload
+                            download: download,
+                            zip_url: download
                         });
 
                         pacotesAdicionados++;
@@ -141,7 +142,7 @@
                 }
 
                 if (pacotesAdicionados === 0) {
-                    throw new Error("Preencha as informações do pacote completamente!");
+                    throw new Error("Preencha o Nome, Capa e Link do ZIP de pelo menos um pacote!");
                 }
 
                 btn.innerText = "Atualizando GitHub...";
