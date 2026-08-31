@@ -20,10 +20,10 @@
         
         <div id="cardsContainer">
             <!-- PACOTE 1 INICIAL -->
-            <div class="pack-card">
+            <div class="pack-card" data-index="1">
                 <h3>Pacote 1</h3>
-                <input type="text" class="nome" required placeholder="Nome Ex: Pagodão 2026">
-                <select class="categoria" required>
+                <input type="text" class="input-nome" required placeholder="Nome Ex: Pagodão 2026">
+                <select class="input-categoria" required>
                     <option value="PAGODAO">PAGODÃO</option>
                     <option value="ARROCHA">ARROCHA</option>
                     <option value="FORRO">FORRÓ</option>
@@ -31,8 +31,8 @@
                     <option value="REPERTORIO">REPERTÓRIO</option>
                     <option value="OUTROS">OUTROS</option>
                 </select>
-                <input type="file" class="capa" accept="image/*" required>
-                <input type="url" class="download" required placeholder="Link Direto do ZIP">
+                <input type="file" class="input-capa" accept="image/*" required>
+                <input type="url" class="input-download" required placeholder="Link Direto do ZIP">
             </div>
         </div>
 
@@ -52,16 +52,17 @@
 
         let packCount = 1;
 
-        // Adiciona um novo formulário de pacote na tela ao clicar no botão
+        // Adiciona um novo formulário de pacote na tela
         document.getElementById('btnAddPack').addEventListener('click', () => {
             packCount++;
             const container = document.getElementById('cardsContainer');
             const cardDiv = document.createElement('div');
             cardDiv.className = 'pack-card';
+            cardDiv.setAttribute('data-index', packCount);
             cardDiv.innerHTML = `
                 <h3>Pacote ${packCount}</h3>
-                <input type="text" class="nome" placeholder="Nome do Pacote">
-                <select class="categoria">
+                <input type="text" class="input-nome" placeholder="Nome do Pacote ${packCount}">
+                <select class="input-categoria">
                     <option value="PAGODAO">PAGODÃO</option>
                     <option value="ARROCHA">ARROCHA</option>
                     <option value="FORRO">FORRÓ</option>
@@ -69,13 +70,13 @@
                     <option value="REPERTORIO">REPERTÓRIO</option>
                     <option value="OUTROS">OUTROS</option>
                 </select>
-                <input type="file" class="capa" accept="image/*">
-                <input type="url" class="download" placeholder="Link Direto do ZIP">
+                <input type="file" class="input-capa" accept="image/*">
+                <input type="url" class="input-download" placeholder="Link Direto do ZIP">
             `;
             container.appendChild(cardDiv);
         });
 
-        // Envio do formulário em lote
+        // Envio do formulário isolando cada elemento
         document.getElementById('packForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
@@ -83,7 +84,7 @@
 
             try {
                 const token = document.getElementById('ghToken').value;
-                const cards = document.querySelectorAll('.pack-card');
+                const cards = Array.from(document.querySelectorAll('.pack-card'));
                 
                 btn.innerText = "Lendo repositório...";
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
@@ -95,17 +96,23 @@
 
                 for (let i = 0; i < cards.length; i++) {
                     const card = cards[i];
-                    const nome = card.querySelector('.nome').value.trim();
-                    const categoria = card.querySelector('.categoria').value;
-                    const fileInput = card.querySelector('.capa');
-                    const file = fileInput.files ? fileInput.files[0] : null;
-                    const download = card.querySelector('.download').value.trim();
+                    
+                    // Captura os elementos especificamente dentro deste card
+                    const nomeInput = card.querySelector('.input-nome');
+                    const categoriaInput = card.querySelector('.input-categoria');
+                    const capaInput = card.querySelector('.input-capa');
+                    const downloadInput = card.querySelector('.input-download');
 
-                    if (nome && file && download) {
-                        btn.innerText = `Enviando capa ${i + 1} de ${cards.length}...`;
+                    valNome = nomeInput ? nomeInput.value.trim() : "";
+                    valCategoria = categoriaInput ? categoriaInput.value : "OUTROS";
+                    valFile = (capaInput && capaInput.files) ? capaInput.files[0] : null;
+                    valDownload = downloadInput ? downloadInput.value.trim() : "";
+
+                    if (valNome && valFile && valDownload) {
+                        btn.innerText = `Enviando foto do pacote "${valNome}"...`;
 
                         const formData = new FormData();
-                        formData.append('file', file);
+                        formData.append('file', valFile);
                         formData.append('upload_preset', UPLOAD_PRESET);
 
                         const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
@@ -114,19 +121,19 @@
                         }).then(r => r.json());
 
                         if (!resImg.secure_url) {
-                            throw new Error(`Falha no upload da foto do Pacote ${i + 1}`);
+                            throw new Error(`Falha no upload da foto do pacote: ${valNome}`);
                         }
 
                         content.push({
                             id: (Date.now() + i).toString(),
-                            nome: nome,
-                            title: nome,
-                            categoria: categoria,
-                            type: categoria,
+                            nome: valNome,
+                            title: valNome,
+                            categoria: valCategoria,
+                            type: valCategoria,
                             capa: resImg.secure_url,
                             cover_url: resImg.secure_url,
-                            download: download,
-                            zip_url: download
+                            download: valDownload,
+                            zip_url: valDownload
                         });
 
                         pacotesAdicionados++;
