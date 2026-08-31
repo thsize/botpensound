@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel PenSound</title>
+    <style>
+        body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #121212; color: #fff; }
+        input, button { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
+        button { background: #6200ee; color: white; border: none; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>PenSound - Painel Admin</h2>
+    <form id="packForm">
+        <label>Nome do Pacote:</label>
+        <input type="text" id="nome" required placeholder="Ex: Pagodão 2026">
+        
+        <label>Capa (Imagem):</label>
+        <input type="file" id="capa" accept="image/*" required>
+        
+        <label>Link do ZIP (Download):</label>
+        <input type="url" id="download" required placeholder="https://...">
+        
+        <label>Token do GitHub (PAT):</label>
+        <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
+        
+        <button type="submit">Publicar Pacote</button>
+    </form>
+
+    <script>
+        const CLOUD_NAME = "y5u5zkp7";
+        const UPLOAD_PRESET = "zwt5npyFyJ1cb5BfisaWifuX5O4";
+        const REPO = "thsize/botpensound";
+
+        document.getElementById('packForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = document.getElementById('ghToken').value;
+            const nome = document.getElementById('nome').value;
+            const download = document.getElementById('download').value;
+            const file = document.getElementById('capa').files[0];
+
+            // 1. Upload da Capa no Cloudinary
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+
+            const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                method: 'POST', body: formData
+            }).then(r => r.json());
+
+            // 2. Buscar pacotes.json do GitHub
+            const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+            const currentData = await fetch(ghUrl).then(r => r.json());
+            const content = JSON.parse(atob(currentData.content));
+
+            // 3. Adicionar novo pacote
+            content.push({
+                id: Date.now().toString(),
+                nome: nome,
+                capa: resImg.secure_url,
+                download: download
+            });
+
+            // 4. Salvar de volta no GitHub
+            await fetch(ghUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `Adicionado pacote: ${nome}`,
+                    content: btoa(JSON.stringify(content, null, 2)),
+                    sha: currentData.sha
+                })
+            });
+
+            alert('Pacote publicado com sucesso!');
+            location.reload();
+        });
+    </script>
+</body>
+</html>
