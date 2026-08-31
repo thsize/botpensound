@@ -42,6 +42,9 @@
         <label>Token do GitHub (PAT):</label>
         <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
         
+        <label>Chave do Servidor Firebase (Server Key):</label>
+        <input type="password" id="fcmServerKey" placeholder="AAAAxxxx... (Opcional p/ Notificações)">
+
         <button type="submit" id="btnSubmit" class="btn-submit">Publicar Todos os Pacotes</button>
     </form>
 
@@ -81,6 +84,7 @@
 
             try {
                 const token = document.getElementById('ghToken').value;
+                const fcmServerKey = document.getElementById('fcmServerKey').value.trim();
                 const cards = document.querySelectorAll('.pack-card');
                 
                 btn.innerText = "Lendo repositório...";
@@ -96,6 +100,7 @@
                 }
 
                 let pacotesAdicionados = 0;
+                let ultimosPacotes = [];
 
                 for (let i = 0; i < cards.length; i++) {
                     const card = cards[i];
@@ -106,9 +111,8 @@
                     const file = capaInput.files ? capaInput.files[0] : null;
                     const download = card.querySelector('.input-download').value.trim();
 
-                    // Valida se o card atual está totalmente preenchido antes de enviar
                     if (nome && file && download) {
-                        btn.innerText = `Enviando foto ${i + 1} de ${cards.length}: ${nome}...`;
+                        btn.innerText = `Enviando capa ${i + 1} de ${cards.length}: ${nome}...`;
 
                         const formData = new FormData();
                         formData.append('file', file);
@@ -123,7 +127,7 @@
                             throw new Error(`Falha no upload da foto do pacote: ${nome}`);
                         }
 
-                        content.push({
+                        const novoPack = {
                             id: (Date.now() + i).toString(),
                             nome: nome,
                             title: nome,
@@ -133,8 +137,10 @@
                             cover_url: resImg.secure_url,
                             download: download,
                             zip_url: download
-                        });
+                        };
 
+                        content.push(novoPack);
+                        ultimosPacotes.push(novoPack);
                         pacotesAdicionados++;
                     }
                 }
@@ -160,6 +166,34 @@
                 });
 
                 if (!ghRes.ok) throw new Error("Erro ao salvar no GitHub. Verifique o seu token PAT.");
+
+                // DISPARO DA NOTIFICAÇÃO PUSH AUTOMÁTICA
+                if (fcmServerKey) {
+                    btn.innerText = "Enviando notificação...";
+                    
+                    for (const pack of ultimosPacotes) {
+                        try {
+                            await fetch("https://fcm.googleapis.com/fcm/send", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `key=${fcmServerKey}`
+                                },
+                                body: JSON.stringify({
+                                    "to": "/topics/todos",
+                                    "notification": {
+                                        "title": "🔥 Novo Pack Liberado!",
+                                        "body": `O pacote "${pack.nome}" [${pack.categoria}] já está disponível no PenSound!`,
+                                        "sound": "default"
+                                    },
+                                    "priority": "high"
+                                })
+                            });
+                        } catch (fcmErr) {
+                            console.error("Erro no FCM:", fcmErr);
+                        }
+                    }
+                }
 
                 alert(`${pacotesAdicionados} pacote(s) publicado(s) com sucesso!`);
                 location.reload();
