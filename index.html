@@ -5,8 +5,9 @@
     <title>Painel PenSound</title>
     <style>
         body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #121212; color: #fff; }
-        input, button { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
-        button { background: #6200ee; color: white; border: none; font-weight: bold; cursor: pointer; }
+        input, select, button { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 4px; }
+        button { background: #6200ee; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        button:disabled { background: #444; }
     </style>
 </head>
 <body>
@@ -15,11 +16,21 @@
         <label>Nome do Pacote:</label>
         <input type="text" id="nome" required placeholder="Ex: Pagodão 2026">
         
+        <label>Categoria:</label>
+        <select id="categoria" required>
+            <option value="PAGODAO">PAGODÃO</option>
+            <option value="ARROCHA">ARROCHA</option>
+            <option value="FORRO">FORRÓ</option>
+            <option value="FUNK">FUNK</option>
+            <option value="REPERTORIO">REPERTÓRIO</option>
+            <option value="OUTROS">OUTROS</option>
+        </select>
+
         <label>Capa (Imagem):</label>
         <input type="file" id="capa" accept="image/*" required>
         
-        <label>Link do ZIP (Download):</label>
-        <input type="url" id="download" required placeholder="https://...">
+        <label>Link do ZIP (Download Direto):</label>
+        <input type="url" id="download" required placeholder="https://download...mediafire.com/...">
         
         <label>Token do GitHub (PAT):</label>
         <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
@@ -29,7 +40,7 @@
 
     <script>
         const CLOUD_NAME = "y5u5zkp7";
-        const UPLOAD_PRESET = "ftpuvxis"; // Nome exato do preset Unsigned da foto
+        const UPLOAD_PRESET = "ftpuvxis";
         const REPO = "thsize/botpensound";
 
         document.getElementById('packForm').addEventListener('submit', async (e) => {
@@ -41,6 +52,7 @@
             try {
                 const token = document.getElementById('ghToken').value;
                 const nome = document.getElementById('nome').value;
+                const categoria = document.getElementById('categoria').value;
                 const download = document.getElementById('download').value;
                 const file = document.getElementById('capa').files[0];
 
@@ -68,11 +80,13 @@
                 const contentText = decodeURIComponent(escape(atob(currentData.content)));
                 const content = JSON.parse(contentText);
 
-                // 3. Adicionar novo pacote
+                // 3. Adicionar novo pacote com campos de Categoria salvos
                 content.push({
                     id: Date.now().toString(),
                     nome: nome,
                     title: nome,
+                    categoria: categoria,
+                    type: categoria,
                     capa: resImg.secure_url,
                     cover_url: resImg.secure_url,
                     download: download,
@@ -89,7 +103,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: `Adicionado pacote: ${nome}`,
+                        message: `Adicionado pacote: ${nome} [${categoria}]`,
                         content: updatedContent,
                         sha: currentData.sha
                     })
