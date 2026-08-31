@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <h2>PenSound - Envio de Pacotes</h2>
+    <h2>PenSound - Envio em Lote</h2>
     <form id="packForm">
         
         <div id="cardsContainer">
@@ -52,7 +52,6 @@
 
         let packCount = 1;
 
-        // Adiciona novos cards dinamicamente sem reiniciar a pagina
         document.getElementById('btnAddPack').addEventListener('click', () => {
             packCount++;
             const container = document.getElementById('cardsContainer');
@@ -75,7 +74,6 @@
             container.appendChild(cardDiv);
         });
 
-        // Loop de processamento de múltiplos itens
         document.getElementById('packForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
@@ -108,9 +106,9 @@
                     const file = capaInput.files ? capaInput.files[0] : null;
                     const download = card.querySelector('.input-download').value.trim();
 
-                    // Valida se todos os 3 campos principais foram preenchidos no card
+                    // Valida se o card atual está totalmente preenchido antes de enviar
                     if (nome && file && download) {
-                        btn.innerText = `Enviando capa (${i + 1} de ${cards.length}): ${nome}...`;
+                        btn.innerText = `Enviando foto ${i + 1} de ${cards.length}: ${nome}...`;
 
                         const formData = new FormData();
                         formData.append('file', file);
