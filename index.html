@@ -29,7 +29,7 @@
 
     <script>
         const CLOUD_NAME = "y5u5zkp7";
-        const UPLOAD_PRESET = "ml_default"; // Corrigido para o preset Unsigned da sua conta
+        const UPLOAD_PRESET = "ftpuvxis"; // Nome exato do preset Unsigned da foto
         const REPO = "thsize/botpensound";
 
         document.getElementById('packForm').addEventListener('submit', async (e) => {
@@ -55,7 +55,7 @@
                 }).then(r => r.json());
 
                 if (!resImg.secure_url) {
-                    throw new Error("Falha no upload da imagem para o Cloudinary.");
+                    throw new Error(resImg.error?.message || "Falha no upload da imagem para o Cloudinary.");
                 }
 
                 btn.innerText = "Atualizando GitHub...";
@@ -68,7 +68,7 @@
                 const contentText = decodeURIComponent(escape(atob(currentData.content)));
                 const content = JSON.parse(contentText);
 
-                // 3. Adicionar novo pacote gravando 'capa' e 'cover_url' para compatibilidade total
+                // 3. Adicionar novo pacote
                 content.push({
                     id: Date.now().toString(),
                     nome: nome,
@@ -82,7 +82,7 @@
                 // 4. Salvar de volta no GitHub
                 const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
 
-                await fetch(ghUrl, {
+                const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${token}`,
@@ -94,6 +94,10 @@
                         sha: currentData.sha
                     })
                 });
+
+                if (!ghRes.ok) {
+                    throw new Error("Erro ao atualizar o GitHub. Verifique o seu token PAT.");
+                }
 
                 alert('Pacote publicado com sucesso!');
                 location.reload();
