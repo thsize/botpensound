@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Painel PenSound - Envio Multiplo</title>
+    <!-- Lib para assinar a chave privada RSA do Firebase V1 no navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
     <style>
         body { font-family: sans-serif; max-width: 600px; margin: 30px auto; padding: 20px; background: #121212; color: #fff; }
         input, select, button { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 4px; }
@@ -15,7 +17,7 @@
     </style>
 </head>
 <body>
-    <h2>PenSound - Envio em Lote</h2>
+    <h2>PenSound - Envio em Lote Automático</h2>
     <form id="packForm">
         
         <div id="cardsContainer">
@@ -41,17 +43,46 @@
         <br><br>
         <label>Token do GitHub (PAT):</label>
         <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
-        
-        <label>Chave do Servidor Firebase (Server Key):</label>
-        <input type="password" id="fcmServerKey" placeholder="AAAAxxxx... (Opcional p/ Notificações)">
 
-        <button type="submit" id="btnSubmit" class="btn-submit">Publicar Todos os Pacotes</button>
+        <button type="submit" id="btnSubmit" class="btn-submit">Publicar e Notificar App</button>
     </form>
 
     <script>
         const CLOUD_NAME = "y5u5zkp7";
         const UPLOAD_PRESET = "ftpuvxis";
         const REPO = "thsize/botpensound";
+
+        // CREDENCIAIS FIREBASE V1
+        const FIREBASE_PROJECT_ID = "painel-sky";
+        const FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@painel-sky.iam.gserviceaccount.com";
+        const FIREBASE_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDSE04ML74e612R
+fo0XwY30hHxGXtAXwEbg0ibUM7LAklx5fKtPa/OulVd7a7b9GU3Wj8widJDs0Unj
+6q23UZKhpGuZTat7kZwnSl8dBFm0dotZqGDbQd3KaoJNYXG3FMHJ9+6Ye6TaxUUU
+9u64hl3XScs9OXBgW9t9T4C7az0McXD2nX3OuK5qYfZzdJyudH6UONOlwroGC148
+ovqw+wsA9Mh+d2KoeVtBp87KrWDfmBO+hKq7QYr8SArOmI5+ILFRWN3An7y9DleK
+6SpSkUVRQ/LO550mAxCJR8xQN018JnEjgK9wa0Il9WXJxnvROECXyZd3hI4SjVra
+4oKwTQO3AgMBAAECggEAIYT1ChrAEjzp5CI2LxkyJlbRYYUVXQTQCmVdzrQlDHcO
+DFBpITYPXsbze3z3aLEV62tsXf8NdMv8J0K1zy9T3zjV9lMfToswSFCkloOwMIxN
+tdOZCMMcuYR/IAuxUk4ckbZeurPX3RRm7m5sLsM5y/U5WZ6FoMpnXjpGRyFYT1is
+Qs5gfEY1s+pJ2WIxD5j/OJ/3MxImJezMY2l/fML414xCsT1h/QCznfGT5/KXWGiN
+yT/Q7qHfXUZRqGXCnkZXMk2zI/4m23S/T2mKe0TPoTyIx6jxURtxjV1nNwAAB/jv
+7q+s49fxupqbtgNp552P1Me0hJ2xHg4qS3ujCod3wQKBgQD5cQE6V7rD4PNzLZAb
+c+IWz7b+xinAD161uPdyK1JlpZTri5FfFqMgx+VkFFOrtDOwxtWmpZFsdoFjji1W
+liJAbDZAJ8APdIWTAk0V5Lll2FQLcKqq9K5qKz3+DX1FyawLgjUYd3mP/GOzAOSO
+bQLiqVL5GRGQ+LySV4WngbVMoQKBgQDXmVOe4t0QHMjH4Jzi6fp0dUgJI9Fy/zH5
+qhV3R+4uqMgS3mGjcm9eIQKiffuFdKRy+6jLFNxCSTecfKHicQQodsCCL4xlPqdN
+Lw+iOpjP0+fASpYhtaILFnTSx6FBGzWhsRIeRHK/Mouk0LBhHQe5F1V2udtbzOOA
+t+asLIxZVwKBgB/Oxi5PY5R4yfKE+9xUUZ9BC3+/ezFvhE897+fSGGa3z56dpILw
+mwqiEuFJKkY562F+aV4fvMSM9ADi72scJ+/5HI3fw8D0xdeyMmw5R17yT/1Jd6nn
+G5qUOwp7Y98TUWoCR40AJzMyJvB7i6mRww1uNBNpm/DVlw4+NN/gTWMhAoGAZu6s
+DqpvMncboNnq7ScaTSmFR9/S6p1OBc2fTACKhbpNMzz6zqce5ojKEjwlrnSe4sql
+rrd55SfBpjOWsl6UxqDTjhQXamr8QwxZ4XEqbebUuWiivttRzwtcoRlwMn5EH7tD
+VDIHuqLuKrT70JGkk0jBo9peETkD0Pt75O2r4CcCgYEAtgA5bJ0ZmDvgkfQOU5y1
+i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
+02odWh+oGddsJkXxhTd/5FbVNfL4BB/eBD6YJzzyi76tmoM11WyAvBZ8Gz9XRSbw
+7W+F72bSHwFUJcEyBTojC8U=
+-----END PRIVATE KEY-----`;
 
         let packCount = 1;
 
@@ -77,6 +108,63 @@
             container.appendChild(cardDiv);
         });
 
+        // GERAR TOKEN DE ACESSO GOOGLE OAUTH2 V1
+        async function getFirebaseAccessToken() {
+            const now = Math.floor(Date.now() / 1000);
+            const claim = {
+                iss: FIREBASE_CLIENT_EMAIL,
+                scope: "https://www.googleapis.com/auth/firebase.messaging",
+                aud: "https://oauth2.googleapis.com/token",
+                exp: now + 3600,
+                iat: now
+            };
+
+            const header = { alg: "RS256", typ: "JWT" };
+            const sHeader = JSON.stringify(header);
+            const sClaim = JSON.stringify(claim);
+            const jwtToken = KJUR.jws.JWS.sign("RS256", sHeader, sClaim, FIREBASE_PRIVATE_KEY);
+
+            const response = await fetch("https://oauth2.googleapis.com/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwtToken}`
+            });
+
+            const data = await response.json();
+            return data.access_token;
+        }
+
+        // ENVIAR PUSH PELA API V1
+        async function dispararNotificacaoV1(tokenAccessToken, packNome, packCategoria) {
+            const fcmUrl = `https://fcm.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/messages:send`;
+            
+            const messageBody = {
+                message: {
+                    topic: "todos",
+                    notification: {
+                        title: "🔥 Novo Pack Liberado!",
+                        body: `O pacote "${packNome}" [${packCategoria}] já está disponível no PenSound!`
+                    },
+                    android: {
+                        priority: "HIGH",
+                        notification: {
+                            sound: "default",
+                            channel_id: "pensound_notifications"
+                        }
+                    }
+                }
+            };
+
+            await fetch(fcmUrl, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${tokenAccessToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(messageBody)
+            });
+        }
+
         document.getElementById('packForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
@@ -84,7 +172,6 @@
 
             try {
                 const token = document.getElementById('ghToken').value;
-                const fcmServerKey = document.getElementById('fcmServerKey').value.trim();
                 const cards = document.querySelectorAll('.pack-card');
                 
                 btn.innerText = "Lendo repositório...";
@@ -167,40 +254,23 @@
 
                 if (!ghRes.ok) throw new Error("Erro ao salvar no GitHub. Verifique o seu token PAT.");
 
-                // DISPARO DA NOTIFICAÇÃO PUSH AUTOMÁTICA
-                if (fcmServerKey) {
-                    btn.innerText = "Enviando notificação...";
-                    
+                // DISPARO AUTOMÁTICO DE NOTIFICAÇÕES VIA API FCM V1
+                btn.innerText = "Disparando notificações para o celular...";
+                try {
+                    const accessToken = await getFirebaseAccessToken();
                     for (const pack of ultimosPacotes) {
-                        try {
-                            await fetch("https://fcm.googleapis.com/fcm/send", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "Authorization": `key=${fcmServerKey}`
-                                },
-                                body: JSON.stringify({
-                                    "to": "/topics/todos",
-                                    "notification": {
-                                        "title": "🔥 Novo Pack Liberado!",
-                                        "body": `O pacote "${pack.nome}" [${pack.categoria}] já está disponível no PenSound!`,
-                                        "sound": "default"
-                                    },
-                                    "priority": "high"
-                                })
-                            });
-                        } catch (fcmErr) {
-                            console.error("Erro no FCM:", fcmErr);
-                        }
+                        await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
                     }
+                } catch (fcmErr) {
+                    console.error("Erro ao enviar notificação FCM V1:", fcmErr);
                 }
 
-                alert(`${pacotesAdicionados} pacote(s) publicado(s) com sucesso!`);
+                alert(`${pacotesAdicionados} pacote(s) publicado(s) e notificação enviada aos celulares!`);
                 location.reload();
             } catch (err) {
                 alert('Erro ao publicar: ' + err.message);
                 btn.disabled = false;
-                btn.innerText = "Publicar Todos os Pacotes";
+                btn.innerText = "Publicar e Notificar App";
             }
         });
     </script>
