@@ -2,21 +2,49 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel PenSound - Envio Multiplo</title>
+    <title>Painel PenSound - Gestão e Envio</title>
     <!-- Lib para assinar a chave privada RSA do Firebase V1 no navegador -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
+    
+    <!-- SDKs do Firebase Firestore para gerenciar as Chaves VIP -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 30px auto; padding: 20px; background: #121212; color: #fff; }
+        body { font-family: sans-serif; max-width: 650px; margin: 30px auto; padding: 20px; background: #121212; color: #fff; }
         input, select, button { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 4px; }
         button { font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-submit { background: #6200ee; color: white; border: none; padding: 12px; margin-top: 20px; }
         .btn-add { background: #03dac6; color: #000; border: none; }
+        .btn-vip { background: #f9e2af; color: #111; border: none; font-size: 15px; }
         button:disabled { background: #444; color: #888; }
-        .pack-card { background: #1a1a1a; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #2a2a2a; }
+        .pack-card { background: #1a1a1a; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #2a2a2a; }
         .pack-card h3 { margin-top: 0; color: #bb86fc; }
+        .vip-card { background: #1e1e2e; padding: 15px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #89b4fa; }
+        .vip-card h3 { margin-top: 0; color: #f9e2af; }
+        .chave-resultado { font-size: 18px; font-weight: bold; color: #a6e3a1; text-align: center; margin-top: 10px; padding: 10px; background: #111; border-radius: 4px; word-break: break-all; }
     </style>
 </head>
 <body>
+
+    <!-- SEÇÃO: GERADOR DE CHAVES VIP -->
+    <div class="vip-card">
+        <h3>👑 Gerador de Chaves VIP</h3>
+        <label>Tipo de Plano:</label>
+        <select id="vipTipoPlano">
+            <option value="mensal">Mensal (30 Dias)</option>
+            <option value="vitalicio">Vitalício (Para Sempre)</option>
+        </select>
+        <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO BANCO</button>
+
+        <div id="boxResultadoVip" style="display: none;">
+            <div class="chave-resultado" id="txtChaveGerada">---</div>
+        </div>
+    </div>
+
+    <hr style="border-color: #333; margin-bottom: 25px;">
+
+    <!-- SEÇÃO: ENVIO DE PACOTES EM LOTE -->
     <h2>PenSound - Envio em Lote Automático</h2>
     <form id="packForm">
         
@@ -48,11 +76,11 @@
     </form>
 
     <script>
+        // CONFIGURAÇÕES E CREDENCIAIS
         const CLOUD_NAME = "y5u5zkp7";
         const UPLOAD_PRESET = "ftpuvxis";
         const REPO = "thsize/botpensound";
 
-        // CREDENCIAIS FIREBASE V1
         const FIREBASE_PROJECT_ID = "painel-sky";
         const FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@painel-sky.iam.gserviceaccount.com";
         const FIREBASE_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
@@ -84,6 +112,44 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
 7W+F72bSHwFUJcEyBTojC8U=
 -----END PRIVATE KEY-----`;
 
+        // INICIALIZA FIRESTORE PARA CHAVES VIP
+        firebase.initializeApp({ projectId: FIREBASE_PROJECT_ID });
+        const db = firebase.firestore();
+
+        // LÓGICA DO GERADOR DE CHAVES VIP
+        document.getElementById('btnGerarVip').addEventListener('click', async () => {
+            const tipo = document.getElementById('vipTipoPlano').value;
+            const btn = document.getElementById('btnGerarVip');
+            btn.disabled = true;
+            btn.innerText = "Gerando...";
+
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let p1 = '', p2 = '';
+            for (let i = 0; i < 4; i++) {
+                p1 += chars.charAt(Math.floor(Math.random() * chars.length));
+                p2 += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const novaChave = `PENSOUND-${p1}-${p2}`;
+
+            try {
+                await db.collection("chaves_vip").doc(novaChave).set({
+                    utilizada: false,
+                    device_id: "",
+                    tipo: tipo
+                });
+
+                document.getElementById('txtChaveGerada').innerText = novaChave;
+                document.getElementById('boxResultadoVip').style.display = 'block';
+                alert("Chave VIP gerada e gravada com sucesso!");
+            } catch (err) {
+                alert("Erro ao gravar chave no Firebase: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "GERAR E SALVAR CHAVE NO BANCO";
+            }
+        });
+
+        // LÓGICA DE PACOTES MULTIPLOS
         let packCount = 1;
 
         document.getElementById('btnAddPack').addEventListener('click', () => {
@@ -108,7 +174,6 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
             container.appendChild(cardDiv);
         });
 
-        // GERAR TOKEN DE ACESSO GOOGLE OAUTH2 V1
         async function getFirebaseAccessToken() {
             const now = Math.floor(Date.now() / 1000);
             const claim = {
@@ -134,7 +199,6 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
             return data.access_token;
         }
 
-        // ENVIAR PUSH PELA API V1
         async function dispararNotificacaoV1(tokenAccessToken, packNome, packCategoria) {
             const fcmUrl = `https://fcm.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/messages:send`;
             
@@ -254,7 +318,6 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
 
                 if (!ghRes.ok) throw new Error("Erro ao salvar no GitHub. Verifique o seu token PAT.");
 
-                // DISPARO AUTOMÁTICO DE NOTIFICAÇÕES VIA API FCM V1
                 btn.innerText = "Disparando notificações para o celular...";
                 try {
                     const accessToken = await getFirebaseAccessToken();
