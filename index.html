@@ -2,39 +2,208 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel PenSound - Gestão e Envio</title>
-    <!-- Lib para assinar a chave privada RSA do Firebase V1 no navegador -->
+    
+    <!-- Lib para assinar a chave privada RSA do Firebase V1 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
     
-    <!-- SDKs do Firebase Firestore para gerenciar as Chaves VIP -->
+    <!-- SDKs do Firebase Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <style>
-        body { font-family: sans-serif; max-width: 650px; margin: 30px auto; padding: 20px; background: #121212; color: #fff; }
-        input, select, button { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 4px; }
-        button { font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-submit { background: #6200ee; color: white; border: none; padding: 12px; margin-top: 20px; }
-        .btn-add { background: #03dac6; color: #000; border: none; }
-        .btn-vip { background: #f9e2af; color: #111; border: none; font-size: 15px; }
-        button:disabled { background: #444; color: #888; }
-        .pack-card { background: #1a1a1a; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #2a2a2a; }
-        .pack-card h3 { margin-top: 0; color: #bb86fc; }
-        .vip-card { background: #1e1e2e; padding: 15px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #89b4fa; }
-        .vip-card h3 { margin-top: 0; color: #f9e2af; }
-        .chave-resultado { font-size: 18px; font-weight: bold; color: #a6e3a1; text-align: center; margin-top: 10px; padding: 10px; background: #111; border-radius: 4px; word-break: break-all; }
+        :root {
+            --bg-dark: #1E1E2E;
+            --card-bg: #313244;
+            --card-inner: #181825;
+            --text-main: #CDD6F4;
+            --text-sub: #A6ADC8;
+            --accent-blue: #89B4FA;
+            --accent-green: #A6E3A1;
+            --accent-gold: #F9E2AF;
+            --accent-purple: #CBA6F7;
+            --danger: #F38BA8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+        }
+
+        .header-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title h1 {
+            font-size: 26px;
+            color: #FFFFFF;
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header-title p {
+            color: var(--text-sub);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-vip h3 { color: var(--accent-gold); }
+        .card-pack h3 { color: var(--accent-purple); }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            margin-top: 12px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="url"],
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: var(--card-inner);
+            color: #FFFFFF;
+            border: 1px solid #45475A;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.2);
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--card-inner);
+            border: 1px dashed #45475A;
+            border-radius: 8px;
+            color: var(--text-sub);
+            box-sizing: border-box;
+            font-size: 13px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s ease, filter 0.2s ease;
+            margin-top: 12px;
+        }
+
+        button:active { transform: scale(0.98); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-vip {
+            background-color: var(--accent-gold);
+            color: #11111B;
+        }
+
+        .btn-add {
+            background-color: var(--card-inner);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .btn-submit {
+            background-color: var(--accent-purple);
+            color: #11111B;
+            font-size: 15px;
+            margin-top: 20px;
+        }
+
+        .chave-resultado {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-green);
+            text-align: center;
+            margin-top: 14px;
+            padding: 12px;
+            background-color: var(--card-inner);
+            border-radius: 8px;
+            border: 1px solid var(--accent-green);
+            word-break: break-all;
+            user-select: all;
+        }
+
+        .pack-item {
+            background-color: var(--card-inner);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #45475A;
+        }
+
+        .pack-item h4 {
+            margin: 0 0 12px 0;
+            color: var(--accent-blue);
+            font-size: 15px;
+        }
+
+        hr.divider {
+            border: 0;
+            height: 1px;
+            background: #45475A;
+            margin: 30px 0;
+        }
     </style>
 </head>
 <body>
 
+    <div class="header-title">
+        <h1>⚡ PenSound Admin</h1>
+        <p>Gerenciador de Chaves VIP e Envio de Pacotes</p>
+    </div>
+
     <!-- SEÇÃO: GERADOR DE CHAVES VIP -->
-    <div class="vip-card">
+    <div class="card card-vip">
         <h3>👑 Gerador de Chaves VIP</h3>
-        <label>Tipo de Plano:</label>
+        
+        <label for="vipTipoPlano">Selecione o Plano:</label>
         <select id="vipTipoPlano">
             <option value="mensal">Mensal (30 Dias)</option>
             <option value="vitalicio">Vitalício (Para Sempre)</option>
         </select>
+        
         <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO BANCO</button>
 
         <div id="boxResultadoVip" style="display: none;">
@@ -42,38 +211,47 @@
         </div>
     </div>
 
-    <hr style="border-color: #333; margin-bottom: 25px;">
+    <hr class="divider">
 
     <!-- SEÇÃO: ENVIO DE PACOTES EM LOTE -->
-    <h2>PenSound - Envio em Lote Automático</h2>
-    <form id="packForm">
-        
-        <div id="cardsContainer">
-            <!-- PACOTE 1 -->
-            <div class="pack-card">
-                <h3>Pacote 1</h3>
-                <input type="text" class="input-nome" placeholder="Nome do Pacote 1">
-                <select class="input-categoria">
-                    <option value="PAGODAO">PAGODÃO</option>
-                    <option value="ARROCHA">ARROCHA</option>
-                    <option value="FORRO">FORRÓ</option>
-                    <option value="FUNK">FUNK</option>
-                    <option value="REPERTORIO">REPERTÓRIO</option>
-                    <option value="OUTROS">OUTROS</option>
-                </select>
-                <input type="file" class="input-capa" accept="image/*">
-                <input type="url" class="input-download" placeholder="Link Direto do ZIP">
+    <div class="card card-pack">
+        <h3>📦 Envio de Pacotes em Lote</h3>
+        <form id="packForm">
+            
+            <div id="cardsContainer">
+                <!-- PACOTE 1 -->
+                <div class="pack-item">
+                    <h4>Pacote 1</h4>
+                    
+                    <label>Nome do Pacote:</label>
+                    <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
+                    
+                    <label>Categoria:</label>
+                    <select class="input-categoria">
+                        <option value="PAGODAO">PAGODÃO</option>
+                        <option value="ARROCHA">ARROCHA</option>
+                        <option value="FORRO">FORRÓ</option>
+                        <option value="FUNK">FUNK</option>
+                        <option value="REPERTORIO">REPERTÓRIO</option>
+                        <option value="OUTROS">OUTROS</option>
+                    </select>
+                    
+                    <label>Capa do Pack (Imagem):</label>
+                    <input type="file" class="input-capa" accept="image/*" required>
+                    
+                    <label>Link Direto do ZIP:</label>
+                    <input type="url" class="input-download" placeholder="https://..." required>
+                </div>
             </div>
-        </div>
 
-        <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
+            <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
 
-        <br><br>
-        <label>Token do GitHub (PAT):</label>
-        <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
+            <label style="margin-top: 20px;">Token do GitHub (PAT):</label>
+            <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
 
-        <button type="submit" id="btnSubmit" class="btn-submit">Publicar e Notificar App</button>
-    </form>
+            <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
+        </form>
+    </div>
 
     <script>
         // CONFIGURAÇÕES E CREDENCIAIS
@@ -140,7 +318,6 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
 
                 document.getElementById('txtChaveGerada').innerText = novaChave;
                 document.getElementById('boxResultadoVip').style.display = 'block';
-                alert("Chave VIP gerada e gravada com sucesso!");
             } catch (err) {
                 alert("Erro ao gravar chave no Firebase: " + err.message);
             } finally {
@@ -156,10 +333,14 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
             packCount++;
             const container = document.getElementById('cardsContainer');
             const cardDiv = document.createElement('div');
-            cardDiv.className = 'pack-card';
+            cardDiv.className = 'pack-item';
             cardDiv.innerHTML = `
-                <h3>Pacote ${packCount}</h3>
-                <input type="text" class="input-nome" placeholder="Nome do Pacote ${packCount}">
+                <h4>Pacote ${packCount}</h4>
+                
+                <label>Nome do Pacote:</label>
+                <input type="text" class="input-nome" placeholder="Nome do Pacote ${packCount}" required>
+                
+                <label>Categoria:</label>
                 <select class="input-categoria">
                     <option value="PAGODAO">PAGODÃO</option>
                     <option value="ARROCHA">ARROCHA</option>
@@ -168,8 +349,12 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
                     <option value="REPERTORIO">REPERTÓRIO</option>
                     <option value="OUTROS">OUTROS</option>
                 </select>
-                <input type="file" class="input-capa" accept="image/*">
-                <input type="url" class="input-download" placeholder="Link Direto do ZIP">
+                
+                <label>Capa do Pack (Imagem):</label>
+                <input type="file" class="input-capa" accept="image/*" required>
+                
+                <label>Link Direto do ZIP:</label>
+                <input type="url" class="input-download" placeholder="https://..." required>
             `;
             container.appendChild(cardDiv);
         });
@@ -236,7 +421,7 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
 
             try {
                 const token = document.getElementById('ghToken').value;
-                const cards = document.querySelectorAll('.pack-card');
+                const cards = document.querySelectorAll('.pack-item');
                 
                 btn.innerText = "Lendo repositório...";
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
@@ -333,7 +518,7 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
             } catch (err) {
                 alert('Erro ao publicar: ' + err.message);
                 btn.disabled = false;
-                btn.innerText = "Publicar e Notificar App";
+                btn.innerText = "PUBLICAR E NOTIFICAR APP";
             }
         });
     </script>
