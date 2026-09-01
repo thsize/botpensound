@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel PenSound - Gestão e Envio</title>
 
-    <!-- Firebase App e Firestore SDKs oficiais -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <!-- Lib para assinar JWT para notificação FCM -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
 
@@ -106,6 +103,7 @@
             border-radius: 8px;
             border: 1px solid var(--accent-green);
             user-select: all;
+            word-break: break-all;
         }
 
         .pack-item {
@@ -124,7 +122,7 @@
 
     <div class="header-title">
         <h1>⚡ PenSound Admin</h1>
-        <p>Gerenciador de Chaves VIP e Envio de Pacotes</p>
+        <p>Gerenciador de Chaves VIP (Supabase) e Envio de Pacotes</p>
     </div>
 
     <!-- SEÇÃO: GERADOR DE CHAVES VIP -->
@@ -137,7 +135,7 @@
             <option value="vitalicio">Vitalício (Para Sempre)</option>
         </select>
         
-        <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO BANCO</button>
+        <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
 
         <div id="boxResultadoVip" style="display: none;">
             <div class="chave-resultado" id="txtChaveGerada">---</div>
@@ -177,7 +175,7 @@
 
             <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
 
-            <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON):</label>
+            <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON - Para notificações):</label>
             <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
 
             <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
@@ -188,26 +186,17 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE SDK
-        const firebaseConfig = {
-            apiKey: "AIzaSyCj2BQbTndcnjsfTvvynfG9uomjkdeFWHs",
-            authDomain: "painel-sky.firebaseapp.com",
-            projectId: "painel-sky",
-            storageBucket: "painel-sky.appspot.com",
-            messagingSenderId: "361210035202",
-            appId: "1:361210035202:web:a61d155f9a6503c14a9a9a"
-        };
-
-        // Inicializa o Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        // CONFIGURAÇÃO DO SUPABASE
+        const SUPABASE_URL = "https://yxrqkhbjytbxwwswbvel.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4cnFraGJqeXRieHd3c3didmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjkzMTksImV4cCI6MjEwMzg0NTMxOX0.zjgkZKrT3dfsRsygMA7QKC33HTrw4I-Y21CE4k-qcyU";
 
         const CLOUD_NAME = "y5u5zkp7";
         const UPLOAD_PRESET = "ftpuvxis";
         const REPO = "thsize/botpensound";
         const FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@painel-sky.iam.gserviceaccount.com";
+        const FIREBASE_PROJECT_ID = "painel-sky";
 
-        // GERAR CHAVE VIP VIA SDK OFICIAL DO FIREBASE
+        // GERAR CHAVE VIP NO SUPABASE VIA API REST
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
             const btn = document.getElementById('btnGerarVip');
@@ -226,21 +215,34 @@
             const novaChave = `PENSOUND-${p1}-${p2}`;
 
             try {
-                // Grava no Firestore usando a SDK Nativa (conecta ao banco correto)
-                await db.collection("chaves_vip").doc(novaChave).set({
-                    utilizada: false,
-                    device_id: "",
-                    tipo: tipo
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        chave: novaChave,
+                        tipo: tipo,
+                        utilizada: false,
+                        device_id: ""
+                    })
                 });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.message || "Erro ao salvar no Supabase.");
+                }
 
                 txtChave.innerText = novaChave;
                 boxResult.style.display = 'block';
             } catch (err) {
-                console.error("Erro no Firestore SDK:", err);
-                alert("Erro ao gravar chave: " + err.message);
+                alert("Erro ao gerar chave: " + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "GERAR E SALVAR CHAVE NO BANCO";
+                btn.innerText = "GERAR E SALVAR CHAVE NO SUPABASE";
             }
         });
 
@@ -296,7 +298,7 @@
         }
 
         async function dispararNotificacaoV1(tokenAccessToken, packNome, packCategoria) {
-            const fcmUrl = `https://fcm.googleapis.com/v1/projects/painel-sky/messages:send`;
+            const fcmUrl = `https://fcm.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/messages:send`;
             await fetch(fcmUrl, {
                 method: "POST",
                 headers: {
@@ -389,7 +391,7 @@
                     await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
                 }
 
-                alert(`${pacotesAdicionados} pacote(s) publicado(s)!`);
+                alert(`${pacotesAdicionados} pacote(s) publicado(s) com sucesso!`);
                 location.reload();
             } catch (err) {
                 alert('Erro ao publicar: ' + err.message);
