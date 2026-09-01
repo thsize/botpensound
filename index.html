@@ -290,14 +290,28 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
 7W+F72bSHwFUJcEyBTojC8U=
 -----END PRIVATE KEY-----`;
 
-        // INICIALIZA FIRESTORE PARA CHAVES VIP
-        firebase.initializeApp({ projectId: FIREBASE_PROJECT_ID });
+        // INICIALIZAÇÃO CORRETA DO FIREBASE WEB CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyCj2BQbTndcnjsfTvvynfG9uomjkdeFWHs",
+            authDomain: "painel-sky.firebaseapp.com",
+            projectId: "painel-sky",
+            storageBucket: "painel-sky.firebasestorage.app",
+            messagingSenderId: "361210035202",
+            appId: "1:361210035202:web:f10aef625456aea9fd7b1b"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
 
         // LÓGICA DO GERADOR DE CHAVES VIP
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
             const btn = document.getElementById('btnGerarVip');
+            const boxResult = document.getElementById('boxResultadoVip');
+            const txtChave = document.getElementById('txtChaveGerada');
+
             btn.disabled = true;
             btn.innerText = "Gerando...";
 
@@ -316,9 +330,10 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
                     tipo: tipo
                 });
 
-                document.getElementById('txtChaveGerada').innerText = novaChave;
-                document.getElementById('boxResultadoVip').style.display = 'block';
+                txtChave.innerText = novaChave;
+                boxResult.style.display = 'block';
             } catch (err) {
+                console.error("Erro ao gravar chave:", err);
                 alert("Erro ao gravar chave no Firebase: " + err.message);
             } finally {
                 btn.disabled = false;
