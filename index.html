@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel PenSound - Gestão e Envio</title>
-    
-    <!-- Lib para assinar a chave privada RSA do Firebase V1 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
 
     <style>
@@ -19,7 +17,6 @@
             --accent-green: #A6E3A1;
             --accent-gold: #F9E2AF;
             --accent-purple: #CBA6F7;
-            --danger: #F38BA8;
         }
 
         body {
@@ -31,26 +28,9 @@
             color: var(--text-main);
         }
 
-        .header-title {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header-title h1 {
-            font-size: 26px;
-            color: #FFFFFF;
-            margin: 0 0 8px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .header-title p {
-            color: var(--text-sub);
-            font-size: 14px;
-            margin: 0;
-        }
+        .header-title { text-align: center; margin-bottom: 30px; }
+        .header-title h1 { font-size: 26px; color: #FFFFFF; margin: 0 0 8px 0; }
+        .header-title p { color: var(--text-sub); font-size: 14px; margin: 0; }
 
         .card {
             background-color: var(--card-bg);
@@ -61,15 +41,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .card h3 {
-            margin-top: 0;
-            margin-bottom: 16px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
+        .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 18px; }
         .card-vip h3 { color: var(--accent-gold); }
         .card-pack h3 { color: var(--accent-purple); }
 
@@ -82,11 +54,7 @@
             margin-top: 12px;
         }
 
-        input[type="text"],
-        input[type="password"],
-        input[type="url"],
-        textarea,
-        select {
+        input[type="text"], input[type="password"], input[type="url"], textarea, select {
             width: 100%;
             padding: 12px 14px;
             background-color: var(--card-inner);
@@ -95,13 +63,6 @@
             border-radius: 8px;
             font-size: 14px;
             box-sizing: border-box;
-            transition: all 0.2s ease;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.2);
         }
 
         input[type="file"] {
@@ -112,7 +73,6 @@
             border-radius: 8px;
             color: var(--text-sub);
             box-sizing: border-box;
-            font-size: 13px;
         }
 
         button {
@@ -123,30 +83,12 @@
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.1s ease, filter 0.2s ease;
             margin-top: 12px;
         }
 
-        button:active { transform: scale(0.98); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .btn-vip {
-            background-color: var(--accent-gold);
-            color: #11111B;
-        }
-
-        .btn-add {
-            background-color: var(--card-inner);
-            color: var(--accent-green);
-            border: 1px solid var(--accent-green);
-        }
-
-        .btn-submit {
-            background-color: var(--accent-purple);
-            color: #11111B;
-            font-size: 15px;
-            margin-top: 20px;
-        }
+        .btn-vip { background-color: var(--accent-gold); color: #11111B; }
+        .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
 
         .chave-resultado {
             font-size: 18px;
@@ -158,7 +100,6 @@
             background-color: var(--card-inner);
             border-radius: 8px;
             border: 1px solid var(--accent-green);
-            word-break: break-all;
             user-select: all;
         }
 
@@ -170,18 +111,8 @@
             border: 1px solid #45475A;
         }
 
-        .pack-item h4 {
-            margin: 0 0 12px 0;
-            color: var(--accent-blue);
-            font-size: 15px;
-        }
-
-        hr.divider {
-            border: 0;
-            height: 1px;
-            background: #45475A;
-            margin: 30px 0;
-        }
+        .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
+        hr.divider { border: 0; height: 1px; background: #45475A; margin: 30px 0; }
     </style>
 </head>
 <body>
@@ -216,10 +147,8 @@
         <form id="packForm">
             
             <div id="cardsContainer">
-                <!-- PACOTE 1 -->
                 <div class="pack-item">
                     <h4>Pacote 1</h4>
-                    
                     <label>Nome do Pacote:</label>
                     <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
                     
@@ -254,16 +183,14 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES E CREDENCIAIS PÚBLICAS DO PROJETO
         const CLOUD_NAME = "y5u5zkp7";
         const UPLOAD_PRESET = "ftpuvxis";
         const REPO = "thsize/botpensound";
-        
         const FIREBASE_PROJECT_ID = "painel-sky";
         const FIREBASE_API_KEY = "AIzaSyCj2BQbTndcnjsfTvvynfG9uomjkdeFWHs";
         const FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@painel-sky.iam.gserviceaccount.com";
 
-        // LÓGICA DO GERADOR DE CHAVES VIP VIA FIRESTORE REST API
+        // GERAR CHAVES VIP CORRIGIDO
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
             const btn = document.getElementById('btnGerarVip');
@@ -290,7 +217,7 @@
                     body: JSON.stringify({
                         fields: {
                             utilizada: { booleanValue: false },
-                            device_id: { stringValue: "" },
+                            device_id: { stringValue: "nenhum" },
                             tipo: { stringValue: tipo }
                         }
                     })
@@ -299,24 +226,23 @@
                 const resData = await res.json();
 
                 if (!res.ok) {
-                    const mensagemErro = resData.error?.message || JSON.stringify(resData);
-                    throw new Error(mensagemErro);
+                    const msg = resData.error?.message || "Erro de gravação no banco";
+                    throw new Error(msg);
                 }
 
                 txtChave.innerText = novaChave;
                 boxResult.style.display = 'block';
             } catch (err) {
-                console.error("Erro completo ao gravar chave:", err);
-                alert("Detalhe do Erro no Banco: " + err.message);
+                console.error("Erro no Firestore:", err);
+                alert("Erro ao gerar chave: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "GERAR E SALVAR CHAVE NO BANCO";
             }
         });
 
-        // LÓGICA DE GERENCIAMENTO DE PACOTES MÚLTIPLOS
+        // ADICIONAR PACOTES
         let packCount = 1;
-
         document.getElementById('btnAddPack').addEventListener('click', () => {
             packCount++;
             const container = document.getElementById('cardsContainer');
@@ -324,10 +250,8 @@
             cardDiv.className = 'pack-item';
             cardDiv.innerHTML = `
                 <h4>Pacote ${packCount}</h4>
-                
                 <label>Nome do Pacote:</label>
                 <input type="text" class="input-nome" placeholder="Nome do Pacote ${packCount}" required>
-                
                 <label>Categoria:</label>
                 <select class="input-categoria">
                     <option value="PAGODAO">PAGODÃO</option>
@@ -337,10 +261,8 @@
                     <option value="REPERTORIO">REPERTÓRIO</option>
                     <option value="OUTROS">OUTROS</option>
                 </select>
-                
                 <label>Capa do Pack (Imagem):</label>
                 <input type="file" class="input-capa" accept="image/*" required>
-                
                 <label>Link Direto do ZIP:</label>
                 <input type="url" class="input-download" placeholder="https://..." required>
             `;
@@ -372,7 +294,6 @@
 
         async function dispararNotificacaoV1(tokenAccessToken, packNome, packCategoria) {
             const fcmUrl = `https://fcm.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/messages:send`;
-            
             await fetch(fcmUrl, {
                 method: "POST",
                 headers: {
@@ -423,7 +344,7 @@
                     const download = card.querySelector('.input-download').value.trim();
 
                     if (nome && file && download) {
-                        btn.innerText = `Enviando imagem ${i + 1} de ${cards.length}...`;
+                        btn.innerText = `Enviando foto ${i + 1} de ${cards.length}...`;
                         const formData = new FormData();
                         formData.append('file', file);
                         formData.append('upload_preset', UPLOAD_PRESET);
@@ -457,7 +378,7 @@
                     })
                 });
 
-                if (!ghRes.ok) throw new Error("Erro de autenticação no GitHub. Verifique o seu Token PAT.");
+                if (!ghRes.ok) throw new Error("Erro no GitHub PAT.");
 
                 btn.innerText = "Enviando notificações...";
                 const accessToken = await getFirebaseAccessToken(privateKey);
@@ -465,7 +386,7 @@
                     await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
                 }
 
-                alert(`${pacotesAdicionados} pacote(s) publicado(s) com sucesso!`);
+                alert(`${pacotesAdicionados} pacote(s) publicado(s)!`);
                 location.reload();
             } catch (err) {
                 alert('Erro ao publicar: ' + err.message);
