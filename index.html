@@ -7,10 +7,6 @@
     
     <!-- Lib para assinar a chave privada RSA do Firebase V1 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
-    
-    <!-- SDKs do Firebase Firestore -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
@@ -290,22 +286,7 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
 7W+F72bSHwFUJcEyBTojC8U=
 -----END PRIVATE KEY-----`;
 
-        // INICIALIZAÇÃO CORRETA DO FIREBASE WEB CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyCj2BQbTndcnjsfTvvynfG9uomjkdeFWHs",
-            authDomain: "painel-sky.firebaseapp.com",
-            projectId: "painel-sky",
-            storageBucket: "painel-sky.firebasestorage.app",
-            messagingSenderId: "361210035202",
-            appId: "1:361210035202:web:f10aef625456aea9fd7b1b"
-        };
-
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.firestore();
-
-        // LÓGICA DO GERADOR DE CHAVES VIP
+        // LÓGICA DO GERADOR DE CHAVES VIP VIA API REST DIRECTA
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
             const btn = document.getElementById('btnGerarVip');
@@ -324,17 +305,33 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
             const novaChave = `PENSOUND-${p1}-${p2}`;
 
             try {
-                await db.collection("chaves_vip").doc(novaChave).set({
-                    utilizada: false,
-                    device_id: "",
-                    tipo: tipo
+                // Requisição direta via Firestore REST API (patch/create document)
+                const restUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/chaves_vip/${novaChave}`;
+
+                const requestBody = {
+                    fields: {
+                        utilizada: { booleanValue: false },
+                        device_id: { stringValue: "" },
+                        tipo: { stringValue: tipo }
+                    }
+                };
+
+                const res = await fetch(restUrl, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
                 });
+
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.error?.message || "Erro na API REST do Firestore");
+                }
 
                 txtChave.innerText = novaChave;
                 boxResult.style.display = 'block';
             } catch (err) {
                 console.error("Erro ao gravar chave:", err);
-                alert("Erro ao gravar chave no Firebase: " + err.message);
+                alert("Erro ao gravar chave: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "GERAR E SALVAR CHAVE NO BANCO";
