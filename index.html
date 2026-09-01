@@ -256,6 +256,7 @@
         const REPO = "thsize/botpensound";
 
         const FIREBASE_PROJECT_ID = "painel-sky";
+        const FIREBASE_API_KEY = "AIzaSyCj2BQbTndcnjsfTvvynfG9uomjkdeFWHs";
         const FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@painel-sky.iam.gserviceaccount.com";
         const FIREBASE_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDSE04ML74e612R
@@ -286,7 +287,7 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
 7W+F72bSHwFUJcEyBTojC8U=
 -----END PRIVATE KEY-----`;
 
-        // LÓGICA DO GERADOR DE CHAVES VIP VIA API REST DIRECTA
+        // LÓGICA DO GERADOR DE CHAVES VIP VIA API REST
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
             const btn = document.getElementById('btnGerarVip');
@@ -305,8 +306,8 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
             const novaChave = `PENSOUND-${p1}-${p2}`;
 
             try {
-                // Requisição direta via Firestore REST API (patch/create document)
-                const restUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/chaves_vip/${novaChave}`;
+                // Endpoint REST oficial contendo a API Key de autorização
+                const restUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/chaves_vip/${novaChave}?key=${FIREBASE_API_KEY}`;
 
                 const requestBody = {
                     fields: {
@@ -324,7 +325,7 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
 
                 if (!res.ok) {
                     const errData = await res.json();
-                    throw new Error(errData.error?.message || "Erro na API REST do Firestore");
+                    throw new Error(errData.error?.message || "Erro de permissão no Firestore REST");
                 }
 
                 txtChave.innerText = novaChave;
@@ -338,7 +339,7 @@ i+lYT0cVykg+1KIMEkq5A9vr5M/pk0GVS8kEE4cOtL048CRaEsKbJpxNEx8OXnUw
             }
         });
 
-        // LÓGICA DE PACOTES MULTIPLOS
+        // LÓGICA DE PACOTES MÚLTIPLOS
         let packCount = 1;
 
         document.getElementById('btnAddPack').addEventListener('click', () => {
