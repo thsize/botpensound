@@ -20,5 +20,49 @@
     "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788193628/papel.png",
     "download": "https://www.mediafire.com/file/45yvswu9u5kgjpb/PACK+VOCAL+CHOP+ARCADE+85+BPM-+Kitdepontos.COm.Br.zip/file",
     "zip_url": "https://www.mediafire.com/file/45yvswu9u5kgjpb/PACK+VOCAL+CHOP+ARCADE+85+BPM-+Kitdepontos.COm.Br.zip/file"
+  },
+  {
+    "id": "1788441879701",
+    "nome": "FORRÓ ROMÂNTICO",
+    "title": "FORRÓ ROMÂNTICO",
+    "categoria": "FORRO",
+    "type": "FORRO",
+    "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788441878/4956455679531093417.jpg",
+    "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788441878/4956455679531093417.jpg",
+    "download": "https://drive.google.com/file/d/1yDvJhwpmkF81-L1kTlnhROtDSima4VRz/view",
+    "zip_url": "https://drive.google.com/file/d/1yDvJhwpmkF81-L1kTlnhROtDSima4VRz/view"
+  },
+  {
+    "id": "1788441880247",
+    "nome": "FUNK",
+    "title": "FUNK",
+    "categoria": "FUNK",
+    "type": "FUNK",
+    "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788441879/FUNK_in_Black_Grungy_Letters.jpg",
+    "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788441879/FUNK_in_Black_Grungy_Letters.jpg",
+    "download": "https://drive.google.com/file/d/11n1AEWHpO48DQmFVddOON2AAiKqWLi9O/view",
+    "zip_url": "https://drive.google.com/file/d/11n1AEWHpO48DQmFVddOON2AAiKqWLi9O/view"
+  },
+  {
+    "id": "1788441880948",
+    "nome": "PISEIRO",
+    "title": "PISEIRO",
+    "categoria": "OUTROS",
+    "type": "OUTROS",
+    "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788441880/408701734954840724.jpg",
+    "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788441880/408701734954840724.jpg",
+    "download": "https://drive.google.com/file/d/14bCOfA8uSCa1WG1G0lffqNLzWDVDlRN-/view",
+    "zip_url": "https://drive.google.com/file/d/14bCOfA8uSCa1WG1G0lffqNLzWDVDlRN-/view"
+  },
+  {
+    "id": "1788441881510",
+    "nome": "FORRÓ2026",
+    "title": "FORRÓ2026",
+    "categoria": "PAGODAO",
+    "type": "PAGODAO",
+    "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788441881/Criativo_inovador_e_elegante_.jpg",
+    "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788441881/Criativo_inovador_e_elegante_.jpg",
+    "download": "https://drive.google.com/file/d/1yEJ72vg4QG64Wh3y_b0eIAbvrEX8kmP_/view",
+    "zip_url": "https://drive.google.com/file/d/1yEJ72vg4QG64Wh3y_b0eIAbvrEX8kmP_/view"
   }
 ]
