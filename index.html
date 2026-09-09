@@ -325,8 +325,9 @@
 
                 <label for="vipTipoPlano">Selecione o Plano:</label>
                 <select id="vipTipoPlano">
-                    <option value="mensal">Mensal (30 Dias)</option>
-                    <option value="vitalicio">Vitalício (Para Sempre)</option>
+                    <option value="semanal">Semanal (7 Dias) - R$ 4,90</option>
+                    <option value="quinzenal">Quinzenal (15 Dias) - R$ 6,90</option>
+                    <option value="vitalicio">Vitalício (Para Sempre) - R$ 29,90</option>
                 </select>
                 
                 <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
@@ -476,7 +477,6 @@
             body.innerHTML = '<tr><td colspan="4">Carregando chaves...</td></tr>';
 
             try {
-                // Tenta ordenar por data de criação. Caso não exista, reverte para consulta padrão sem ordem
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=created_at.desc`, {
                     method: 'GET',
                     headers: {
@@ -529,7 +529,7 @@
 
                 tr.innerHTML = `
                     <td><b>${item.chave}</b></td>
-                    <td>${item.tipo ? item.tipo.toUpperCase() : 'MENSAL'}</td>
+                    <td>${item.tipo ? item.tipo.toUpperCase() : 'SEMANAL'}</td>
                     <td>${statusHtml}</td>
                     <td>
                         <button class="btn-danger" onclick="excluirChaveVip('${item.chave}')">Excluir</button>
