@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel PenSound - Gestão e Envio</title>
+    <title>PenSound Admin - Gestão Completa</title>
 
     <!-- Lib para assinar JWT para notificação FCM -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
 
     <style>
         :root {
-            --bg-dark: #1E1E2E;
+            --bg-dark: #11111B;
+            --sidebar-bg: #1E1E2E;
             --card-bg: #313244;
             --card-inner: #181825;
             --text-main: #CDD6F4;
@@ -19,31 +20,90 @@
             --accent-green: #A6E3A1;
             --accent-gold: #F9E2AF;
             --accent-purple: #CBA6F7;
+            --accent-red: #F38BA8;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 30px 20px;
+            margin: 0;
+            padding: 0;
             background-color: var(--bg-dark);
             color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
         }
 
-        .header-title { text-align: center; margin-bottom: 30px; }
-        .header-title h1 { font-size: 26px; color: #FFFFFF; margin: 0 0 8px 0; }
-        .header-title p { color: var(--text-sub); font-size: 14px; margin: 0; }
+        /* BARRA LATERAL (SIDEBAR) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-brand h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #FFFFFF;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            padding: 14px 20px;
+            color: var(--text-sub);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu li:hover, .sidebar-menu li.active {
+            background-color: var(--card-bg);
+            color: var(--accent-blue);
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        /* CONTEÚDO PRINCIPAL */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 30px;
+            max-width: 900px;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
         .card {
             background-color: var(--card-bg);
             border-radius: 12px;
-            padding: 20px;
+            padding: 24px;
             margin-bottom: 24px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 18px; }
+        .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 20px; }
         .card-vip h3 { color: var(--accent-gold); }
         .card-pack h3 { color: var(--accent-purple); }
 
@@ -64,7 +124,6 @@
             border: 1px solid #45475A;
             border-radius: 8px;
             font-size: 14px;
-            box-sizing: border-box;
         }
 
         input[type="file"] {
@@ -74,23 +133,27 @@
             border: 1px dashed #45475A;
             border-radius: 8px;
             color: var(--text-sub);
-            box-sizing: border-box;
         }
 
         button {
             width: 100%;
-            padding: 14px;
+            padding: 12px 14px;
             border: none;
             border-radius: 8px;
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 12px;
+            transition: opacity 0.2s;
         }
+
+        button:hover { opacity: 0.9; }
 
         .btn-vip { background-color: var(--accent-gold); color: #11111B; }
         .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
         .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
+        .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
+        .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
 
         .chave-resultado {
             font-size: 18px;
@@ -115,80 +178,216 @@
         }
 
         .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
-        hr.divider { border: 0; height: 1px; background: #45475A; margin: 30px 0; }
+
+        /* TABELAS E LISTAS */
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-inner);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid #313244;
+            font-size: 14px;
+        }
+
+        th { background-color: #11111B; color: var(--accent-blue); }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge-success { background-color: var(--accent-green); color: #11111B; }
+        .badge-warning { background-color: var(--accent-gold); color: #11111B; }
+
+        .action-btns { display: flex; gap: 8px; }
+
+        /* MODAL DE EDIÇÃO */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header-title">
-        <h1>⚡ PenSound Admin</h1>
-        <p>Gerenciador de Chaves VIP (Supabase) e Envio de Pacotes</p>
-    </div>
-
-    <!-- SEÇÃO: GERADOR DE CHAVES VIP -->
-    <div class="card card-vip">
-        <h3>👑 Gerador de Chaves VIP</h3>
-        
-        <label for="vipTipoPlano">Selecione o Plano:</label>
-        <select id="vipTipoPlano">
-            <option value="mensal">Mensal (30 Dias)</option>
-            <option value="vitalicio">Vitalício (Para Sempre)</option>
-        </select>
-        
-        <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
-
-        <div id="boxResultadoVip" style="display: none;">
-            <div class="chave-resultado" id="txtChaveGerada">---</div>
+    <!-- BARRA LATERAL -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h2>⚡ PenSound Admin</h2>
         </div>
+        <ul class="sidebar-menu">
+            <li class="active" onclick="switchTab('tab-publicar')">📦 Publicar Pacotes</li>
+            <li onclick="switchTab('tab-pacotes')">🎵 Gerenciar Pacotes</li>
+            <li onclick="switchTab('tab-vip')">👑 Gerenciar Chaves VIP</li>
+        </ul>
     </div>
 
-    <hr class="divider">
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="main-content">
 
-    <!-- SEÇÃO: ENVIO DE PACOTES EM LOTE -->
-    <div class="card card-pack">
-        <h3>📦 Envio de Pacotes em Lote</h3>
-        <form id="packForm">
-            
-            <div id="cardsContainer">
-                <div class="pack-item">
-                    <h4>Pacote 1</h4>
-                    <label>Nome do Pacote:</label>
-                    <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
-                    
-                    <label>Categoria:</label>
-                    <select class="input-categoria">
-                        <option value="PAGODAO">PAGODÃO</option>
-                        <option value="ARROCHA">ARROCHA</option>
-                        <option value="ARROCHADEIRA">ARROCHADEIRA</option>
-                        <option value="SAMBA">SAMBA</option>
-                        <option value="FORRO">FORRÓ</option>
-                        <option value="FUNK">FUNK</option>
-                        <option value="REPERTORIO">REPERTÓRIO</option>
-                        <option value="OUTROS">OUTROS</option>
-                    </select>
-                    
-                    <label>Capa do Pack (Imagem):</label>
-                    <input type="file" class="input-capa" accept="image/*" required>
-                    
-                    <label>Link Direto do ZIP:</label>
-                    <input type="url" class="input-download" placeholder="https://..." required>
+        <!-- ABA 1: PUBLICAR PACOTES -->
+        <div id="tab-publicar" class="tab-content active">
+            <div class="card card-pack">
+                <h3>📦 Envio de Pacotes em Lote</h3>
+                <form id="packForm">
+                    <div id="cardsContainer">
+                        <div class="pack-item">
+                            <h4>Pacote 1</h4>
+                            <label>Nome do Pacote:</label>
+                            <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
+                            
+                            <label>Categoria:</label>
+                            <select class="input-categoria">
+                                <option value="PAGODAO">PAGODÃO</option>
+                                <option value="ARROCHA">ARROCHA</option>
+                                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
+                                <option value="SAMBA">SAMBA</option>
+                                <option value="FORRO">FORRÓ</option>
+                                <option value="FUNK">FUNK</option>
+                                <option value="REPERTORIO">REPERTÓRIO</option>
+                                <option value="OUTROS">OUTROS</option>
+                            </select>
+                            
+                            <label>Capa do Pack (Imagem):</label>
+                            <input type="file" class="input-capa" accept="image/*" required>
+                            
+                            <label>Link Direto do ZIP (MediaFire Página/Google Drive):</label>
+                            <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
+
+                    <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON):</label>
+                    <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
+
+                    <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
+                    <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
+
+                    <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ABA 2: GERENCIAR PACOTES -->
+        <div id="tab-pacotes" class="tab-content">
+            <div class="card card-pack">
+                <h3>🎵 Lista de Pacotes Cadastrados</h3>
+                <input type="text" id="searchPacote" placeholder="🔎 Pesquisar pacote por nome ou categoria..." onkeyup="filtrarPacotes()">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Capa</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaPacotesBody">
+                            <tr><td colspan="4">Carregando pacotes do GitHub...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 3: GERENCIAR CHAVES VIP -->
+        <div id="tab-vip" class="tab-content">
+            <div class="card card-vip">
+                <h3>👑 Gerar Nova Chave VIP</h3>
+                <label for="vipTipoPlano">Selecione o Plano:</label>
+                <select id="vipTipoPlano">
+                    <option value="mensal">Mensal (30 Dias)</option>
+                    <option value="vitalicio">Vitalício (Para Sempre)</option>
+                </select>
+                
+                <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
+
+                <div id="boxResultadoVip" style="display: none;">
+                    <div class="chave-resultado" id="txtChaveGerada">---</div>
                 </div>
             </div>
 
-            <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
+            <div class="card card-vip">
+                <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
+                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP ou Device ID..." onkeyup="filtrarChavesVip()">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Chave</th>
+                                <th>Tipo</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaChavesBody">
+                            <tr><td colspan="4">Carregando chaves do Supabase...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-            <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON - Para notificações):</label>
-            <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
+    </div>
 
-            <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
-            <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
+    <!-- MODAL DE EDIÇÃO DE PACOTE -->
+    <div id="modalEditPacote" class="modal">
+        <div class="modal-content">
+            <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
+            <input type="hidden" id="editPackIndex">
+            
+            <label>Nome do Pacote:</label>
+            <input type="text" id="editPackNome">
+            
+            <label>Categoria:</label>
+            <select id="editPackCategoria">
+                <option value="PAGODAO">PAGODÃO</option>
+                <option value="ARROCHA">ARROCHA</option>
+                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
+                <option value="SAMBA">SAMBA</option>
+                <option value="FORRO">FORRÓ</option>
+                <option value="FUNK">FUNK</option>
+                <option value="REPERTORIO">REPERTÓRIO</option>
+                <option value="OUTROS">OUTROS</option>
+            </select>
+            
+            <label>Link Direto do ZIP:</label>
+            <input type="url" id="editPackDownload">
 
-            <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
-        </form>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" class="btn-submit" onclick="salvarEdicaoPacote()" style="margin:0;">Salvar Alterações</button>
+                <button type="button" class="btn-danger" onclick="fecharModalEdit()" style="margin:0;">Cancelar</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO SUPABASE
         const SUPABASE_URL = "https://yxrqkhbjytbxwwswbvel.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4cnFraGJqeXRieHd3c3didmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjkzMTksImV4cCI6MjEwMzg0NTMxOX0.zjgkZKrT3dfsRsygMA7QKC33HTrw4I-Y21CE4k-qcyU";
 
@@ -198,7 +397,24 @@
         const FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@painel-sky.iam.gserviceaccount.com";
         const FIREBASE_PROJECT_ID = "painel-sky";
 
-        // GERAR CHAVE VIP NO SUPABASE VIA API REST
+        let globalPacotes = [];
+        let globalShaGitHub = "";
+        let globalChavesVip = [];
+
+        // ALTERNÂNCIA DE ABAS
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (tabId === 'tab-pacotes') carregarPacotesGitHub();
+            if (tabId === 'tab-vip') carregarChavesSupabase();
+        }
+
+        // --- GERENCIAMENTO DE CHAVES VIP ---
+
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
             const btn = document.getElementById('btnGerarVip');
@@ -233,13 +449,11 @@
                     })
                 });
 
-                if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.message || "Erro ao salvar no Supabase.");
-                }
+                if (!response.ok) throw new Error("Erro ao salvar chave no Supabase.");
 
                 txtChave.innerText = novaChave;
                 boxResult.style.display = 'block';
+                carregarChavesSupabase();
             } catch (err) {
                 alert("Erro ao gerar chave: " + err.message);
             } finally {
@@ -248,7 +462,216 @@
             }
         });
 
-        // ADICIONAR PACOTES
+        async function carregarChavesSupabase() {
+            const body = document.getElementById('listaChavesBody');
+            body.innerHTML = '<tr><td colspan="4">Carregando chaves...</td></tr>';
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=id.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                globalChavesVip = await res.json();
+                renderizarTabelaChaves(globalChavesVip);
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="4">Erro ao carregar chaves do Supabase.</td></tr>';
+            }
+        }
+
+        function renderizarTabelaChaves(chaves) {
+            const body = document.getElementById('listaChavesBody');
+            body.innerHTML = '';
+
+            if (chaves.length === 0) {
+                body.innerHTML = '<tr><td colspan="4">Nenhuma chave VIP encontrada.</td></tr>';
+                return;
+            }
+
+            chaves.forEach(item => {
+                const tr = document.createElement('tr');
+                const statusHtml = item.utilizada 
+                    ? `<span class="badge badge-warning">Em Uso (${item.device_id ? item.device_id.substring(0,6) : 'Ativado'})</span>`
+                    : `<span class="badge badge-success">Livre</span>`;
+
+                tr.innerHTML = `
+                    <td><b>${item.chave}</b></td>
+                    <td>${item.tipo ? item.tipo.toUpperCase() : 'MENSAL'}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <button class="btn-danger" onclick="excluirChaveVip('${item.chave}')">Excluir</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function filtrarChavesVip() {
+            const termo = document.getElementById('searchChave').value.toLowerCase();
+            const filtradas = globalChavesVip.filter(c => 
+                c.chave.toLowerCase().includes(termo) || 
+                (c.device_id && c.device_id.toLowerCase().includes(termo))
+            );
+            renderizarTabelaChaves(filtradas);
+        }
+
+        async function excluirChaveVip(chave) {
+            if (!confirm(`Deseja realmente excluir a chave ${chave}? O usuário VIP associado a ela perderá o acesso no app.`)) return;
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?chave=eq.${chave}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (res.ok) {
+                    alert("Chave VIP excluída com sucesso!");
+                    carregarChavesSupabase();
+                } else {
+                    alert("Erro ao excluir chave no banco.");
+                }
+            } catch (e) {
+                alert("Falha na conexão ao excluir chave.");
+            }
+        }
+
+        // --- GERENCIAMENTO DE PACOTES (GITHUB) ---
+
+        async function carregarPacotesGitHub() {
+            const body = document.getElementById('listaPacotesBody');
+            body.innerHTML = '<tr><td colspan="4">Buscando do GitHub...</td></tr>';
+
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                const currentData = await fetch(ghUrl).then(r => r.json());
+                globalShaGitHub = currentData.sha;
+
+                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                globalPacotes = contentText ? JSON.parse(contentText) : [];
+
+                renderizarTabelaPacotes(globalPacotes);
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="4">Erro ao carregar pacotes. Verifique o repositório.</td></tr>';
+            }
+        }
+
+        function renderizarTabelaPacotes(pacotes) {
+            const body = document.getElementById('listaPacotesBody');
+            body.innerHTML = '';
+
+            if (pacotes.length === 0) {
+                body.innerHTML = '<tr><td colspan="4">Nenhum pacote publicado.</td></tr>';
+                return;
+            }
+
+            pacotes.forEach((pack, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><img src="${pack.capa || pack.cover_url}" width="45" height="45" style="border-radius:6px; object-fit:cover;"></td>
+                    <td><b>${pack.nome || pack.title}</b></td>
+                    <td><span class="badge badge-success">${pack.categoria || pack.type}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-edit" onclick="abrirEdicaoPacote(${index})">Editar</button>
+                            <button class="btn-danger" onclick="excluirPacote(${index})">Excluir</button>
+                        </div>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function filtrarPacotes() {
+            const termo = document.getElementById('searchPacote').value.toLowerCase();
+            const filtrados = globalPacotes.filter(p => 
+                (p.nome && p.nome.toLowerCase().includes(termo)) || 
+                (p.categoria && p.categoria.toLowerCase().includes(termo))
+            );
+            renderizarTabelaPacotes(filtrados);
+        }
+
+        function abrirEdicaoPacote(index) {
+            const pack = globalPacotes[index];
+            document.getElementById('editPackIndex').value = index;
+            document.getElementById('editPackNome').value = pack.nome || pack.title;
+            document.getElementById('editPackCategoria').value = pack.categoria || pack.type;
+            document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
+
+            document.getElementById('modalEditPacote').style.display = 'flex';
+        }
+
+        function fecharModalEdit() {
+            document.getElementById('modalEditPacote').style.display = 'none';
+        }
+
+        async function salvarEdicaoPacote() {
+            const token = document.getElementById('ghToken').value;
+            if (!token) {
+                alert("Por favor, digite seu Token do GitHub (PAT) na aba de Envio para autorizar a alteração.");
+                return;
+            }
+
+            const index = document.getElementById('editPackIndex').value;
+            const novoNome = document.getElementById('editPackNome').value.trim();
+            const novaCategoria = document.getElementById('editPackCategoria').value;
+            const novoDownload = document.getElementById('editPackDownload').value.trim();
+
+            globalPacotes[index].nome = novoNome;
+            globalPacotes[index].title = novoNome;
+            globalPacotes[index].categoria = novaCategoria;
+            globalPacotes[index].type = novaCategoria;
+            globalPacotes[index].download = novoDownload;
+            globalPacotes[index].zip_url = novoDownload;
+
+            await atualizarArquivoGitHub(token, `Editado pacote ${novoNome}`);
+            fecharModalEdit();
+            carregarPacotesGitHub();
+        }
+
+        async function excluirPacote(index) {
+            const pack = globalPacotes[index];
+            if (!confirm(`Deseja excluir o pacote "${pack.nome || pack.title}"?`)) return;
+
+            const token = prompt("Digite seu Token do GitHub (PAT) para confirmar a exclusão:");
+            if (!token) return;
+
+            globalPacotes.splice(index, 1);
+            await atualizarArquivoGitHub(token, `Removido pacote ${pack.nome || pack.title}`);
+            carregarPacotesGitHub();
+        }
+
+        async function atualizarArquivoGitHub(token, commitMessage) {
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalPacotes, null, 2))));
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: commitMessage,
+                        content: updatedContent,
+                        sha: globalShaGitHub
+                    })
+                });
+
+                if (ghRes.ok) {
+                    alert("Operação salva no GitHub com sucesso!");
+                } else {
+                    alert("Erro ao atualizar GitHub. Verifique seu Token.");
+                }
+            } catch (e) {
+                alert("Erro de comunicação com o GitHub.");
+            }
+        }
+
+        // --- PUBLICAR NOVOS PACOTES EM LOTE ---
+
         let packCount = 1;
         document.getElementById('btnAddPack').addEventListener('click', () => {
             packCount++;
