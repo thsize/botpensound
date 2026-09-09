@@ -238,9 +238,9 @@
             <h2>⚡ PenSound Admin</h2>
         </div>
         <ul class="sidebar-menu">
-            <li class="active" onclick="switchTab('tab-publicar')">📦 Publicar Pacotes</li>
-            <li onclick="switchTab('tab-pacotes')">🎵 Gerenciar Pacotes</li>
-            <li onclick="switchTab('tab-vip')">👑 Gerenciar Chaves VIP</li>
+            <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
+            <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
+            <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
         </ul>
     </div>
 
@@ -402,12 +402,12 @@
         let globalChavesVip = [];
 
         // ALTERNÂNCIA DE ABAS
-        function switchTab(tabId) {
+        function switchTab(tabId, evt) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
 
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
             if (tabId === 'tab-pacotes') carregarPacotesGitHub();
             if (tabId === 'tab-vip') carregarChavesSupabase();
@@ -449,7 +449,10 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("Erro ao salvar chave no Supabase.");
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.message || "Erro ao salvar no Supabase.");
+                }
 
                 txtChave.innerText = novaChave;
                 boxResult.style.display = 'block';
@@ -468,16 +471,26 @@
 
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=id.desc`, {
+                    method: 'GET',
                     headers: {
                         'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
                     }
                 });
 
-                globalChavesVip = await res.json();
+                if (!res.ok) {
+                    const err = await res.json();
+                    body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-red)">Erro no Supabase: ${err.message || res.statusText}</td></tr>`;
+                    return;
+                }
+
+                const data = await res.json();
+                globalChavesVip = Array.isArray(data) ? data : [];
                 renderizarTabelaChaves(globalChavesVip);
             } catch (e) {
-                body.innerHTML = '<tr><td colspan="4">Erro ao carregar chaves do Supabase.</td></tr>';
+                console.error(e);
+                body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-red)">Erro de Conexão: ${e.message}</td></tr>`;
             }
         }
 
