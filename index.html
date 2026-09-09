@@ -319,6 +319,10 @@
         <div id="tab-vip" class="tab-content">
             <div class="card card-vip">
                 <h3>👑 Gerar Nova Chave VIP</h3>
+
+                <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
+                <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
+
                 <label for="vipTipoPlano">Selecione o Plano:</label>
                 <select id="vipTipoPlano">
                     <option value="mensal">Mensal (30 Dias)</option>
@@ -342,7 +346,7 @@
                             <tr>
                                 <th>Chave</th>
                                 <th>Tipo</th>
-                                <th>Status</th>
+                                <th>Status / Dispositivo</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -417,6 +421,7 @@
 
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
+            const deviceIdInput = document.getElementById('vipDeviceIdInput').value.trim();
             const btn = document.getElementById('btnGerarVip');
             const boxResult = document.getElementById('boxResultadoVip');
             const txtChave = document.getElementById('txtChaveGerada');
@@ -444,8 +449,8 @@
                     body: JSON.stringify({
                         chave: novaChave,
                         tipo: tipo,
-                        utilizada: false,
-                        device_id: ""
+                        utilizada: deviceIdInput ? true : false,
+                        device_id: deviceIdInput
                     })
                 });
 
@@ -456,6 +461,7 @@
 
                 txtChave.innerText = novaChave;
                 boxResult.style.display = 'block';
+                document.getElementById('vipDeviceIdInput').value = '';
                 carregarChavesSupabase();
             } catch (err) {
                 alert("Erro ao gerar chave: " + err.message);
@@ -470,7 +476,8 @@
             body.innerHTML = '<tr><td colspan="4">Carregando chaves...</td></tr>';
 
             try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=id.desc`, {
+                // Tenta ordenar por data de criação. Caso não exista, reverte para consulta padrão sem ordem
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=created_at.desc`, {
                     method: 'GET',
                     headers: {
                         'apikey': SUPABASE_ANON_KEY,
@@ -478,6 +485,17 @@
                         'Content-Type': 'application/json'
                     }
                 });
+
+                if (!res.ok) {
+                    res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*`, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
 
                 if (!res.ok) {
                     const err = await res.json();
@@ -506,8 +524,8 @@
             chaves.forEach(item => {
                 const tr = document.createElement('tr');
                 const statusHtml = item.utilizada 
-                    ? `<span class="badge badge-warning">Em Uso (${item.device_id ? item.device_id.substring(0,6) : 'Ativado'})</span>`
-                    : `<span class="badge badge-success">Livre</span>`;
+                    ? `<span class="badge badge-warning">Ativado (${item.device_id ? item.device_id : 'Sem ID'})</span>`
+                    : `<span class="badge badge-success">Livre (Aguardando Ativação)</span>`;
 
                 tr.innerHTML = `
                     <td><b>${item.chave}</b></td>
