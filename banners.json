@@ -28,20 +28,5 @@
     "clicavel": false,
     "tipoDestino": "PACK",
     "destinoId": "http"
-  },
-  {
-    "id": "1789391841045",
-    "layoutType": "FULL_IMAGE",
-    "badge": "",
-    "titulo": "Banner Cheio",
-    "subtitulo": "",
-    "bgColor": "#000000",
-    "borderColor": "#9D00FF",
-    "accentColor": "#9D00FF",
-    "titleColor": "#FFFFFF",
-    "imagemUrl": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788535009/images.jpg",
-    "clicavel": false,
-    "tipoDestino": "PACK",
-    "destinoId": "http"
   }
 ]
