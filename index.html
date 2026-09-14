@@ -464,27 +464,20 @@
         let globalChavesVip = [];
 
         function utf8ToBase64(str) {
-            const bytes = new TextEncoder().encode(str);
-            let binary = '';
-            for (let i = 0; i < bytes.byteLength; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return btoa(binary);
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+                return String.fromCharCode('0x' + p1);
+            }));
         }
 
         function base64ToUtf8(str) {
-            const cleanStr = str.replace(/\s/g, '');
-            const binary = atob(cleanStr);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            return new TextDecoder().decode(bytes);
+            return decodeURIComponent(atob(str.replace(/\s/g, '')).split('').map((c) => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
         }
 
         function getAuthHeader(token) {
             if (!token) return {};
-            return { 'Authorization': token.startsWith('github_pat_') ? `Bearer ${token}` : `token ${token}` };
+            return { 'Authorization': `Bearer ${token}` };
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -655,7 +648,7 @@
                         localStorage.getItem("gh_pat_token");
 
             if (!token) {
-                token = prompt("Digite seu Token do GitHub (PAT) para publicar:");
+                token = prompt("Cole seu Token do GitHub (PAT) que você acabou de criar:");
                 if (!token) return;
                 salvarTokenLocal(token);
             }
@@ -682,6 +675,8 @@
                     } catch (errContent) {
                         bannersAtuais = [];
                     }
+                } else if (getRes.status === 401) {
+                    throw new Error("Seu Token do GitHub foi recusado (401 Unauthorized). Crie um novo Token Classic com a permissão 'repo' ativada!");
                 }
 
                 const layoutType = document.getElementById('bannerLayoutType').value;
@@ -744,13 +739,13 @@
 
                 if (!ghRes.ok) {
                     const errorData = await ghRes.json();
-                    throw new Error(errorData.message || "Erro de permissão no GitHub. Verifique seu PAT.");
+                    throw new Error(`Erro GitHub (${ghRes.status}): ` + (errorData.message || "Verifique se o token tem permissão 'repo'."));
                 }
 
                 alert("Banner publicado com sucesso!");
                 carregarBannersGitHub();
             } catch (err) {
-                alert("Erro ao publicar banner: " + err.message);
+                alert(err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "PUBLICAR BANNER";
