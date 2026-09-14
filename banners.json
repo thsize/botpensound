@@ -1,20 +1,5 @@
 [
   {
-    "id": "1789412161348",
-    "layoutType": "CUSTOM",
-    "badge": "ATENÇÃO !!",
-    "titulo": "ESSA E A VESAO BETA PODE TER BUGS",
-    "subtitulo": "MENSAGEM",
-    "bgColor": "#22123b",
-    "borderColor": "#9d00ff",
-    "accentColor": "#9d00ff",
-    "titleColor": "#ffffff",
-    "imagemUrl": "",
-    "clicavel": false,
-    "tipoDestino": "PACK",
-    "destinoId": ""
-  },
-  {
     "id": "1789412955095",
     "layoutType": "CUSTOM",
     "badge": "teste",
