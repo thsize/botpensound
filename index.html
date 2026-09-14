@@ -27,24 +27,18 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--bg-dark);
             color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
+            display: flex; min-height: 100vh;
         }
 
-        /* BARRA LATERAL (SIDEBAR) */
+        /* BARRA LATERAL */
         .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
+            width: 260px; background-color: var(--sidebar-bg);
+            padding: 20px 0; display: flex; flex-direction: column;
             border-right: 1px solid rgba(255, 255, 255, 0.05);
-            position: fixed;
-            height: 100vh;
+            position: fixed; height: 100vh;
         }
 
         .sidebar-brand {
@@ -53,52 +47,31 @@
             margin-bottom: 20px;
         }
 
-        .sidebar-brand h2 {
-            margin: 0;
-            font-size: 20px;
-            color: #FFFFFF;
-        }
+        .sidebar-brand h2 { margin: 0; font-size: 20px; color: #FFFFFF; }
 
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li {
-            padding: 14px 20px;
-            color: var(--text-sub);
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            padding: 14px 20px; color: var(--text-sub);
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease; display: flex; align-items: center; gap: 10px;
         }
 
         .sidebar-menu li:hover, .sidebar-menu li.active {
-            background-color: var(--card-bg);
-            color: var(--accent-blue);
+            background-color: var(--card-bg); color: var(--accent-blue);
             border-left: 4px solid var(--accent-blue);
         }
 
         /* CONTEÚDO PRINCIPAL */
         .main-content {
-            margin-left: 260px;
-            flex: 1;
-            padding: 30px;
-            max-width: 900px;
+            margin-left: 260px; flex: 1; padding: 30px; max-width: 950px;
         }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
         .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
+            background-color: var(--card-bg); border-radius: 12px;
+            padding: 24px; margin-bottom: 24px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -106,44 +79,28 @@
         .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 20px; }
         .card-vip h3 { color: var(--accent-gold); }
         .card-pack h3 { color: var(--accent-purple); }
+        .card-banner h3 { color: var(--accent-blue); }
 
         label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-sub);
-            margin-bottom: 6px;
-            margin-top: 12px;
+            display: block; font-size: 13px; font-weight: 600;
+            color: var(--text-sub); margin-bottom: 6px; margin-top: 12px;
         }
 
-        input[type="text"], input[type="password"], input[type="url"], textarea, select {
-            width: 100%;
-            padding: 12px 14px;
-            background-color: var(--card-inner);
-            color: #FFFFFF;
-            border: 1px solid #45475A;
-            border-radius: 8px;
-            font-size: 14px;
+        input[type="text"], input[type="password"], input[type="url"], textarea, select, input[type="color"] {
+            width: 100%; padding: 12px 14px; background-color: var(--card-inner);
+            color: #FFFFFF; border: 1px solid #45475A; border-radius: 8px; font-size: 14px;
         }
+
+        input[type="color"] { height: 44px; padding: 4px; cursor: pointer; }
 
         input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--card-inner);
-            border: 1px dashed #45475A;
-            border-radius: 8px;
-            color: var(--text-sub);
+            width: 100%; padding: 10px; background-color: var(--card-inner);
+            border: 1px dashed #45475A; border-radius: 8px; color: var(--text-sub);
         }
 
         button {
-            width: 100%;
-            padding: 12px 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 12px;
+            width: 100%; padding: 12px 14px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 12px;
             transition: opacity 0.2s;
         }
 
@@ -156,90 +113,90 @@
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
 
         .chave-resultado {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--accent-green);
-            text-align: center;
-            margin-top: 14px;
-            padding: 12px;
-            background-color: var(--card-inner);
-            border-radius: 8px;
-            border: 1px solid var(--accent-green);
-            user-select: all;
-            word-break: break-all;
+            font-size: 18px; font-weight: bold; color: var(--accent-green);
+            text-align: center; margin-top: 14px; padding: 12px;
+            background-color: var(--card-inner); border-radius: 8px;
+            border: 1px solid var(--accent-green); user-select: all; word-break: break-all;
         }
 
         .pack-item {
-            background-color: var(--card-inner);
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            border: 1px solid #45475A;
+            background-color: var(--card-inner); padding: 16px;
+            border-radius: 8px; margin-bottom: 16px; border: 1px solid #45475A;
         }
 
         .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
 
-        /* TABELAS E LISTAS */
+        /* TABELAS */
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
-
         table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: var(--card-inner);
-            border-radius: 8px;
-            overflow: hidden;
+            width: 100%; border-collapse: collapse; background-color: var(--card-inner);
+            border-radius: 8px; overflow: hidden;
         }
-
         th, td {
-            padding: 12px 14px;
-            text-align: left;
-            border-bottom: 1px solid #313244;
-            font-size: 14px;
+            padding: 12px 14px; text-align: left;
+            border-bottom: 1px solid #313244; font-size: 14px;
         }
-
         th { background-color: #11111B; color: var(--accent-blue); }
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .badge-success { background-color: var(--accent-green); color: #11111B; }
         .badge-warning { background-color: var(--accent-gold); color: #11111B; }
-
         .action-btns { display: flex; gap: 8px; }
 
-        /* MODAL DE EDIÇÃO */
+        /* MODAL */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background-color: var(--card-bg); padding: 24px; border-radius: 12px;
+            width: 90%; max-width: 500px;
         }
 
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 24px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
+        /* PREVIEW BANNER */
+        .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .banner-preview-box {
+            background-color: var(--card-inner); border: 1px dashed var(--accent-blue);
+            border-radius: 12px; padding: 16px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; margin-bottom: 16px;
         }
+
+        .banner-mockup {
+            width: 100%; height: 145px; border-radius: 16px; border: 1.5px solid #9D00FF;
+            position: relative; overflow: hidden; display: flex; align-items: center;
+            padding: 16px; box-sizing: border-box; transition: all 0.3s ease;
+        }
+
+        .banner-mockup .badge-tag {
+            position: absolute; top: 0; left: 0; padding: 4px 10px; font-size: 9px;
+            font-weight: bold; color: #FFF; border-bottom-right-radius: 10px; border-top-left-radius: 14px;
+        }
+
+        .banner-mockup .info-area {
+            flex: 1; display: flex; flex-direction: column; gap: 3px; z-index: 2;
+        }
+
+        .banner-mockup .info-title { font-size: 16px; font-weight: bold; margin: 0; }
+        .banner-mockup .info-sub { font-size: 10px; margin: 0; opacity: 0.9; }
+
+        .banner-mockup .btn-action {
+            width: fit-content; padding: 6px 12px; font-size: 9px; font-weight: bold;
+            border-radius: 4px; margin-top: 6px; color: #FFF;
+        }
+
+        .banner-mockup.full-image { padding: 0; }
     </style>
 </head>
 <body>
 
     <!-- BARRA LATERAL -->
     <div class="sidebar">
-        <div class="sidebar-brand">
-            <h2>⚡ PenSound Admin</h2>
-        </div>
+        <div class="sidebar-brand"><h2>⚡ PenSound Admin</h2></div>
         <ul class="sidebar-menu">
             <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
             <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
+            <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
             <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
         </ul>
     </div>
@@ -284,7 +241,7 @@
                     <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
 
                     <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
-                    <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
+                    <input type="password" id="ghToken" required placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
 
                     <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
                 </form>
@@ -315,7 +272,114 @@
             </div>
         </div>
 
-        <!-- ABA 3: GERENCIAR CHAVES VIP -->
+        <!-- ABA 3: GERENCIAR BANNERS -->
+        <div id="tab-banners" class="tab-content">
+            <div class="card card-banner">
+                <h3>🎨 Editor de Banner</h3>
+
+                <label>Tipo de Banner:</label>
+                <select id="bannerLayoutType" onchange="alternarTipoLayout()">
+                    <option value="CUSTOM">Customizado (Textos + Cores)</option>
+                    <option value="FULL_IMAGE">Imagem Cheia (Preenche o Card Todo)</option>
+                </select>
+                
+                <div class="banner-preview-box" style="margin-top: 16px;">
+                    <span style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold;">PRÉ-VISUALIZAÇÃO AO VIVO NO APP</span>
+                    <div id="bannerMockup" class="banner-mockup" style="background-color: #22123B; border-color: #9D00FF;">
+                        <div id="customBannerView" style="width:100%; height:100%; display:flex; align-items:center;">
+                            <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF;">🔥 NOVIDADES</div>
+                            <div class="info-area">
+                                <p id="prevTitulo" class="info-title" style="color: #FFFFFF;">NOVOS PACOTES</p>
+                                <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8;">Confira os últimos lançamentos!</p>
+                                <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF;">VER NOVIDADES →</div>
+                            </div>
+                        </div>
+
+                        <img id="prevFullImg" src="" style="display:none; width:100%; height:100%; object-fit:cover;">
+                    </div>
+                </div>
+
+                <form id="bannerForm">
+                    <div id="sectionCustomFields">
+                        <label>Texto da Tag/Selo:</label>
+                        <input type="text" id="bannerBadge" value="🔥 NOVIDADES" oninput="atualizarPreview()">
+
+                        <label>Título Principal:</label>
+                        <input type="text" id="bannerTitulo" value="NOVOS PACOTES" oninput="atualizarPreview()">
+
+                        <label>Subtítulo / Descrição:</label>
+                        <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!" oninput="atualizarPreview()">
+
+                        <div class="editor-grid">
+                            <div>
+                                <label>Cor de Fundo:</label>
+                                <input type="color" id="colorBgCard" value="#22123B" onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label>Cor da Borda:</label>
+                                <input type="color" id="colorBorderCard" value="#9D00FF" onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label>Cor Destaques:</label>
+                                <input type="color" id="colorAccent" value="#9D00FF" onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label>Cor do Título:</label>
+                                <input type="color" id="colorTextTitle" value="#FFFFFF" onchange="atualizarPreview()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sectionFileField" style="display: none;">
+                        <label id="lblBannerFile">Imagem do Banner Cheio (PNG/JPG):</label>
+                        <input type="file" id="bannerCapa" accept="image/png, image/jpeg" onchange="previewImage(this)">
+                    </div>
+
+                    <label style="margin-top:14px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="bannerClicavel" onchange="toggleBannerDestino()" style="width:auto;">
+                        <span>Tornar Banner Clicável?</span>
+                    </label>
+
+                    <div id="boxBannerDestino" style="display: none; background-color: var(--card-inner); padding: 14px; border-radius: 8px; margin-top: 10px; border: 1px solid #45475A;">
+                        <label style="margin-top:0;">Tipo de Ação ao Clicar:</label>
+                        <select id="bannerTipoDestino">
+                            <option value="PACK">Abrir Pacote Específico do App</option>
+                            <option value="LINK">Abrir Link Externo no Navegador</option>
+                        </select>
+
+                        <label>ID do Pacote ou Link Completo (https://):</label>
+                        <input type="text" id="bannerDestinoValue" placeholder="Ex: ID_DO_PACK ou https://link.com">
+                    </div>
+
+                    <label style="margin-top: 14px; color: var(--accent-gold);">Token do GitHub (PAT):</label>
+                    <input type="password" id="bannerGhToken" placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
+
+                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
+                </form>
+            </div>
+
+            <div class="card card-banner">
+                <h3>🖼️ Banners Publicados</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Imagem/Prévia</th>
+                                <th>Tipo</th>
+                                <th>Título/Info</th>
+                                <th>Clicável?</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaBannersBody">
+                            <tr><td colspan="5">Carregando banners...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 4: GERENCIAR CHAVES VIP -->
         <div id="tab-vip" class="tab-content">
             <div class="card card-vip">
                 <h3>👑 Gerar Nova Chave VIP</h3>
@@ -365,7 +429,7 @@
     <div id="modalEditPacote" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
-            <input type="hidden" id="editPackIndex">
+            <input type="hidden" id="editPackId">
             
             <label>Nome do Pacote:</label>
             <input type="text" id="editPackNome">
@@ -404,7 +468,44 @@
 
         let globalPacotes = [];
         let globalShaGitHub = "";
+        let globalBanners = [];
         let globalChavesVip = [];
+
+        function utf8ToBase64(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+                return String.fromCharCode('0x' + p1);
+            }));
+        }
+
+        function base64ToUtf8(str) {
+            return decodeURIComponent(atob(str.replace(/\s/g, '')).split('').map((c) => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        }
+
+        function getAuthHeader(token) {
+            if (!token) return {};
+            const cleanToken = token.trim();
+            if (cleanToken.startsWith('github_pat_')) {
+                return { 'Authorization': `Bearer ${cleanToken}` };
+            }
+            return { 'Authorization': `token ${cleanToken}` };
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const tokenSalvo = localStorage.getItem("gh_pat_token");
+            if (tokenSalvo) {
+                if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = tokenSalvo;
+                if (document.getElementById('ghToken')) document.getElementById('ghToken').value = tokenSalvo;
+            }
+        });
+
+        function salvarTokenLocal(val) {
+            const trimmed = val.trim();
+            localStorage.setItem("gh_pat_token", trimmed);
+            if (document.getElementById('ghToken')) document.getElementById('ghToken').value = trimmed;
+            if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = trimmed;
+        }
 
         // ALTERNÂNCIA DE ABAS
         function switchTab(tabId, evt) {
@@ -415,7 +516,325 @@
             if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
             if (tabId === 'tab-pacotes') carregarPacotesGitHub();
+            if (tabId === 'tab-banners') carregarBannersGitHub();
             if (tabId === 'tab-vip') carregarChavesSupabase();
+        }
+
+        // --- LÓGICA DO EDITOR DE BANNERS ---
+
+        function alternarTipoLayout() {
+            const layout = document.getElementById('bannerLayoutType').value;
+            const sectionCustom = document.getElementById('sectionCustomFields');
+            const sectionFile = document.getElementById('sectionFileField');
+            const customView = document.getElementById('customBannerView');
+            const fullImg = document.getElementById('prevFullImg');
+            const mockup = document.getElementById('bannerMockup');
+
+            if (layout === 'FULL_IMAGE') {
+                sectionCustom.style.display = 'none';
+                sectionFile.style.display = 'block';
+                customView.style.display = 'none';
+                fullImg.style.display = 'block';
+                mockup.classList.add('full-image');
+            } else {
+                sectionCustom.style.display = 'block';
+                sectionFile.style.display = 'none';
+                customView.style.display = 'flex';
+                fullImg.style.display = 'none';
+                mockup.classList.remove('full-image');
+            }
+            atualizarPreview();
+        }
+
+        function atualizarPreview() {
+            const layout = document.getElementById('bannerLayoutType').value;
+            const mockup = document.getElementById('bannerMockup');
+
+            if (layout === 'CUSTOM') {
+                const badgeText = document.getElementById('bannerBadge').value;
+                const tituloText = document.getElementById('bannerTitulo').value;
+                const subText = document.getElementById('bannerSubtitulo').value;
+                const bgColor = document.getElementById('colorBgCard').value;
+                const borderColor = document.getElementById('colorBorderCard').value;
+                const accentColor = document.getElementById('colorAccent').value;
+                const titleColor = document.getElementById('colorTextTitle').value;
+
+                const badgeEl = document.getElementById('prevBadge');
+                badgeEl.innerText = badgeText;
+                badgeEl.style.backgroundColor = accentColor;
+
+                const titleEl = document.getElementById('prevTitulo');
+                titleEl.innerText = tituloText;
+                titleEl.style.color = titleColor;
+
+                document.getElementById('prevSubtitulo').innerText = subText;
+                document.getElementById('prevBtnAction').style.backgroundColor = accentColor;
+
+                mockup.style.backgroundColor = bgColor;
+                mockup.style.borderColor = borderColor;
+            }
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('prevFullImg').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function toggleBannerDestino() {
+            const isChecked = document.getElementById('bannerClicavel').checked;
+            document.getElementById('boxBannerDestino').style.display = isChecked ? 'block' : 'none';
+        }
+
+        async function carregarBannersGitHub() {
+            const body = document.getElementById('listaBannersBody');
+            body.innerHTML = '<tr><td colspan="5">Buscando banners do GitHub...</td></tr>';
+
+            try {
+                let token = document.getElementById('bannerGhToken')?.value.trim() || 
+                            document.getElementById('ghToken')?.value.trim() || 
+                            localStorage.getItem("gh_pat_token");
+
+                const headers = getAuthHeader(token);
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json?t=${Date.now()}`;
+                
+                const res = await fetch(ghUrl, { headers });
+                if (!res.ok) {
+                    globalBanners = [];
+                    renderizarTabelaBanners([]);
+                    return;
+                }
+                const currentData = await res.json();
+                const contentText = base64ToUtf8(currentData.content).trim();
+                globalBanners = contentText ? JSON.parse(contentText) : [];
+                renderizarTabelaBanners(globalBanners);
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="5">Nenhum banner encontrado ou erro de conexão.</td></tr>';
+            }
+        }
+
+        function renderizarTabelaBanners(banners) {
+            const body = document.getElementById('listaBannersBody');
+            body.innerHTML = '';
+
+            if (!banners || banners.length === 0) {
+                body.innerHTML = '<tr><td colspan="5">Nenhum banner cadastrado.</td></tr>';
+                return;
+            }
+
+            banners.forEach((banner) => {
+                const tr = document.createElement('tr');
+                const clicavelBadge = banner.clicavel 
+                    ? `<span class="badge badge-success">SIM</span>` 
+                    : `<span class="badge badge-warning">NÃO</span>`;
+                
+                const tipoBadge = banner.layoutType === 'FULL_IMAGE'
+                    ? `<span class="badge badge-warning">IMAGEM CHEIA</span>`
+                    : `<span class="badge badge-success">CUSTOM</span>`;
+
+                const thumbImg = banner.layoutType === 'FULL_IMAGE' && banner.imagemUrl
+                    ? `<img src="${banner.imagemUrl}" width="60" height="35" style="border-radius:6px; object-fit:cover;">`
+                    : `<div style="width:60px; height:35px; background:${banner.bgColor || '#333'}; border:1px solid ${banner.borderColor || '#555'}; border-radius:6px;"></div>`;
+
+                tr.innerHTML = `
+                    <td>${thumbImg}</td>
+                    <td>${tipoBadge}</td>
+                    <td><b>${banner.titulo || 'Banner Customizado'}</b></td>
+                    <td>${clicavelBadge}</td>
+                    <td>
+                        <button class="btn-danger" onclick="excluirBanner('${banner.id}')">Excluir</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        document.getElementById('bannerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitBanner');
+            
+            let token = document.getElementById('bannerGhToken')?.value.trim() || 
+                        document.getElementById('ghToken')?.value.trim() || 
+                        localStorage.getItem("gh_pat_token");
+
+            if (!token) {
+                token = prompt("Informe seu Token Personalizado do GitHub (PAT):");
+                if (!token) {
+                    alert("A publicação foi cancelada pois o Token não foi informado.");
+                    return;
+                }
+                salvarTokenLocal(token);
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Iniciando publicação...";
+
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                let currentSha = "";
+                let bannersAtuais = [];
+                
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, {
+                    headers: getAuthHeader(token)
+                });
+
+                if (getRes.ok) {
+                    const dataJson = await getRes.json();
+                    currentSha = dataJson.sha;
+                    try {
+                        const contentText = base64ToUtf8(dataJson.content).trim();
+                        bannersAtuais = contentText ? JSON.parse(contentText) : [];
+                    } catch (errContent) {
+                        bannersAtuais = [];
+                    }
+                } else if (getRes.status === 401) {
+                    localStorage.removeItem("gh_pat_token");
+                    throw new Error("Token recusado pelo GitHub (401 Unauthorized). Digite o token correto novamente.");
+                }
+
+                const layoutType = document.getElementById('bannerLayoutType').value;
+                let imageUrl = "";
+
+                if (layoutType === 'FULL_IMAGE') {
+                    const fileInput = document.getElementById('bannerCapa');
+                    if (fileInput.files && fileInput.files[0]) {
+                        btn.innerText = "Enviando imagem...";
+                        const formData = new FormData();
+                        formData.append('file', fileInput.files[0]);
+                        formData.append('upload_preset', UPLOAD_PRESET);
+
+                        const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                            method: 'POST', body: formData
+                        }).then(r => r.json());
+                        
+                        if (!resImg.secure_url) throw new Error("Falha no envio da imagem para o servidor de mídias.");
+                        imageUrl = resImg.secure_url;
+                    } else {
+                        throw new Error("Por favor, selecione uma imagem para a opção Banner Cheio.");
+                    }
+                }
+
+                const novoBanner = {
+                    id: Date.now().toString(),
+                    layoutType: layoutType,
+                    badge: layoutType === 'CUSTOM' ? document.getElementById('bannerBadge').value.trim() : "",
+                    titulo: layoutType === 'CUSTOM' ? document.getElementById('bannerTitulo').value.trim() : "Banner Cheio",
+                    subtitulo: layoutType === 'CUSTOM' ? document.getElementById('bannerSubtitulo').value.trim() : "",
+                    bgColor: layoutType === 'CUSTOM' ? document.getElementById('colorBgCard').value : "#000000",
+                    borderColor: layoutType === 'CUSTOM' ? document.getElementById('colorBorderCard').value : "#9D00FF",
+                    accentColor: layoutType === 'CUSTOM' ? document.getElementById('colorAccent').value : "#9D00FF",
+                    titleColor: layoutType === 'CUSTOM' ? document.getElementById('colorTextTitle').value : "#FFFFFF",
+                    imagemUrl: imageUrl,
+                    clicavel: document.getElementById('bannerClicavel').checked,
+                    tipoDestino: document.getElementById('bannerTipoDestino').value,
+                    destinoId: document.getElementById('bannerDestinoValue').value.trim()
+                };
+
+                bannersAtuais.push(novoBanner);
+
+                btn.innerText = "Gravando dados no GitHub...";
+                const updatedContent = utf8ToBase64(JSON.stringify(bannersAtuais, null, 2));
+
+                const bodyPayload = {
+                    message: `Adicionado banner ${novoBanner.titulo}`,
+                    content: updatedContent
+                };
+                if (currentSha) bodyPayload.sha = currentSha;
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { 
+                        ...getAuthHeader(token), 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(bodyPayload)
+                });
+
+                if (!ghRes.ok) {
+                    const errorData = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(`Erro de resposta do GitHub (${ghRes.status}): ` + (errorData.message || "Erro desconhecido. Verifique as permissões do PAT."));
+                }
+
+                alert("Banner publicado com sucesso!");
+                carregarBannersGitHub();
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "PUBLICAR BANNER";
+            }
+        });
+
+        async function excluirBanner(bannerId) {
+            let token = document.getElementById('bannerGhToken')?.value.trim() || 
+                        document.getElementById('ghToken')?.value.trim() || 
+                        localStorage.getItem("gh_pat_token");
+
+            if (!token) {
+                token = prompt("Digite seu Token do GitHub (PAT) para excluir:");
+                if (!token) return;
+                salvarTokenLocal(token);
+            }
+
+            if (!confirm(`Deseja realmente excluir este banner?`)) return;
+
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, {
+                    headers: getAuthHeader(token)
+                });
+
+                if (!getRes.ok) {
+                    const errorGet = await getRes.json();
+                    if (getRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errorGet.message || "Não foi possível carregar o banners.json do GitHub.");
+                }
+
+                const currentData = await getRes.json();
+                const latestSha = currentData.sha;
+
+                const contentText = base64ToUtf8(currentData.content).trim();
+                let banners = contentText ? JSON.parse(contentText) : [];
+
+                const idAlvo = String(bannerId).trim();
+                const novosBanners = banners.filter(b => String(b.id).trim() !== idAlvo);
+
+                if (banners.length === novosBanners.length) {
+                    throw new Error("O banner não foi localizado no arquivo do GitHub para ser removido.");
+                }
+
+                const updatedContent = utf8ToBase64(JSON.stringify(novosBanners, null, 2));
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { 
+                        ...getAuthHeader(token), 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({
+                        message: `Removido banner ID: ${bannerId}`,
+                        content: updatedContent,
+                        sha: latestSha
+                    })
+                });
+
+                if (ghRes.ok) {
+                    alert("Banner excluído com sucesso!");
+                    carregarBannersGitHub();
+                } else {
+                    const errRes = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errRes.message || "Erro de permissão no GitHub.");
+                }
+            } catch (err) {
+                alert("Erro ao excluir banner: " + err.message);
+            }
         }
 
         // --- GERENCIAMENTO DE CHAVES VIP ---
@@ -578,11 +997,16 @@
             body.innerHTML = '<tr><td colspan="4">Buscando do GitHub...</td></tr>';
 
             try {
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const currentData = await fetch(ghUrl).then(r => r.json());
+                let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json?t=${Date.now()}`;
+                const res = await fetch(ghUrl, { headers: getAuthHeader(token) });
+                
+                if (!res.ok) throw new Error("Não foi possível acessar pacotes.json");
+
+                const currentData = await res.json();
                 globalShaGitHub = currentData.sha;
 
-                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                const contentText = base64ToUtf8(currentData.content).trim();
                 globalPacotes = contentText ? JSON.parse(contentText) : [];
 
                 renderizarTabelaPacotes(globalPacotes);
@@ -600,16 +1024,17 @@
                 return;
             }
 
-            pacotes.forEach((pack, index) => {
+            pacotes.forEach((pack) => {
                 const tr = document.createElement('tr');
+                const packId = pack.id || pack.nome || pack.title;
                 tr.innerHTML = `
                     <td><img src="${pack.capa || pack.cover_url}" width="45" height="45" style="border-radius:6px; object-fit:cover;"></td>
                     <td><b>${pack.nome || pack.title}</b></td>
                     <td><span class="badge badge-success">${pack.categoria || pack.type}</span></td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn-edit" onclick="abrirEdicaoPacote(${index})">Editar</button>
-                            <button class="btn-danger" onclick="excluirPacote(${index})">Excluir</button>
+                            <button class="btn-edit" onclick="abrirEdicaoPacote('${packId}')">Editar</button>
+                            <button class="btn-danger" onclick="excluirPacote('${packId}')">Excluir</button>
                         </div>
                     </td>
                 `;
@@ -626,9 +1051,11 @@
             renderizarTabelaPacotes(filtrados);
         }
 
-        function abrirEdicaoPacote(index) {
-            const pack = globalPacotes[index];
-            document.getElementById('editPackIndex').value = index;
+        function abrirEdicaoPacote(targetId) {
+            const pack = globalPacotes.find(p => String(p.id || p.nome || p.title).trim() === String(targetId).trim());
+            if (!pack) return;
+
+            document.getElementById('editPackId').value = targetId;
             document.getElementById('editPackNome').value = pack.nome || pack.title;
             document.getElementById('editPackCategoria').value = pack.categoria || pack.type;
             document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
@@ -641,13 +1068,21 @@
         }
 
         async function salvarEdicaoPacote() {
-            const token = document.getElementById('ghToken').value;
+            let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
             if (!token) {
-                alert("Por favor, digite seu Token do GitHub (PAT) na aba de Envio para autorizar a alteração.");
+                token = prompt("Digite seu Token do GitHub (PAT) para salvar:");
+                if (!token) return;
+                salvarTokenLocal(token);
+            }
+
+            const targetId = document.getElementById('editPackId').value;
+            const index = globalPacotes.findIndex(p => String(p.id || p.nome || p.title).trim() === String(targetId).trim());
+
+            if (index === -1) {
+                alert("Erro ao localizar o pacote para salvar.");
                 return;
             }
 
-            const index = document.getElementById('editPackIndex').value;
             const novoNome = document.getElementById('editPackNome').value.trim();
             const novaCategoria = document.getElementById('editPackCategoria').value;
             const novoDownload = document.getElementById('editPackDownload').value.trim();
@@ -664,40 +1099,97 @@
             carregarPacotesGitHub();
         }
 
-        async function excluirPacote(index) {
-            const pack = globalPacotes[index];
-            if (!confirm(`Deseja excluir o pacote "${pack.nome || pack.title}"?`)) return;
+        async function excluirPacote(targetId) {
+            let token = document.getElementById('ghToken')?.value.trim() || 
+                        document.getElementById('bannerGhToken')?.value.trim() || 
+                        localStorage.getItem("gh_pat_token");
 
-            const token = prompt("Digite seu Token do GitHub (PAT) para confirmar a exclusão:");
-            if (!token) return;
+            if (!token) {
+                token = prompt("Digite seu Token do GitHub (PAT) para excluir:");
+                if (!token) return;
+                salvarTokenLocal(token);
+            }
 
-            globalPacotes.splice(index, 1);
-            await atualizarArquivoGitHub(token, `Removido pacote ${pack.nome || pack.title}`);
-            carregarPacotesGitHub();
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                
+                if (!getRes.ok) throw new Error("Falha ao consultar pacotes no GitHub.");
+                
+                const currentData = await getRes.json();
+                const latestSha = currentData.sha;
+                const contentText = base64ToUtf8(currentData.content).trim();
+                let listaAtual = contentText ? JSON.parse(contentText) : [];
+
+                const idAlvo = String(targetId).trim();
+                const itemAlvo = listaAtual.find(p => String(p.id || p.nome || p.title).trim() === idAlvo);
+                const nomePacote = itemAlvo ? (itemAlvo.nome || itemAlvo.title) : "selecionado";
+
+                if (!confirm(`Deseja realmente excluir o pacote "${nomePacote}"?`)) return;
+
+                const novaLista = listaAtual.filter(p => String(p.id || p.nome || p.title).trim() !== idAlvo);
+
+                if (listaAtual.length === novaLista.length) {
+                    throw new Error("O pacote não foi localizado na lista remota do GitHub.");
+                }
+
+                const updatedContent = utf8ToBase64(JSON.stringify(novaLista, null, 2));
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `Removido pacote ${nomePacote}`,
+                        content: updatedContent,
+                        sha: latestSha
+                    })
+                });
+
+                if (ghRes.ok) {
+                    alert("Pacote excluído com sucesso!");
+                    carregarPacotesGitHub();
+                } else {
+                    const errData = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errData.message || "Erro de permissão no GitHub.");
+                }
+            } catch(e) {
+                alert("Erro ao excluir pacote: " + e.message);
+            }
         }
 
         async function atualizarArquivoGitHub(token, commitMessage) {
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalPacotes, null, 2))));
+                
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                let latestSha = globalShaGitHub;
+                if (getRes.ok) {
+                    const currentData = await getRes.json();
+                    latestSha = currentData.sha;
+                }
+
+                const updatedContent = utf8ToBase64(JSON.stringify(globalPacotes, null, 2));
 
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: commitMessage,
                         content: updatedContent,
-                        sha: globalShaGitHub
+                        sha: latestSha
                     })
                 });
 
                 if (ghRes.ok) {
                     alert("Operação salva no GitHub com sucesso!");
                 } else {
-                    alert("Erro ao atualizar GitHub. Verifique seu Token.");
+                    const errData = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    alert(`Erro ao atualizar GitHub: ${errData.message || 'Verifique seu Token.'}`);
                 }
             } catch (e) {
-                alert("Erro de comunicação com o GitHub.");
+                alert("Erro de comunicação com o GitHub: " + e.message);
             }
         }
 
@@ -785,15 +1277,28 @@
             btn.disabled = true;
 
             try {
-                const token = document.getElementById('ghToken').value;
+                let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
+                if (!token) {
+                    token = prompt("Digite seu Token do GitHub (PAT) para publicar:");
+                    if (!token) return;
+                    salvarTokenLocal(token);
+                }
+
                 const privateKey = document.getElementById('firebaseKeyInput').value.trim();
                 const cards = document.querySelectorAll('.pack-item');
 
                 btn.innerText = "Lendo repositório...";
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const currentData = await fetch(ghUrl).then(r => r.json());
+                const currentRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                
+                if (!currentRes.ok) {
+                    const errGet = await currentRes.json();
+                    if (currentRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errGet.message || "Erro ao consultar pacotes.json no GitHub.");
+                }
+                const currentData = await currentRes.json();
 
-                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                const contentText = base64ToUtf8(currentData.content).trim();
                 let content = contentText ? JSON.parse(contentText) : [];
 
                 let pacotesAdicionados = 0;
@@ -816,6 +1321,10 @@
                             method: 'POST', body: formData
                         }).then(r => r.json());
 
+                        if (!resImg.secure_url) {
+                            throw new Error(`Falha ao fazer upload da imagem do pacote ${i + 1}.`);
+                        }
+
                         const novoPack = {
                             id: (Date.now() + i).toString(),
                             nome: nome, title: nome,
@@ -831,28 +1340,38 @@
                 }
 
                 btn.innerText = "Atualizando GitHub...";
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+                const updatedContent = utf8ToBase64(JSON.stringify(content, null, 2));
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: `Adicionados ${pacotesAdicionados} pacotes`,
                         content: updatedContent, sha: currentData.sha
                     })
                 });
 
-                if (!ghRes.ok) throw new Error("Erro no GitHub PAT.");
+                if (!ghRes.ok) {
+                    const errPut = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errPut.message || "Erro ao salvar alterações no GitHub. Verifique as permissões do PAT.");
+                }
 
                 btn.innerText = "Enviando notificações...";
-                const accessToken = await getFirebaseAccessToken(privateKey);
-                for (const pack of ultimosPacotes) {
-                    await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
+                try {
+                    const accessToken = await getFirebaseAccessToken(privateKey);
+                    for (const pack of ultimosPacotes) {
+                        await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
+                    }
+                } catch (errFcm) {
+                    console.warn("Falha no disparo FCM:", errFcm);
+                    alert("Pacote publicado no GitHub, mas houve erro ao disparar a notificação Firebase.");
                 }
 
                 alert(`${pacotesAdicionados} pacote(s) publicado(s) com sucesso!`);
                 location.reload();
             } catch (err) {
                 alert('Erro ao publicar: ' + err.message);
+            } finally {
                 btn.disabled = false;
                 btn.innerText = "PUBLICAR E NOTIFICAR APP";
             }
