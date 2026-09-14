@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PenSound Admin - Gestão Completa</title>
 
-    <!-- Lib para assinar JWT para notificação FCM -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
 
     <style>
@@ -27,24 +26,17 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--bg-dark);
             color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
+            display: flex; min-height: 100vh;
         }
 
-        /* BARRA LATERAL */
         .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
+            width: 260px; background-color: var(--sidebar-bg);
+            padding: 20px 0; display: flex; flex-direction: column;
             border-right: 1px solid rgba(255, 255, 255, 0.05);
-            position: fixed;
-            height: 100vh;
+            position: fixed; height: 100vh;
         }
 
         .sidebar-brand {
@@ -57,39 +49,26 @@
 
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li {
-            padding: 14px 20px;
-            color: var(--text-sub);
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            padding: 14px 20px; color: var(--text-sub);
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease; display: flex; align-items: center; gap: 10px;
         }
 
         .sidebar-menu li:hover, .sidebar-menu li.active {
-            background-color: var(--card-bg);
-            color: var(--accent-blue);
+            background-color: var(--card-bg); color: var(--accent-blue);
             border-left: 4px solid var(--accent-blue);
         }
 
-        /* CONTEÚDO PRINCIPAL */
         .main-content {
-            margin-left: 260px;
-            flex: 1;
-            padding: 30px;
-            max-width: 950px;
+            margin-left: 260px; flex: 1; padding: 30px; max-width: 950px;
         }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
         .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
+            background-color: var(--card-bg); border-radius: 12px;
+            padding: 24px; margin-bottom: 24px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -100,48 +79,25 @@
         .card-banner h3 { color: var(--accent-blue); }
 
         label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-sub);
-            margin-bottom: 6px;
-            margin-top: 12px;
+            display: block; font-size: 13px; font-weight: 600;
+            color: var(--text-sub); margin-bottom: 6px; margin-top: 12px;
         }
 
         input[type="text"], input[type="password"], input[type="url"], textarea, select, input[type="color"] {
-            width: 100%;
-            padding: 12px 14px;
-            background-color: var(--card-inner);
-            color: #FFFFFF;
-            border: 1px solid #45475A;
-            border-radius: 8px;
-            font-size: 14px;
+            width: 100%; padding: 12px 14px; background-color: var(--card-inner);
+            color: #FFFFFF; border: 1px solid #45475A; border-radius: 8px; font-size: 14px;
         }
 
-        input[type="color"] {
-            height: 44px;
-            padding: 4px;
-            cursor: pointer;
-        }
+        input[type="color"] { height: 44px; padding: 4px; cursor: pointer; }
 
         input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--card-inner);
-            border: 1px dashed #45475A;
-            border-radius: 8px;
-            color: var(--text-sub);
+            width: 100%; padding: 10px; background-color: var(--card-inner);
+            border: 1px dashed #45475A; border-radius: 8px; color: var(--text-sub);
         }
 
         button {
-            width: 100%;
-            padding: 12px 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 12px;
+            width: 100%; padding: 12px 14px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 12px;
             transition: opacity 0.2s;
         }
 
@@ -154,43 +110,27 @@
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
 
         .chave-resultado {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--accent-green);
-            text-align: center;
-            margin-top: 14px;
-            padding: 12px;
-            background-color: var(--card-inner);
-            border-radius: 8px;
-            border: 1px solid var(--accent-green);
-            user-select: all;
-            word-break: break-all;
+            font-size: 18px; font-weight: bold; color: var(--accent-green);
+            text-align: center; margin-top: 14px; padding: 12px;
+            background-color: var(--card-inner); border-radius: 8px;
+            border: 1px solid var(--accent-green); user-select: all; word-break: break-all;
         }
 
         .pack-item {
-            background-color: var(--card-inner);
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            border: 1px solid #45475A;
+            background-color: var(--card-inner); padding: 16px;
+            border-radius: 8px; margin-bottom: 16px; border: 1px solid #45475A;
         }
 
         .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
 
-        /* TABELAS E LISTAS */
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
         table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: var(--card-inner);
-            border-radius: 8px;
-            overflow: hidden;
+            width: 100%; border-collapse: collapse; background-color: var(--card-inner);
+            border-radius: 8px; overflow: hidden;
         }
         th, td {
-            padding: 12px 14px;
-            text-align: left;
-            border-bottom: 1px solid #313244;
-            font-size: 14px;
+            padding: 12px 14px; text-align: left;
+            border-bottom: 1px solid #313244; font-size: 14px;
         }
         th { background-color: #11111B; color: var(--accent-blue); }
 
@@ -199,115 +139,63 @@
         .badge-warning { background-color: var(--accent-gold); color: #11111B; }
         .action-btns { display: flex; gap: 8px; }
 
-        /* MODAL */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000;
         }
         .modal-content {
-            background-color: var(--card-bg);
-            padding: 24px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
+            background-color: var(--card-bg); padding: 24px; border-radius: 12px;
+            width: 90%; max-width: 500px;
         }
 
-        /* ESTILOS DO EDITOR AVANÇADO DE BANNER */
-        .editor-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
+        .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
         .banner-preview-box {
-            background-color: var(--card-inner);
-            border: 1px dashed var(--accent-blue);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
+            background-color: var(--card-inner); border: 1px dashed var(--accent-blue);
+            border-radius: 12px; padding: 16px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; margin-bottom: 16px;
         }
 
         .banner-mockup {
-            width: 100%;
-            height: 145px;
-            border-radius: 16dp;
-            border: 1.5px solid #9D00FF;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
+            width: 100%; height: 145px; border-radius: 16px; border: 1.5px solid #9D00FF;
+            position: relative; overflow: hidden; display: flex; align-items: center;
+            padding: 12px; box-sizing: border-box; transition: all 0.3s ease;
         }
 
         .banner-mockup .badge-tag {
-            position: absolute;
-            top: 0;
-            left: 0;
-            padding: 4px 8px;
-            font-size: 9px;
-            font-weight: bold;
-            color: #FFF;
-            border-bottom-right-radius: 10px;
-            border-top-left-radius: 14px;
+            position: absolute; top: 0; left: 0; padding: 4px 8px; font-size: 9px;
+            font-weight: bold; color: #FFF; border-bottom-right-radius: 10px; border-top-left-radius: 14px;
         }
 
         .banner-mockup .info-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            z-index: 2;
+            flex: 1; display: flex; flex-direction: column; gap: 2px; z-index: 2;
         }
 
-        .banner-mockup .info-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .banner-mockup .info-sub {
-            font-size: 10px;
-            margin: 0;
-            opacity: 0.9;
-        }
+        .banner-mockup .info-title { font-size: 16px; font-weight: bold; margin: 0; }
+        .banner-mockup .info-sub { font-size: 10px; margin: 0; opacity: 0.9; }
 
         .banner-mockup .btn-action {
-            width: fit-content;
-            padding: 4px 10px;
-            font-size: 9px;
-            font-weight: bold;
-            border-radius: 4px;
-            margin-top: 6px;
-            color: #FFF;
+            width: fit-content; padding: 4px 10px; font-size: 9px; font-weight: bold;
+            border-radius: 4px; margin-top: 6px; color: #FFF;
         }
 
         .banner-mockup .cover-preview {
-            width: 75px;
-            height: 100px;
-            border-radius: 8px;
-            object-fit: cover;
-            background-color: #222;
+            width: 75px; height: 100px; border-radius: 8px; object-fit: cover; background-color: #222;
+        }
+
+        /* BANNER IMAGEM CHEIA (FULL BANNER) */
+        .banner-mockup.full-image {
+            padding: 0;
+        }
+        .banner-mockup.full-image .full-banner-img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
         }
     </style>
 </head>
 <body>
 
-    <!-- BARRA LATERAL -->
     <div class="sidebar">
-        <div class="sidebar-brand">
-            <h2>⚡ PenSound Admin</h2>
-        </div>
+        <div class="sidebar-brand"><h2>⚡ PenSound Admin</h2></div>
         <ul class="sidebar-menu">
             <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
             <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
@@ -316,7 +204,6 @@
         </ul>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <div class="main-content">
 
         <!-- ABA 1: PUBLICAR PACOTES -->
@@ -387,18 +274,23 @@
             </div>
         </div>
 
-        <!-- ABA 3: GERENCIAR BANNERS COM EDITOR AVANÇADO -->
+        <!-- ABA 3: GERENCIAR BANNERS (TEXTO OU CHEIO) -->
         <div id="tab-banners" class="tab-content">
             <div class="card card-banner">
-                <h3>🎨 Editor Avançado de Banner</h3>
+                <h3>🎨 Editor de Banner</h3>
+
+                <label>Tipo de Banner:</label>
+                <select id="bannerLayoutType" onchange="alternarTipoLayout()">
+                    <option value="CUSTOM">Customizado (Textos + Cores + Capa)</option>
+                    <option value="FULL_IMAGE">Imagem Cheia (Preenche o Card Todo)</option>
+                </select>
                 
-                <!-- PAINEL DE PRÉ-VISUALIZAÇÃO AO VIVO -->
-                <div class="banner-preview-box">
-                    <span style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold;">PRÉ-VISUALIZAÇÃO EM TEMPO REAL NO APP</span>
+                <div class="banner-preview-box" style="margin-top: 16px;">
+                    <span style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold;">PRÉ-VISUALIZAÇÃO AO VIVO NO APP</span>
                     <div id="bannerMockup" class="banner-mockup" style="background-color: #22123B; border-color: #9D00FF;">
                         <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF;">🔥 NOVIDADES</div>
                         
-                        <div class="info-area">
+                        <div id="prevInfoArea" class="info-area">
                             <p id="prevTitulo" class="info-title" style="color: #FFFFFF;">NOVOS PACOTES</p>
                             <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8;">Confira os lançamentos!</p>
                             <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF;">VER NOVIDADES →</div>
@@ -409,37 +301,38 @@
                 </div>
 
                 <form id="bannerForm">
-                    <!-- TEXTOS PRINCIPAIS -->
-                    <label>Texto da Tag/Selo:</label>
-                    <input type="text" id="bannerBadge" value="🔥 NOVIDADES" oninput="atualizarPreview()" required>
+                    <!-- CAMPOS APENAS PARA LAYOUT CUSTOMIZADO -->
+                    <div id="sectionCustomFields">
+                        <label>Texto da Tag/Selo:</label>
+                        <input type="text" id="bannerBadge" value="🔥 NOVIDADES" oninput="atualizarPreview()">
 
-                    <label>Título Principal:</label>
-                    <input type="text" id="bannerTitulo" value="NOVOS PACOTES" oninput="atualizarPreview()" required>
+                        <label>Título Principal:</label>
+                        <input type="text" id="bannerTitulo" value="NOVOS PACOTES" oninput="atualizarPreview()">
 
-                    <label>Subtítulo / Descrição:</label>
-                    <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!" oninput="atualizarPreview()" required>
+                        <label>Subtítulo / Descrição:</label>
+                        <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!" oninput="atualizarPreview()">
 
-                    <!-- SELEÇÃO DE CORES -->
-                    <div class="editor-grid">
-                        <div>
-                            <label>Cor de Fundo do Card:</label>
-                            <input type="color" id="colorBgCard" value="#22123B" onchange="atualizarPreview()">
-                        </div>
-                        <div>
-                            <label>Cor da Borda do Card:</label>
-                            <input type="color" id="colorBorderCard" value="#9D00FF" onchange="atualizarPreview()">
-                        </div>
-                        <div>
-                            <label>Cor dos Destaques (Tag/Botão):</label>
-                            <input type="color" id="colorAccent" value="#9D00FF" onchange="atualizarPreview()">
-                        </div>
-                        <div>
-                            <label>Cor do Texto do Título:</label>
-                            <input type="color" id="colorTextTitle" value="#FFFFFF" onchange="atualizarPreview()">
+                        <div class="editor-grid">
+                            <div>
+                                <label>Cor de Fundo:</label>
+                                <input type="color" id="colorBgCard" value="#22123B" onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label>Cor da Borda:</label>
+                                <input type="color" id="colorBorderCard" value="#9D00FF" onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label>Cor Destaques:</label>
+                                <input type="color" id="colorAccent" value="#9D00FF" onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label>Cor do Título:</label>
+                                <input type="color" id="colorTextTitle" value="#FFFFFF" onchange="atualizarPreview()">
+                            </div>
                         </div>
                     </div>
 
-                    <label>Capa/Imagem Lateral (PNG/JPG):</label>
+                    <label id="lblBannerFile">Imagem da Capa (PNG/JPG):</label>
                     <input type="file" id="bannerCapa" accept="image/png, image/jpeg" onchange="previewImage(this)">
 
                     <label style="margin-top:14px; display:flex; align-items:center; gap:8px; cursor:pointer;">
@@ -458,7 +351,7 @@
                         <input type="text" id="bannerDestinoValue" placeholder="Ex: ID_DO_PACK ou https://link.com">
                     </div>
 
-                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER PERSONALIZADO</button>
+                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
                 </form>
             </div>
 
@@ -469,9 +362,9 @@
                         <thead>
                             <tr>
                                 <th>Imagem</th>
-                                <th>Título</th>
+                                <th>Tipo</th>
+                                <th>Título/Info</th>
                                 <th>Clicável?</th>
-                                <th>Destino</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -487,8 +380,7 @@
         <div id="tab-vip" class="tab-content">
             <div class="card card-vip">
                 <h3>👑 Gerar Nova Chave VIP</h3>
-
-                <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
+                <label>ID do Aparelho / Nome do Cliente:</label>
                 <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
 
                 <label for="vipTipoPlano">Selecione o Plano:</label>
@@ -507,7 +399,7 @@
 
             <div class="card card-vip">
                 <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
-                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP ou Device ID..." onkeyup="filtrarChavesVip()">
+                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave..." onkeyup="filtrarChavesVip()">
                 
                 <div class="table-responsive">
                     <table>
@@ -520,7 +412,7 @@
                             </tr>
                         </thead>
                         <tbody id="listaChavesBody">
-                            <tr><td colspan="4">Carregando chaves do Supabase...</td></tr>
+                            <tr><td colspan="4">Carregando chaves...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -529,7 +421,7 @@
 
     </div>
 
-    <!-- MODAL DE EDIÇÃO DE PACOTE -->
+    <!-- MODAL EDIT PACOTE -->
     <div id="modalEditPacote" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
@@ -576,7 +468,6 @@
         let globalShaBannersGitHub = "";
         let globalChavesVip = [];
 
-        // ALTERNÂNCIA DE ABAS
         function switchTab(tabId, evt) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
@@ -589,37 +480,75 @@
             if (tabId === 'tab-vip') carregarChavesSupabase();
         }
 
-        // --- EDITOR DE BANNERS AO VIVO ---
+        // --- ALTERNÂNCIA DE TIPO DE BANNER ---
+
+        function alternarTipoLayout() {
+            const layout = document.getElementById('bannerLayoutType').value;
+            const sectionCustom = document.getElementById('sectionCustomFields');
+            const mockup = document.getElementById('bannerMockup');
+            const lblFile = document.getElementById('lblBannerFile');
+
+            if (layout === 'FULL_IMAGE') {
+                sectionCustom.style.display = 'none';
+                mockup.classList.add('full-image');
+                lblFile.innerText = "Banner em Imagem Cheia (Tamanho Recomendado: 1000x450 PNG/JPG):";
+            } else {
+                sectionCustom.style.display = 'block';
+                mockup.classList.remove('full-image');
+                lblFile.innerText = "Imagem da Capa (PNG/JPG):";
+            }
+            atualizarPreview();
+        }
 
         function atualizarPreview() {
-            const badgeText = document.getElementById('bannerBadge').value;
-            const tituloText = document.getElementById('bannerTitulo').value;
-            const subText = document.getElementById('bannerSubtitulo').value;
-            const bgColor = document.getElementById('colorBgCard').value;
-            const borderColor = document.getElementById('colorBorderCard').value;
-            const accentColor = document.getElementById('colorAccent').value;
-            const titleColor = document.getElementById('colorTextTitle').value;
-
-            document.getElementById('prevBadge').innerText = badgeText;
-            document.getElementById('prevBadge').style.backgroundColor = accentColor;
-            
-            document.getElementById('prevTitulo').innerText = tituloText;
-            document.getElementById('prevTitulo').style.color = titleColor;
-
-            document.getElementById('prevSubtitulo').innerText = subText;
-            
-            document.getElementById('prevBtnAction').style.backgroundColor = accentColor;
-
+            const layout = document.getElementById('bannerLayoutType').value;
             const mockup = document.getElementById('bannerMockup');
-            mockup.style.backgroundColor = bgColor;
-            mockup.style.borderColor = borderColor;
+            const prevCover = document.getElementById('prevCover');
+
+            if (layout === 'FULL_IMAGE') {
+                mockup.innerHTML = `<img class="full-banner-img" src="${prevCover.src}">`;
+            } else {
+                mockup.innerHTML = `
+                    <div id="prevBadge" class="badge-tag"></div>
+                    <div id="prevInfoArea" class="info-area">
+                        <p id="prevTitulo" class="info-title"></p>
+                        <p id="prevSubtitulo" class="info-sub"></p>
+                        <div id="prevBtnAction" class="btn-action">VER NOVIDADES →</div>
+                    </div>
+                    <img id="prevCover" class="cover-preview" src="${prevCover.src}">
+                `;
+
+                const badgeText = document.getElementById('bannerBadge').value;
+                const tituloText = document.getElementById('bannerTitulo').value;
+                const subText = document.getElementById('bannerSubtitulo').value;
+                const bgColor = document.getElementById('colorBgCard').value;
+                const borderColor = document.getElementById('colorBorderCard').value;
+                const accentColor = document.getElementById('colorAccent').value;
+                const titleColor = document.getElementById('colorTextTitle').value;
+
+                const badgeEl = document.getElementById('prevBadge');
+                badgeEl.innerText = badgeText;
+                badgeEl.style.backgroundColor = accentColor;
+                
+                const titleEl = document.getElementById('prevTitulo');
+                titleEl.innerText = tituloText;
+                titleEl.style.color = titleColor;
+
+                document.getElementById('prevSubtitulo').innerText = subText;
+                document.getElementById('prevBtnAction').style.backgroundColor = accentColor;
+
+                mockup.style.backgroundColor = bgColor;
+                mockup.style.borderColor = borderColor;
+            }
         }
 
         function previewImage(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    document.getElementById('prevCover').src = e.target.result;
+                    const prevCover = document.getElementById('prevCover');
+                    if (prevCover) prevCover.src = e.target.result;
+                    atualizarPreview();
                 }
                 reader.readAsDataURL(input.files[0]);
             }
@@ -649,7 +578,7 @@
                 globalBanners = contentText ? JSON.parse(contentText) : [];
                 renderizarTabelaBanners(globalBanners);
             } catch (e) {
-                body.innerHTML = '<tr><td colspan="5">Nenhum banner encontrado ou arquivo novo.</td></tr>';
+                body.innerHTML = '<tr><td colspan="5">Nenhum banner encontrado.</td></tr>';
             }
         }
 
@@ -667,12 +596,16 @@
                 const clicavelBadge = banner.clicavel 
                     ? `<span class="badge badge-success">SIM</span>` 
                     : `<span class="badge badge-warning">NÃO</span>`;
+                
+                const tipoBadge = banner.layoutType === 'FULL_IMAGE'
+                    ? `<span class="badge badge-warning">IMAGEM CHEIA</span>`
+                    : `<span class="badge badge-success">CUSTOM</span>`;
 
                 tr.innerHTML = `
-                    <td><img src="${banner.imagemUrl}" width="60" height="40" style="border-radius:6px; object-fit:cover;"></td>
-                    <td><b>${banner.titulo}</b><br><small style="color:var(--text-sub)">${banner.subtitulo}</small></td>
+                    <td><img src="${banner.imagemUrl}" width="60" height="35" style="border-radius:6px; object-fit:cover;"></td>
+                    <td>${tipoBadge}</td>
+                    <td><b>${banner.titulo || 'Banner Imagem'}</b></td>
                     <td>${clicavelBadge}</td>
-                    <td>${banner.clicavel ? `[${banner.tipoDestino}] ${banner.destinoId}` : '-'}</td>
                     <td>
                         <button class="btn-danger" onclick="excluirBanner(${index})">Excluir</button>
                     </td>
@@ -709,15 +642,17 @@
                     imageUrl = resImg.secure_url;
                 }
 
+                const layoutType = document.getElementById('bannerLayoutType').value;
                 const novoBanner = {
                     id: Date.now().toString(),
-                    badge: document.getElementById('bannerBadge').value.trim(),
-                    titulo: document.getElementById('bannerTitulo').value.trim(),
-                    subtitulo: document.getElementById('bannerSubtitulo').value.trim(),
-                    bgColor: document.getElementById('colorBgCard').value,
-                    borderColor: document.getElementById('colorBorderCard').value,
-                    accentColor: document.getElementById('colorAccent').value,
-                    titleColor: document.getElementById('colorTextTitle').value,
+                    layoutType: layoutType,
+                    badge: layoutType === 'CUSTOM' ? document.getElementById('bannerBadge').value.trim() : "",
+                    titulo: layoutType === 'CUSTOM' ? document.getElementById('bannerTitulo').value.trim() : "Banner Cheio",
+                    subtitulo: layoutType === 'CUSTOM' ? document.getElementById('bannerSubtitulo').value.trim() : "",
+                    bgColor: layoutType === 'CUSTOM' ? document.getElementById('colorBgCard').value : "#000000",
+                    borderColor: layoutType === 'CUSTOM' ? document.getElementById('colorBorderCard').value : "#9D00FF",
+                    accentColor: layoutType === 'CUSTOM' ? document.getElementById('colorAccent').value : "#9D00FF",
+                    titleColor: layoutType === 'CUSTOM' ? document.getElementById('colorTextTitle').value : "#FFFFFF",
                     imagemUrl: imageUrl,
                     clicavel: document.getElementById('bannerClicavel').checked,
                     tipoDestino: document.getElementById('bannerTipoDestino').value,
@@ -744,13 +679,13 @@
 
                 if (!ghRes.ok) throw new Error("Erro ao salvar banners no GitHub.");
 
-                alert("Banner personalizado cadastrado com sucesso!");
+                alert("Banner cadastrado com sucesso!");
                 carregarBannersGitHub();
             } catch (err) {
                 alert("Erro ao publicar banner: " + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "PUBLICAR BANNER PERSONALIZADO";
+                btn.innerText = "PUBLICAR BANNER";
             }
         });
 
@@ -758,7 +693,7 @@
             const token = document.getElementById('ghToken').value || prompt("Digite seu Token do GitHub (PAT):");
             if (!token) return;
 
-            if (!confirm(`Deseja realmente excluir o banner "${globalBanners[index].titulo}"?`)) return;
+            if (!confirm(`Deseja realmente excluir o banner?`)) return;
 
             globalBanners.splice(index, 1);
             const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
@@ -791,8 +726,7 @@
             const boxResult = document.getElementById('boxResultadoVip');
             const txtChave = document.getElementById('txtChaveGerada');
 
-            btn.disabled = true;
-            btn.innerText = "Gerando...";
+            btn.disabled = true; btn.innerText = "Gerando...";
 
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let p1 = '', p2 = '';
@@ -812,10 +746,8 @@
                         'Prefer': 'return=minimal'
                     },
                     body: JSON.stringify({
-                        chave: novaChave,
-                        tipo: tipo,
-                        utilizada: deviceIdInput ? true : false,
-                        device_id: deviceIdInput
+                        chave: novaChave, tipo: tipo,
+                        utilizada: deviceIdInput ? true : false, device_id: deviceIdInput
                     })
                 });
 
@@ -831,8 +763,7 @@
             } catch (err) {
                 alert("Erro ao gerar chave: " + err.message);
             } finally {
-                btn.disabled = false;
-                btn.innerText = "GERAR E SALVAR CHAVE NO SUPABASE";
+                btn.disabled = false; btn.innerText = "GERAR E SALVAR CHAVE NO SUPABASE";
             }
         });
 
@@ -844,8 +775,7 @@
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=created_at.desc`, {
                     method: 'GET',
                     headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -854,8 +784,7 @@
                     res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*`, {
                         method: 'GET',
                         headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                             'Content-Type': 'application/json'
                         }
                     });
@@ -871,7 +800,6 @@
                 globalChavesVip = Array.isArray(data) ? data : [];
                 renderizarTabelaChaves(globalChavesVip);
             } catch (e) {
-                console.error(e);
                 body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-red)">Erro de Conexão: ${e.message}</td></tr>`;
             }
         }
@@ -895,9 +823,7 @@
                     <td><b>${item.chave}</b></td>
                     <td>${item.tipo ? item.tipo.toUpperCase() : 'SEMANAL'}</td>
                     <td>${statusHtml}</td>
-                    <td>
-                        <button class="btn-danger" onclick="excluirChaveVip('${item.chave}')">Excluir</button>
-                    </td>
+                    <td><button class="btn-danger" onclick="excluirChaveVip('${item.chave}')">Excluir</button></td>
                 `;
                 body.appendChild(tr);
             });
@@ -913,23 +839,18 @@
         }
 
         async function excluirChaveVip(chave) {
-            if (!confirm(`Deseja realmente excluir a chave ${chave}? O usuário VIP associado a ela perderá o acesso no app.`)) return;
+            if (!confirm(`Deseja realmente excluir a chave ${chave}?`)) return;
 
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?chave=eq.${chave}`, {
                     method: 'DELETE',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    }
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
                 });
 
                 if (res.ok) {
                     alert("Chave VIP excluída com sucesso!");
                     carregarChavesSupabase();
-                } else {
-                    alert("Erro ao excluir chave no banco.");
-                }
+                } else alert("Erro ao excluir chave no banco.");
             } catch (e) {
                 alert("Falha na conexão ao excluir chave.");
             }
@@ -948,7 +869,6 @@
 
                 const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
                 globalPacotes = contentText ? JSON.parse(contentText) : [];
-
                 renderizarTabelaPacotes(globalPacotes);
             } catch (e) {
                 body.innerHTML = '<tr><td colspan="4">Erro ao carregar pacotes. Verifique o repositório.</td></tr>';
@@ -1007,7 +927,7 @@
         async function salvarEdicaoPacote() {
             const token = document.getElementById('ghToken').value;
             if (!token) {
-                alert("Por favor, digite seu Token do GitHub (PAT) na aba de Envio para autorizar a alteração.");
+                alert("Por favor, digite seu Token do GitHub (PAT) na aba de Envio.");
                 return;
             }
 
@@ -1032,7 +952,7 @@
             const pack = globalPacotes[index];
             if (!confirm(`Deseja excluir o pacote "${pack.nome || pack.title}"?`)) return;
 
-            const token = prompt("Digite seu Token do GitHub (PAT) para confirmar a exclusão:");
+            const token = prompt("Digite seu Token do GitHub (PAT):");
             if (!token) return;
 
             globalPacotes.splice(index, 1);
@@ -1055,11 +975,8 @@
                     })
                 });
 
-                if (ghRes.ok) {
-                    alert("Operação salva no GitHub com sucesso!");
-                } else {
-                    alert("Erro ao atualizar GitHub. Verifique seu Token.");
-                }
+                if (ghRes.ok) alert("Operação salva no GitHub com sucesso!");
+                else alert("Erro ao atualizar GitHub. Verifique seu Token.");
             } catch (e) {
                 alert("Erro de comunicação com o GitHub.");
             }
@@ -1102,19 +1019,15 @@
                 iss: FIREBASE_CLIENT_EMAIL,
                 scope: "https://www.googleapis.com/auth/firebase.messaging",
                 aud: "https://oauth2.googleapis.com/token",
-                exp: now + 3600,
-                iat: now
+                exp: now + 3600, iat: now
             };
-
             const header = { alg: "RS256", typ: "JWT" };
             const jwtToken = KJUR.jws.JWS.sign("RS256", JSON.stringify(header), JSON.stringify(claim), privateKey);
 
             const response = await fetch("https://oauth2.googleapis.com/token", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwtToken}`
             });
-
             const data = await response.json();
             return data.access_token;
         }
@@ -1124,8 +1037,7 @@
             await fetch(fcmUrl, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${tokenAccessToken}`,
-                    "Content-Type": "application/json"
+                    "Authorization": `Bearer ${tokenAccessToken}`, "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     message: {
