@@ -463,6 +463,30 @@
         let globalBanners = [];
         let globalChavesVip = [];
 
+        function utf8ToBase64(str) {
+            const bytes = new TextEncoder().encode(str);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        function base64ToUtf8(str) {
+            const cleanStr = str.replace(/\s/g, '');
+            const binary = atob(cleanStr);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new TextDecoder().decode(bytes);
+        }
+
+        function getAuthHeader(token) {
+            if (!token) return {};
+            return { 'Authorization': token.startsWith('github_pat_') ? `Bearer ${token}` : `token ${token}` };
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             const tokenSalvo = localStorage.getItem("gh_pat_token");
             if (tokenSalvo) {
@@ -569,8 +593,8 @@
                             document.getElementById('ghToken')?.value.trim() || 
                             localStorage.getItem("gh_pat_token");
 
-                const headers = token ? { 'Authorization': `token ${token}` } : {};
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json?timestamp=${Date.now()}`;
+                const headers = getAuthHeader(token);
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json?t=${Date.now()}`;
                 
                 const res = await fetch(ghUrl, { headers, cache: 'no-store' });
                 if (!res.ok) {
@@ -579,7 +603,7 @@
                     return;
                 }
                 const currentData = await res.json();
-                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                const contentText = base64ToUtf8(currentData.content).trim();
                 globalBanners = contentText ? JSON.parse(contentText) : [];
                 renderizarTabelaBanners(globalBanners);
             } catch (e) {
@@ -645,15 +669,15 @@
                 let currentSha = "";
                 let bannersAtuais = [];
                 
-                const getRes = await fetch(ghUrl, {
-                    headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, {
+                    headers: { ...getAuthHeader(token), 'Cache-Control': 'no-cache' }
                 });
 
                 if (getRes.ok) {
                     const dataJson = await getRes.json();
                     currentSha = dataJson.sha;
                     try {
-                        const contentText = decodeURIComponent(escape(atob(dataJson.content))).trim();
+                        const contentText = base64ToUtf8(dataJson.content).trim();
                         bannersAtuais = contentText ? JSON.parse(contentText) : [];
                     } catch (errContent) {
                         bannersAtuais = [];
@@ -701,7 +725,7 @@
                 bannersAtuais.push(novoBanner);
 
                 btn.innerText = "Salvando no GitHub...";
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(bannersAtuais, null, 2))));
+                const updatedContent = utf8ToBase64(JSON.stringify(bannersAtuais, null, 2));
 
                 const bodyPayload = {
                     message: `Adicionado banner ${novoBanner.titulo}`,
@@ -712,7 +736,7 @@
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
                     headers: { 
-                        'Authorization': `token ${token}`, 
+                        ...getAuthHeader(token), 
                         'Content-Type': 'application/json' 
                     },
                     body: JSON.stringify(bodyPayload)
@@ -720,7 +744,7 @@
 
                 if (!ghRes.ok) {
                     const errorData = await ghRes.json();
-                    throw new Error(errorData.message || "Erro ao salvar no GitHub. Verifique seu PAT.");
+                    throw new Error(errorData.message || "Erro de permissão no GitHub. Verifique seu PAT.");
                 }
 
                 alert("Banner publicado com sucesso!");
@@ -749,9 +773,9 @@
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
                 
-                const getRes = await fetch(ghUrl, {
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, {
                     headers: { 
-                        'Authorization': `token ${token}`,
+                        ...getAuthHeader(token),
                         'Cache-Control': 'no-cache'
                     }
                 });
@@ -764,7 +788,7 @@
                 const currentData = await getRes.json();
                 const latestSha = currentData.sha;
 
-                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                const contentText = base64ToUtf8(currentData.content).trim();
                 let banners = contentText ? JSON.parse(contentText) : [];
 
                 const novosBanners = banners.filter(b => String(b.id) !== String(bannerId));
@@ -773,12 +797,12 @@
                     throw new Error("O banner selecionado não foi localizado no arquivo remoto.");
                 }
 
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(novosBanners, null, 2))));
+                const updatedContent = utf8ToBase64(JSON.stringify(novosBanners, null, 2));
 
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
                     headers: { 
-                        'Authorization': `token ${token}`, 
+                        ...getAuthHeader(token), 
                         'Content-Type': 'application/json' 
                     },
                     body: JSON.stringify({
@@ -946,11 +970,12 @@
             body.innerHTML = '<tr><td colspan="4">Buscando do GitHub...</td></tr>';
 
             try {
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const currentData = await fetch(ghUrl).then(r => r.json());
+                let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json?t=${Date.now()}`;
+                const currentData = await fetch(ghUrl, { headers: getAuthHeader(token), cache: 'no-store' }).then(r => r.json());
                 globalShaGitHub = currentData.sha;
 
-                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                const contentText = base64ToUtf8(currentData.content).trim();
                 globalPacotes = contentText ? JSON.parse(contentText) : [];
                 renderizarTabelaPacotes(globalPacotes);
             } catch (e) {
@@ -1052,18 +1077,18 @@
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
                 
-                const getRes = await fetch(ghUrl, { headers: { 'Authorization': `token ${token}` } });
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: { ...getAuthHeader(token), 'Cache-Control': 'no-cache' } });
                 let latestSha = globalShaGitHub;
                 if (getRes.ok) {
                     const currentData = await getRes.json();
                     latestSha = currentData.sha;
                 }
 
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalPacotes, null, 2))));
+                const updatedContent = utf8ToBase64(JSON.stringify(globalPacotes, null, 2));
 
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: commitMessage,
                         content: updatedContent,
@@ -1072,9 +1097,12 @@
                 });
 
                 if (ghRes.ok) alert("Operação salva no GitHub com sucesso!");
-                else alert("Erro ao atualizar GitHub. Verifique seu Token.");
+                else {
+                    const errData = await ghRes.json();
+                    alert(`Erro ao atualizar GitHub: ${errData.message || 'Verifique seu Token.'}`);
+                }
             } catch (e) {
-                alert("Erro de comunicação com o GitHub.");
+                alert("Erro de comunicação com o GitHub: " + e.message);
             }
         }
 
@@ -1169,9 +1197,15 @@
 
                 btn.innerText = "Lendo repositório...";
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const currentData = await fetch(ghUrl, { headers: { 'Authorization': `token ${token}` } }).then(r => r.json());
+                const currentRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: { ...getAuthHeader(token), 'Cache-Control': 'no-cache' } });
+                
+                if (!currentRes.ok) {
+                    const errGet = await currentRes.json();
+                    throw new Error(errGet.message || "Erro ao consultar pacotes.json no GitHub.");
+                }
+                const currentData = await currentRes.json();
 
-                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                const contentText = base64ToUtf8(currentData.content).trim();
                 let content = contentText ? JSON.parse(contentText) : [];
 
                 let pacotesAdicionados = 0;
@@ -1194,6 +1228,10 @@
                             method: 'POST', body: formData
                         }).then(r => r.json());
 
+                        if (!resImg.secure_url) {
+                            throw new Error(`Falha ao fazer upload da imagem do pacote ${i + 1}.`);
+                        }
+
                         const novoPack = {
                             id: (Date.now() + i).toString(),
                             nome: nome, title: nome,
@@ -1209,28 +1247,37 @@
                 }
 
                 btn.innerText = "Atualizando GitHub...";
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+                const updatedContent = utf8ToBase64(JSON.stringify(content, null, 2));
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: `Adicionados ${pacotesAdicionados} pacotes`,
                         content: updatedContent, sha: currentData.sha
                     })
                 });
 
-                if (!ghRes.ok) throw new Error("Erro no GitHub PAT.");
+                if (!ghRes.ok) {
+                    const errPut = await ghRes.json();
+                    throw new Error(errPut.message || "Erro ao salvar alterações no GitHub. Verifique as permissões do PAT.");
+                }
 
                 btn.innerText = "Enviando notificações...";
-                const accessToken = await getFirebaseAccessToken(privateKey);
-                for (const pack of ultimosPacotes) {
-                    await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
+                try {
+                    const accessToken = await getFirebaseAccessToken(privateKey);
+                    for (const pack of ultimosPacotes) {
+                        await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
+                    }
+                } catch (errFcm) {
+                    console.warn("Falha no disparo FCM:", errFcm);
+                    alert("Pacote publicado no GitHub, mas houve erro ao disparar a notificação Firebase.");
                 }
 
                 alert(`${pacotesAdicionados} pacote(s) publicado(s) com sucesso!`);
                 location.reload();
             } catch (err) {
                 alert('Erro ao publicar: ' + err.message);
+            } finally {
                 btn.disabled = false;
                 btn.innerText = "PUBLICAR E NOTIFICAR APP";
             }
