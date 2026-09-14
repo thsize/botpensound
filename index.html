@@ -106,7 +106,6 @@
         .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 20px; }
         .card-vip h3 { color: var(--accent-gold); }
         .card-pack h3 { color: var(--accent-purple); }
-        .card-banner h3 { color: var(--accent-blue); }
 
         label {
             display: block;
@@ -241,7 +240,6 @@
         <ul class="sidebar-menu">
             <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
             <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
-            <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
             <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
         </ul>
     </div>
@@ -317,62 +315,7 @@
             </div>
         </div>
 
-        <!-- ABA 3: GERENCIAR BANNERS -->
-        <div id="tab-banners" class="tab-content">
-            <div class="card card-banner">
-                <h3>🖼️ Publicar Novo Banner de Lançamento</h3>
-                <form id="bannerForm">
-                    <label>Título do Banner:</label>
-                    <input type="text" id="bannerTitulo" placeholder="Ex: NOVOS PACOTES" required>
-
-                    <label>Subtítulo / Descrição:</label>
-                    <input type="text" id="bannerSubtitulo" placeholder="Ex: Confira os lançamentos de Pagodão!" required>
-
-                    <label>Imagem da Capa (PNG/JPG):</label>
-                    <input type="file" id="bannerCapa" accept="image/png, image/jpeg" required>
-
-                    <label style="margin-top:14px; display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" id="bannerClicavel" onchange="toggleBannerDestino()" style="width:auto;">
-                        <span>Tornar Banner Clicável?</span>
-                    </label>
-
-                    <div id="boxBannerDestino" style="display: none; background-color: var(--card-inner); padding: 14px; border-radius: 8px; margin-top: 10px; border: 1px solid #45475A;">
-                        <label style="margin-top:0;">Tipo de Ação ao Clicar:</label>
-                        <select id="bannerTipoDestino">
-                            <option value="PACK">Abrir Pacote Específico do App</option>
-                            <option value="LINK">Abrir Link Externo no Navegador</option>
-                        </select>
-
-                        <label>ID do Pacote ou Link Completo (https://):</label>
-                        <input type="text" id="bannerDestinoValue" placeholder="Ex: ID_DO_PACK ou https://link.com">
-                    </div>
-
-                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
-                </form>
-            </div>
-
-            <div class="card card-banner">
-                <h3>🖼️ Banners Publicados</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Imagem</th>
-                                <th>Título</th>
-                                <th>Clicável?</th>
-                                <th>Destino</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaBannersBody">
-                            <tr><td colspan="5">Carregando banners...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ABA 4: GERENCIAR CHAVES VIP -->
+        <!-- ABA 3: GERENCIAR CHAVES VIP -->
         <div id="tab-vip" class="tab-content">
             <div class="card card-vip">
                 <h3>👑 Gerar Nova Chave VIP</h3>
@@ -461,8 +404,6 @@
 
         let globalPacotes = [];
         let globalShaGitHub = "";
-        let globalBanners = [];
-        let globalShaBannersGitHub = "";
         let globalChavesVip = [];
 
         // ALTERNÂNCIA DE ABAS
@@ -474,159 +415,7 @@
             if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
             if (tabId === 'tab-pacotes') carregarPacotesGitHub();
-            if (tabId === 'tab-banners') carregarBannersGitHub();
             if (tabId === 'tab-vip') carregarChavesSupabase();
-        }
-
-        // --- GERENCIAMENTO DE BANNERS ---
-
-        function toggleBannerDestino() {
-            const isChecked = document.getElementById('bannerClicavel').checked;
-            document.getElementById('boxBannerDestino').style.display = isChecked ? 'block' : 'none';
-        }
-
-        async function carregarBannersGitHub() {
-            const body = document.getElementById('listaBannersBody');
-            body.innerHTML = '<tr><td colspan="5">Buscando banners do GitHub...</td></tr>';
-
-            try {
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
-                const res = await fetch(ghUrl);
-                if (!res.ok) {
-                    globalBanners = [];
-                    renderizarTabelaBanners([]);
-                    return;
-                }
-                const currentData = await res.json();
-                globalShaBannersGitHub = currentData.sha;
-
-                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
-                globalBanners = contentText ? JSON.parse(contentText) : [];
-                renderizarTabelaBanners(globalBanners);
-            } catch (e) {
-                body.innerHTML = '<tr><td colspan="5">Nenhum banner encontrado ou arquivo novo.</td></tr>';
-            }
-        }
-
-        function renderizarTabelaBanners(banners) {
-            const body = document.getElementById('listaBannersBody');
-            body.innerHTML = '';
-
-            if (banners.length === 0) {
-                body.innerHTML = '<tr><td colspan="5">Nenhum banner cadastrado.</td></tr>';
-                return;
-            }
-
-            banners.forEach((banner, index) => {
-                const tr = document.createElement('tr');
-                const clicavelBadge = banner.clicavel 
-                    ? `<span class="badge badge-success">SIM</span>` 
-                    : `<span class="badge badge-warning">NÃO</span>`;
-
-                tr.innerHTML = `
-                    <td><img src="${banner.imagemUrl}" width="60" height="40" style="border-radius:6px; object-fit:cover;"></td>
-                    <td><b>${banner.titulo}</b><br><small style="color:var(--text-sub)">${banner.subtitulo}</small></td>
-                    <td>${clicavelBadge}</td>
-                    <td>${banner.clicavel ? `[${banner.tipoDestino}] ${banner.destinoId}` : '-'}</td>
-                    <td>
-                        <button class="btn-danger" onclick="excluirBanner(${index})">Excluir</button>
-                    </td>
-                `;
-                body.appendChild(tr);
-            });
-        }
-
-        document.getElementById('bannerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmitBanner');
-            const token = document.getElementById('ghToken').value;
-
-            if (!token) {
-                alert("Digite seu Token do GitHub (PAT) na primeira aba antes de enviar o banner.");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Enviando imagem...";
-
-            try {
-                const file = document.getElementById('bannerCapa').files[0];
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', UPLOAD_PRESET);
-
-                const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                    method: 'POST', body: formData
-                }).then(r => r.json());
-
-                const novoBanner = {
-                    id: Date.now().toString(),
-                    titulo: document.getElementById('bannerTitulo').value.trim(),
-                    subtitulo: document.getElementById('bannerSubtitulo').value.trim(),
-                    imagemUrl: resImg.secure_url,
-                    clicavel: document.getElementById('bannerClicavel').checked,
-                    tipoDestino: document.getElementById('bannerTipoDestino').value,
-                    destinoId: document.getElementById('bannerDestinoValue').value.trim()
-                };
-
-                btn.innerText = "Salvando no GitHub...";
-                globalBanners.push(novoBanner);
-
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalBanners, null, 2))));
-
-                const bodyPayload = {
-                    message: `Adicionado banner ${novoBanner.titulo}`,
-                    content: updatedContent
-                };
-                if (globalShaBannersGitHub) bodyPayload.sha = globalShaBannersGitHub;
-
-                const ghRes = await fetch(ghUrl, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(bodyPayload)
-                });
-
-                if (!ghRes.ok) throw new Error("Erro ao salvar banners no GitHub.");
-
-                alert("Banner cadastrado com sucesso!");
-                document.getElementById('bannerForm').reset();
-                toggleBannerDestino();
-                carregarBannersGitHub();
-            } catch (err) {
-                alert("Erro ao publicar banner: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "PUBLICAR BANNER";
-            }
-        });
-
-        async function excluirBanner(index) {
-            const token = document.getElementById('ghToken').value || prompt("Digite seu Token do GitHub (PAT):");
-            if (!token) return;
-
-            if (!confirm(`Deseja realmente excluir o banner "${globalBanners[index].titulo}"?`)) return;
-
-            globalBanners.splice(index, 1);
-            const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
-            const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalBanners, null, 2))));
-
-            const ghRes = await fetch(ghUrl, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: `Removido banner ${index}`,
-                    content: updatedContent,
-                    sha: globalShaBannersGitHub
-                })
-            });
-
-            if (ghRes.ok) {
-                alert("Banner excluído com sucesso!");
-                carregarBannersGitHub();
-            } else {
-                alert("Erro ao excluir banner no GitHub.");
-            }
         }
 
         // --- GERENCIAMENTO DE CHAVES VIP ---
