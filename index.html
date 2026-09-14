@@ -421,7 +421,7 @@
     <div id="modalEditPacote" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
-            <input type="hidden" id="editPackIndex">
+            <input type="hidden" id="editPackId">
             
             <label>Nome do Pacote:</label>
             <input type="text" id="editPackNome">
@@ -794,7 +794,12 @@
                 const contentText = base64ToUtf8(currentData.content).trim();
                 let banners = contentText ? JSON.parse(contentText) : [];
 
-                const novosBanners = banners.filter(b => String(b.id) !== String(bannerId));
+                const idAlvo = String(bannerId).trim();
+                const novosBanners = banners.filter(b => String(b.id).trim() !== idAlvo);
+
+                if (banners.length === novosBanners.length) {
+                    throw new Error("O banner não foi localizado no arquivo do GitHub para ser removido.");
+                }
 
                 const updatedContent = utf8ToBase64(JSON.stringify(novosBanners, null, 2));
 
@@ -996,16 +1001,17 @@
                 return;
             }
 
-            pacotes.forEach((pack, index) => {
+            pacotes.forEach((pack) => {
                 const tr = document.createElement('tr');
+                const packId = pack.id || pack.nome || pack.title;
                 tr.innerHTML = `
                     <td><img src="${pack.capa || pack.cover_url}" width="45" height="45" style="border-radius:6px; object-fit:cover;"></td>
                     <td><b>${pack.nome || pack.title}</b></td>
                     <td><span class="badge badge-success">${pack.categoria || pack.type}</span></td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn-edit" onclick="abrirEdicaoPacote(${index})">Editar</button>
-                            <button class="btn-danger" onclick="excluirPacote(${index})">Excluir</button>
+                            <button class="btn-edit" onclick="abrirEdicaoPacote('${packId}')">Editar</button>
+                            <button class="btn-danger" onclick="excluirPacote('${packId}')">Excluir</button>
                         </div>
                     </td>
                 `;
@@ -1022,9 +1028,11 @@
             renderizarTabelaPacotes(filtrados);
         }
 
-        function abrirEdicaoPacote(index) {
-            const pack = globalPacotes[index];
-            document.getElementById('editPackIndex').value = index;
+        function abrirEdicaoPacote(targetId) {
+            const pack = globalPacotes.find(p => String(p.id || p.nome || p.title).trim() === String(targetId).trim());
+            if (!pack) return;
+
+            document.getElementById('editPackId').value = targetId;
             document.getElementById('editPackNome').value = pack.nome || pack.title;
             document.getElementById('editPackCategoria').value = pack.categoria || pack.type;
             document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
@@ -1044,7 +1052,14 @@
                 salvarTokenLocal(token);
             }
 
-            const index = document.getElementById('editPackIndex').value;
+            const targetId = document.getElementById('editPackId').value;
+            const index = globalPacotes.findIndex(p => String(p.id || p.nome || p.title).trim() === String(targetId).trim());
+
+            if (index === -1) {
+                alert("Erro ao localizar o pacote para salvar.");
+                return;
+            }
+
             const novoNome = document.getElementById('editPackNome').value.trim();
             const novaCategoria = document.getElementById('editPackCategoria').value;
             const novoDownload = document.getElementById('editPackDownload').value.trim();
@@ -1061,18 +1076,17 @@
             carregarPacotesGitHub();
         }
 
-        async function excluirPacote(index) {
-            const pack = globalPacotes[index];
-            if (!confirm(`Deseja excluir o pacote "${pack.nome || pack.title}"?`)) return;
+        async function excluirPacote(targetId) {
+            let token = document.getElementById('ghToken')?.value.trim() || 
+                        document.getElementById('bannerGhToken')?.value.trim() || 
+                        localStorage.getItem("gh_pat_token");
 
-            let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
             if (!token) {
-                token = prompt("Digite seu Token do GitHub (PAT):");
+                token = prompt("Digite seu Token do GitHub (PAT) para excluir:");
                 if (!token) return;
                 salvarTokenLocal(token);
             }
 
-            // Garante lista e SHA atualizados antes de excluir
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
                 const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
@@ -1084,15 +1098,25 @@
                 const contentText = base64ToUtf8(currentData.content).trim();
                 let listaAtual = contentText ? JSON.parse(contentText) : [];
 
-                listaAtual.splice(index, 1);
-                
-                const updatedContent = utf8ToBase64(JSON.stringify(listaAtual, null, 2));
+                const idAlvo = String(targetId).trim();
+                const itemAlvo = listaAtual.find(p => String(p.id || p.nome || p.title).trim() === idAlvo);
+                const nomePacote = itemAlvo ? (itemAlvo.nome || itemAlvo.title) : "selecionado";
+
+                if (!confirm(`Deseja realmente excluir o pacote "${nomePacote}"?`)) return;
+
+                const novaLista = listaAtual.filter(p => String(p.id || p.nome || p.title).trim() !== idAlvo);
+
+                if (listaAtual.length === novaLista.length) {
+                    throw new Error("O pacote não foi localizado na lista remota do GitHub.");
+                }
+
+                const updatedContent = utf8ToBase64(JSON.stringify(novaLista, null, 2));
 
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
                     headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        message: `Removido pacote ${pack.nome || pack.title}`,
+                        message: `Removido pacote ${nomePacote}`,
                         content: updatedContent,
                         sha: latestSha
                     })
@@ -1103,6 +1127,7 @@
                     carregarPacotesGitHub();
                 } else {
                     const errData = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
                     throw new Error(errData.message || "Erro de permissão no GitHub.");
                 }
             } catch(e) {
