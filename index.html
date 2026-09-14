@@ -291,7 +291,7 @@
                             <div class="info-area">
                                 <p id="prevTitulo" class="info-title" style="color: #FFFFFF;">NOVOS PACOTES</p>
                                 <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8;">Confira os últimos lançamentos!</p>
-                                <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF;">VER NOVIDADES →</div>
+                                <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF;">CONFERIR AGORA ⚡</div>
                             </div>
                         </div>
 
@@ -309,6 +309,9 @@
 
                         <label>Subtítulo / Descrição:</label>
                         <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!" oninput="atualizarPreview()">
+
+                        <label>Texto do Botão de Ação:</label>
+                        <input type="text" id="bannerBtnText" value="CONFERIR AGORA ⚡" placeholder="Ex: BAIXAR AGORA ⚡, OUVIR AGORA 🎧" oninput="atualizarPreview()">
 
                         <div class="editor-grid">
                             <div>
@@ -554,6 +557,7 @@
                 const badgeText = document.getElementById('bannerBadge').value;
                 const tituloText = document.getElementById('bannerTitulo').value;
                 const subText = document.getElementById('bannerSubtitulo').value;
+                const btnText = document.getElementById('bannerBtnText').value;
                 const bgColor = document.getElementById('colorBgCard').value;
                 const borderColor = document.getElementById('colorBorderCard').value;
                 const accentColor = document.getElementById('colorAccent').value;
@@ -568,7 +572,10 @@
                 titleEl.style.color = titleColor;
 
                 document.getElementById('prevSubtitulo').innerText = subText;
-                document.getElementById('prevBtnAction').style.backgroundColor = accentColor;
+                
+                const btnActionEl = document.getElementById('prevBtnAction');
+                btnActionEl.innerText = btnText || "CONFERIR AGORA ⚡";
+                btnActionEl.style.backgroundColor = accentColor;
 
                 mockup.style.backgroundColor = bgColor;
                 mockup.style.borderColor = borderColor;
@@ -724,6 +731,7 @@
                     badge: layoutType === 'CUSTOM' ? document.getElementById('bannerBadge').value.trim() : "",
                     titulo: layoutType === 'CUSTOM' ? document.getElementById('bannerTitulo').value.trim() : "Banner Cheio",
                     subtitulo: layoutType === 'CUSTOM' ? document.getElementById('bannerSubtitulo').value.trim() : "",
+                    btnText: layoutType === 'CUSTOM' ? (document.getElementById('bannerBtnText').value.trim() || "CONFERIR AGORA ⚡") : "CONFERIR AGORA ⚡",
                     bgColor: layoutType === 'CUSTOM' ? document.getElementById('colorBgCard').value : "#000000",
                     borderColor: layoutType === 'CUSTOM' ? document.getElementById('colorBorderCard').value : "#9D00FF",
                     accentColor: layoutType === 'CUSTOM' ? document.getElementById('colorAccent').value : "#9D00FF",
