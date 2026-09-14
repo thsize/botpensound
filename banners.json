@@ -16,22 +16,6 @@
     "destinoId": ""
   },
   {
-    "id": "1789413052656",
-    "layoutType": "CUSTOM",
-    "badge": "teste1",
-    "titulo": "eet",
-    "subtitulo": "teste",
-    "btnText": "baixa",
-    "bgColor": "#22123b",
-    "borderColor": "#9d00ff",
-    "accentColor": "#9d00ff",
-    "titleColor": "#ffffff",
-    "imagemUrl": "",
-    "clicavel": false,
-    "tipoDestino": "LINK",
-    "destinoId": ""
-  },
-  {
     "id": "1789413941854",
     "layoutType": "FULL_IMAGE",
     "badge": "",
