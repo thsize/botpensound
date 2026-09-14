@@ -477,7 +477,11 @@
 
         function getAuthHeader(token) {
             if (!token) return {};
-            return { 'Authorization': `token ${token}` };
+            const cleanToken = token.trim();
+            if (cleanToken.startsWith('github_pat_')) {
+                return { 'Authorization': `Bearer ${cleanToken}` };
+            }
+            return { 'Authorization': `token ${cleanToken}` };
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -680,7 +684,8 @@
                         bannersAtuais = [];
                     }
                 } else if (getRes.status === 401) {
-                    throw new Error("Token recusado pelo GitHub (401 Unauthorized). Verifique se você digitou a chave correta.");
+                    localStorage.removeItem("gh_pat_token");
+                    throw new Error("Token recusado pelo GitHub (401 Unauthorized). Digite o token correto novamente.");
                 }
 
                 const layoutType = document.getElementById('bannerLayoutType').value;
@@ -743,13 +748,14 @@
 
                 if (!ghRes.ok) {
                     const errorData = await ghRes.json();
-                    throw new Error(`Erro de resposta do GitHub (${ghRes.status}): ` + (errorData.message || "Erro desconhecido."));
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(`Erro de resposta do GitHub (${ghRes.status}): ` + (errorData.message || "Erro desconhecido. Verifique as permissões do PAT."));
                 }
 
                 alert("Banner publicado com sucesso!");
                 carregarBannersGitHub();
             } catch (err) {
-                alert("Aviso de erro: " + err.message);
+                alert(err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "PUBLICAR BANNER";
@@ -778,6 +784,7 @@
 
                 if (!getRes.ok) {
                     const errorGet = await getRes.json();
+                    if (getRes.status === 401) localStorage.removeItem("gh_pat_token");
                     throw new Error(errorGet.message || "Não foi possível carregar o banners.json do GitHub.");
                 }
 
@@ -788,10 +795,6 @@
                 let banners = contentText ? JSON.parse(contentText) : [];
 
                 const novosBanners = banners.filter(b => String(b.id) !== String(bannerId));
-
-                if (banners.length === novosBanners.length) {
-                    throw new Error("O banner selecionado não foi localizado no arquivo remoto.");
-                }
 
                 const updatedContent = utf8ToBase64(JSON.stringify(novosBanners, null, 2));
 
@@ -813,6 +816,7 @@
                     carregarBannersGitHub();
                 } else {
                     const errRes = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
                     throw new Error(errRes.message || "Erro de permissão no GitHub.");
                 }
             } catch (err) {
@@ -968,7 +972,11 @@
             try {
                 let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json?t=${Date.now()}`;
-                const currentData = await fetch(ghUrl, { headers: getAuthHeader(token) }).then(r => r.json());
+                const res = await fetch(ghUrl, { headers: getAuthHeader(token) });
+                
+                if (!res.ok) throw new Error("Não foi possível acessar pacotes.json");
+                
+                const currentData = await res.json();
                 globalShaGitHub = currentData.sha;
 
                 const contentText = base64ToUtf8(currentData.content).trim();
@@ -1064,9 +1072,42 @@
                 salvarTokenLocal(token);
             }
 
-            globalPacotes.splice(index, 1);
-            await atualizarArquivoGitHub(token, `Removido pacote ${pack.nome || pack.title}`);
-            carregarPacotesGitHub();
+            // Garante lista e SHA atualizados antes de excluir
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                
+                if (!getRes.ok) throw new Error("Falha ao consultar pacotes no GitHub.");
+                
+                const currentData = await getRes.json();
+                const latestSha = currentData.sha;
+                const contentText = base64ToUtf8(currentData.content).trim();
+                let listaAtual = contentText ? JSON.parse(contentText) : [];
+
+                listaAtual.splice(index, 1);
+                
+                const updatedContent = utf8ToBase64(JSON.stringify(listaAtual, null, 2));
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `Removido pacote ${pack.nome || pack.title}`,
+                        content: updatedContent,
+                        sha: latestSha
+                    })
+                });
+
+                if (ghRes.ok) {
+                    alert("Pacote excluído com sucesso!");
+                    carregarPacotesGitHub();
+                } else {
+                    const errData = await ghRes.json();
+                    throw new Error(errData.message || "Erro de permissão no GitHub.");
+                }
+            } catch(e) {
+                alert("Erro ao excluir pacote: " + e.message);
+            }
         }
 
         async function atualizarArquivoGitHub(token, commitMessage) {
@@ -1095,6 +1136,7 @@
                 if (ghRes.ok) alert("Operação salva no GitHub com sucesso!");
                 else {
                     const errData = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
                     alert(`Erro ao atualizar GitHub: ${errData.message || 'Verifique seu Token.'}`);
                 }
             } catch (e) {
@@ -1197,6 +1239,7 @@
                 
                 if (!currentRes.ok) {
                     const errGet = await currentRes.json();
+                    if (currentRes.status === 401) localStorage.removeItem("gh_pat_token");
                     throw new Error(errGet.message || "Erro ao consultar pacotes.json no GitHub.");
                 }
                 const currentData = await currentRes.json();
@@ -1255,6 +1298,7 @@
 
                 if (!ghRes.ok) {
                     const errPut = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
                     throw new Error(errPut.message || "Erro ao salvar alterações no GitHub. Verifique as permissões do PAT.");
                 }
 
