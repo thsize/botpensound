@@ -233,7 +233,7 @@
                     <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
 
                     <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
-                    <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
+                    <input type="password" id="ghToken" required placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
 
                     <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
                 </form>
@@ -343,6 +343,9 @@
                         <label>ID do Pacote ou Link Completo (https://):</label>
                         <input type="text" id="bannerDestinoValue" placeholder="Ex: ID_DO_PACK ou https://link.com">
                     </div>
+
+                    <label style="margin-top: 14px; color: var(--accent-gold);">Token do GitHub (PAT):</label>
+                    <input type="password" id="bannerGhToken" placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
 
                     <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
                 </form>
@@ -459,6 +462,21 @@
         let globalShaGitHub = "";
         let globalBanners = [];
         let globalChavesVip = [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const tokenSalvo = localStorage.getItem("gh_pat_token");
+            if (tokenSalvo) {
+                if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = tokenSalvo;
+                if (document.getElementById('ghToken')) document.getElementById('ghToken').value = tokenSalvo;
+            }
+        });
+
+        function salvarTokenLocal(val) {
+            const trimmed = val.trim();
+            localStorage.setItem("gh_pat_token", trimmed);
+            if (document.getElementById('ghToken')) document.getElementById('ghToken').value = trimmed;
+            if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = trimmed;
+        }
 
         function switchTab(tabId, evt) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -602,27 +620,38 @@
         document.getElementById('bannerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitBanner');
-            const token = document.getElementById('ghToken').value;
+            let token = document.getElementById('bannerGhToken')?.value.trim() || 
+                        document.getElementById('ghToken')?.value.trim() || 
+                        localStorage.getItem("gh_pat_token");
 
             if (!token) {
-                alert("Digite seu Token do GitHub (PAT) na primeira aba antes de enviar o banner.");
-                return;
+                token = prompt("Digite seu Token do GitHub (PAT) para publicar:");
+                if (!token) return;
+                salvarTokenLocal(token);
             }
 
             btn.disabled = true;
-            btn.innerText = "Processando banner...";
+            btn.innerText = "Processando...";
 
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
-                const getRes = await fetch(ghUrl);
+                
                 let currentSha = "";
                 let bannersAtuais = [];
+                
+                const getRes = await fetch(ghUrl, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
 
                 if (getRes.ok) {
                     const dataJson = await getRes.json();
                     currentSha = dataJson.sha;
-                    const contentText = decodeURIComponent(escape(atob(dataJson.content))).trim();
-                    bannersAtuais = contentText ? JSON.parse(contentText) : [];
+                    try {
+                        const contentText = decodeURIComponent(escape(atob(dataJson.content))).trim();
+                        bannersAtuais = contentText ? JSON.parse(contentText) : [];
+                    } catch (errContent) {
+                        bannersAtuais = [];
+                    }
                 }
 
                 const layoutType = document.getElementById('bannerLayoutType').value;
@@ -639,7 +668,11 @@
                         const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
                             method: 'POST', body: formData
                         }).then(r => r.json());
+                        
+                        if (!resImg.secure_url) throw new Error("Falha no upload da imagem no Cloudinary.");
                         imageUrl = resImg.secure_url;
+                    } else {
+                        throw new Error("Selecione uma imagem para o Banner Cheio.");
                     }
                 }
 
@@ -659,9 +692,9 @@
                     destinoId: document.getElementById('bannerDestinoValue').value.trim()
                 };
 
-                btn.innerText = "Salvando no GitHub...";
                 bannersAtuais.push(novoBanner);
 
+                btn.innerText = "Salvando no GitHub...";
                 const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(bannersAtuais, null, 2))));
 
                 const bodyPayload = {
@@ -672,13 +705,19 @@
 
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Authorization': `token ${token}`, 
+                        'Content-Type': 'application/json' 
+                    },
                     body: JSON.stringify(bodyPayload)
                 });
 
-                if (!ghRes.ok) throw new Error("Erro ao salvar banners no GitHub. Verifique o PAT.");
+                if (!ghRes.ok) {
+                    const errorData = await ghRes.json();
+                    throw new Error(errorData.message || "Erro ao salvar no GitHub. Verifique seu PAT.");
+                }
 
-                alert("Banner cadastrado com sucesso!");
+                alert("Banner publicado com sucesso!");
                 carregarBannersGitHub();
             } catch (err) {
                 alert("Erro ao publicar banner: " + err.message);
@@ -688,12 +727,15 @@
             }
         });
 
-        // --- FUNÇÃO DE EXCLUSÃO DE BANNER COM SHA EM TEMPO REAL ---
         async function excluirBanner(index) {
-            let token = document.getElementById('ghToken').value;
+            let token = document.getElementById('bannerGhToken')?.value.trim() || 
+                        document.getElementById('ghToken')?.value.trim() || 
+                        localStorage.getItem("gh_pat_token");
+
             if (!token) {
-                token = prompt("Digite seu Token do GitHub (PAT) para confirmar a exclusão:");
+                token = prompt("Digite seu Token do GitHub (PAT) para excluir:");
                 if (!token) return;
+                salvarTokenLocal(token);
             }
 
             if (!confirm(`Deseja realmente excluir este banner?`)) return;
@@ -701,7 +743,6 @@
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
                 
-                // 1. Busca o arquivo e SHA atualizado direto do GitHub
                 const getRes = await fetch(ghUrl, {
                     headers: { 'Authorization': `token ${token}` }
                 });
@@ -714,10 +755,8 @@
                 const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
                 let banners = contentText ? JSON.parse(contentText) : [];
 
-                // 2. Remove o item escolhido
                 banners.splice(index, 1);
 
-                // 3. Atualiza o GitHub enviando o SHA novinho
                 const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(banners, null, 2))));
 
                 const ghRes = await fetch(ghUrl, {
@@ -953,10 +992,11 @@
         }
 
         async function salvarEdicaoPacote() {
-            const token = document.getElementById('ghToken').value;
+            let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
             if (!token) {
-                alert("Por favor, digite seu Token do GitHub (PAT) na aba de Envio.");
-                return;
+                token = prompt("Digite seu Token do GitHub (PAT) para salvar:");
+                if (!token) return;
+                salvarTokenLocal(token);
             }
 
             const index = document.getElementById('editPackIndex').value;
@@ -980,8 +1020,12 @@
             const pack = globalPacotes[index];
             if (!confirm(`Deseja excluir o pacote "${pack.nome || pack.title}"?`)) return;
 
-            const token = prompt("Digite seu Token do GitHub (PAT):");
-            if (!token) return;
+            let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
+            if (!token) {
+                token = prompt("Digite seu Token do GitHub (PAT):");
+                if (!token) return;
+                salvarTokenLocal(token);
+            }
 
             globalPacotes.splice(index, 1);
             await atualizarArquivoGitHub(token, `Removido pacote ${pack.nome || pack.title}`);
@@ -991,6 +1035,14 @@
         async function atualizarArquivoGitHub(token, commitMessage) {
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                
+                const getRes = await fetch(ghUrl, { headers: { 'Authorization': `token ${token}` } });
+                let latestSha = globalShaGitHub;
+                if (getRes.ok) {
+                    const currentData = await getRes.json();
+                    latestSha = currentData.sha;
+                }
+
                 const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalPacotes, null, 2))));
 
                 const ghRes = await fetch(ghUrl, {
@@ -999,7 +1051,7 @@
                     body: JSON.stringify({
                         message: commitMessage,
                         content: updatedContent,
-                        sha: globalShaGitHub
+                        sha: latestSha
                     })
                 });
 
@@ -1089,13 +1141,19 @@
             btn.disabled = true;
 
             try {
-                const token = document.getElementById('ghToken').value;
+                let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
+                if (!token) {
+                    token = prompt("Digite seu Token do GitHub (PAT) para publicar:");
+                    if (!token) return;
+                    salvarTokenLocal(token);
+                }
+
                 const privateKey = document.getElementById('firebaseKeyInput').value.trim();
                 const cards = document.querySelectorAll('.pack-item');
 
                 btn.innerText = "Lendo repositório...";
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const currentData = await fetch(ghUrl).then(r => r.json());
+                const currentData = await fetch(ghUrl, { headers: { 'Authorization': `token ${token}` } }).then(r => r.json());
 
                 const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
                 let content = contentText ? JSON.parse(contentText) : [];
