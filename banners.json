@@ -1,20 +1,5 @@
 [
   {
-    "id": "1789411586057",
-    "layoutType": "CUSTOM",
-    "badge": "🔥 NOVIDADES",
-    "titulo": "que baixa sem anucios? clique em remove anucios e sabia mais..",
-    "subtitulo": "",
-    "bgColor": "#f5c211",
-    "borderColor": "#9d00ff",
-    "accentColor": "#9d00ff",
-    "titleColor": "#ffffff",
-    "imagemUrl": "",
-    "clicavel": false,
-    "tipoDestino": "PACK",
-    "destinoId": ""
-  },
-  {
     "id": "1789412161348",
     "layoutType": "CUSTOM",
     "badge": "ATENÇÃO !!",
