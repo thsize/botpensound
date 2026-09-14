@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "1789411048277",
+    "layoutType": "CUSTOM",
+    "badge": "🔥 NOVIDADES",
+    "titulo": "NOVOS PACOTES",
+    "subtitulo": "Confira os últimos lançamentos!",
+    "bgColor": "#22123b",
+    "borderColor": "#9d00ff",
+    "accentColor": "#9d00ff",
+    "titleColor": "#ffffff",
+    "imagemUrl": "",
+    "clicavel": false,
+    "tipoDestino": "PACK",
+    "destinoId": ""
+  }
+]
