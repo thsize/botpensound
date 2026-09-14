@@ -477,7 +477,7 @@
 
         function getAuthHeader(token) {
             if (!token) return {};
-            return { 'Authorization': `Bearer ${token}` };
+            return { 'Authorization': `token ${token}` };
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -589,7 +589,7 @@
                 const headers = getAuthHeader(token);
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json?t=${Date.now()}`;
                 
-                const res = await fetch(ghUrl, { headers, cache: 'no-store' });
+                const res = await fetch(ghUrl, { headers });
                 if (!res.ok) {
                     globalBanners = [];
                     renderizarTabelaBanners([]);
@@ -643,18 +643,22 @@
         document.getElementById('bannerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitBanner');
+            
             let token = document.getElementById('bannerGhToken')?.value.trim() || 
                         document.getElementById('ghToken')?.value.trim() || 
                         localStorage.getItem("gh_pat_token");
 
             if (!token) {
-                token = prompt("Cole seu Token do GitHub (PAT) que você acabou de criar:");
-                if (!token) return;
+                token = prompt("Informe seu Token Personalizado do GitHub (PAT):");
+                if (!token) {
+                    alert("A publicação foi cancelada pois o Token não foi informado.");
+                    return;
+                }
                 salvarTokenLocal(token);
             }
 
             btn.disabled = true;
-            btn.innerText = "Processando...";
+            btn.innerText = "Iniciando publicação...";
 
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
@@ -663,7 +667,7 @@
                 let bannersAtuais = [];
                 
                 const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, {
-                    headers: { ...getAuthHeader(token), 'Cache-Control': 'no-cache' }
+                    headers: getAuthHeader(token)
                 });
 
                 if (getRes.ok) {
@@ -676,7 +680,7 @@
                         bannersAtuais = [];
                     }
                 } else if (getRes.status === 401) {
-                    throw new Error("Seu Token do GitHub foi recusado (401 Unauthorized). Crie um novo Token Classic com a permissão 'repo' ativada!");
+                    throw new Error("Token recusado pelo GitHub (401 Unauthorized). Verifique se você digitou a chave correta.");
                 }
 
                 const layoutType = document.getElementById('bannerLayoutType').value;
@@ -694,10 +698,10 @@
                             method: 'POST', body: formData
                         }).then(r => r.json());
                         
-                        if (!resImg.secure_url) throw new Error("Falha no upload da imagem no Cloudinary.");
+                        if (!resImg.secure_url) throw new Error("Falha no envio da imagem para o servidor de mídias.");
                         imageUrl = resImg.secure_url;
                     } else {
-                        throw new Error("Selecione uma imagem para o Banner Cheio.");
+                        throw new Error("Por favor, selecione uma imagem para a opção Banner Cheio.");
                     }
                 }
 
@@ -719,7 +723,7 @@
 
                 bannersAtuais.push(novoBanner);
 
-                btn.innerText = "Salvando no GitHub...";
+                btn.innerText = "Gravando dados no GitHub...";
                 const updatedContent = utf8ToBase64(JSON.stringify(bannersAtuais, null, 2));
 
                 const bodyPayload = {
@@ -739,13 +743,13 @@
 
                 if (!ghRes.ok) {
                     const errorData = await ghRes.json();
-                    throw new Error(`Erro GitHub (${ghRes.status}): ` + (errorData.message || "Verifique se o token tem permissão 'repo'."));
+                    throw new Error(`Erro de resposta do GitHub (${ghRes.status}): ` + (errorData.message || "Erro desconhecido."));
                 }
 
                 alert("Banner publicado com sucesso!");
                 carregarBannersGitHub();
             } catch (err) {
-                alert(err.message);
+                alert("Aviso de erro: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "PUBLICAR BANNER";
@@ -769,10 +773,7 @@
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
                 
                 const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, {
-                    headers: { 
-                        ...getAuthHeader(token),
-                        'Cache-Control': 'no-cache'
-                    }
+                    headers: getAuthHeader(token)
                 });
 
                 if (!getRes.ok) {
@@ -967,7 +968,7 @@
             try {
                 let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json?t=${Date.now()}`;
-                const currentData = await fetch(ghUrl, { headers: getAuthHeader(token), cache: 'no-store' }).then(r => r.json());
+                const currentData = await fetch(ghUrl, { headers: getAuthHeader(token) }).then(r => r.json());
                 globalShaGitHub = currentData.sha;
 
                 const contentText = base64ToUtf8(currentData.content).trim();
@@ -1072,7 +1073,7 @@
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
                 
-                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: { ...getAuthHeader(token), 'Cache-Control': 'no-cache' } });
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
                 let latestSha = globalShaGitHub;
                 if (getRes.ok) {
                     const currentData = await getRes.json();
@@ -1192,7 +1193,7 @@
 
                 btn.innerText = "Lendo repositório...";
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const currentRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: { ...getAuthHeader(token), 'Cache-Control': 'no-cache' } });
+                const currentRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
                 
                 if (!currentRes.ok) {
                     const errGet = await currentRes.json();
