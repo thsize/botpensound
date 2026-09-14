@@ -150,7 +150,6 @@
 
         .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-        /* PREVIEW BANNER MOCKUP */
         .banner-preview-box {
             background-color: var(--card-inner); border: 1px dashed var(--accent-blue);
             border-radius: 12px; padding: 16px; display: flex; flex-direction: column;
@@ -280,7 +279,6 @@
                     <span style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold;">PRÉ-VISUALIZAÇÃO AO VIVO NO APP</span>
                     <div id="bannerMockup" class="banner-mockup" style="background-color: #22123B; border-color: #9D00FF;">
                         
-                        <!-- VIEW DO MODO CUSTOMIZADO -->
                         <div id="customBannerView" style="width:100%; height:100%; display:flex; align-items:center;">
                             <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF;">🔥 NOVIDADES</div>
                             <div class="info-area">
@@ -290,13 +288,11 @@
                             </div>
                         </div>
 
-                        <!-- VIEW DO MODO IMAGEM CHEIA -->
                         <img id="prevFullImg" src="" style="display:none; width:100%; height:100%; object-fit:cover;">
                     </div>
                 </div>
 
                 <form id="bannerForm">
-                    <!-- CAMPOS APENAS PARA LAYOUT CUSTOMIZADO -->
                     <div id="sectionCustomFields">
                         <label>Texto da Tag/Selo:</label>
                         <input type="text" id="bannerBadge" value="🔥 NOVIDADES" oninput="atualizarPreview()">
@@ -462,7 +458,6 @@
         let globalPacotes = [];
         let globalShaGitHub = "";
         let globalBanners = [];
-        let globalShaBannersGitHub = "";
         let globalChavesVip = [];
 
         function switchTab(tabId, evt) {
@@ -560,8 +555,6 @@
                     return;
                 }
                 const currentData = await res.json();
-                globalShaBannersGitHub = currentData.sha;
-
                 const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
                 globalBanners = contentText ? JSON.parse(contentText) : [];
                 renderizarTabelaBanners(globalBanners);
@@ -574,7 +567,7 @@
             const body = document.getElementById('listaBannersBody');
             body.innerHTML = '';
 
-            if (banners.length === 0) {
+            if (!banners || banners.length === 0) {
                 body.innerHTML = '<tr><td colspan="5">Nenhum banner cadastrado.</td></tr>';
                 return;
             }
@@ -620,6 +613,18 @@
             btn.innerText = "Processando banner...";
 
             try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                const getRes = await fetch(ghUrl);
+                let currentSha = "";
+                let bannersAtuais = [];
+
+                if (getRes.ok) {
+                    const dataJson = await getRes.json();
+                    currentSha = dataJson.sha;
+                    const contentText = decodeURIComponent(escape(atob(dataJson.content))).trim();
+                    bannersAtuais = contentText ? JSON.parse(contentText) : [];
+                }
+
                 const layoutType = document.getElementById('bannerLayoutType').value;
                 let imageUrl = "";
 
@@ -655,16 +660,15 @@
                 };
 
                 btn.innerText = "Salvando no GitHub...";
-                globalBanners.push(novoBanner);
+                bannersAtuais.push(novoBanner);
 
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalBanners, null, 2))));
+                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(bannersAtuais, null, 2))));
 
                 const bodyPayload = {
                     message: `Adicionado banner ${novoBanner.titulo}`,
                     content: updatedContent
                 };
-                if (globalShaBannersGitHub) bodyPayload.sha = globalShaBannersGitHub;
+                if (currentSha) bodyPayload.sha = currentSha;
 
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
@@ -672,7 +676,7 @@
                     body: JSON.stringify(bodyPayload)
                 });
 
-                if (!ghRes.ok) throw new Error("Erro ao salvar banners no GitHub.");
+                if (!ghRes.ok) throw new Error("Erro ao salvar banners no GitHub. Verifique o PAT.");
 
                 alert("Banner cadastrado com sucesso!");
                 carregarBannersGitHub();
@@ -684,31 +688,60 @@
             }
         });
 
+        // --- FUNÇÃO DE EXCLUSÃO DE BANNER COM SHA EM TEMPO REAL ---
         async function excluirBanner(index) {
-            const token = document.getElementById('ghToken').value || prompt("Digite seu Token do GitHub (PAT):");
-            if (!token) return;
+            let token = document.getElementById('ghToken').value;
+            if (!token) {
+                token = prompt("Digite seu Token do GitHub (PAT) para confirmar a exclusão:");
+                if (!token) return;
+            }
 
-            if (!confirm(`Deseja realmente excluir o banner?`)) return;
+            if (!confirm(`Deseja realmente excluir este banner?`)) return;
 
-            globalBanners.splice(index, 1);
-            const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
-            const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalBanners, null, 2))));
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                
+                // 1. Busca o arquivo e SHA atualizado direto do GitHub
+                const getRes = await fetch(ghUrl, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
 
-            const ghRes = await fetch(ghUrl, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: `Removido banner ${index}`,
-                    content: updatedContent,
-                    sha: globalShaBannersGitHub
-                })
-            });
+                if (!getRes.ok) throw new Error("Não foi possível acessar o banners.json no GitHub.");
 
-            if (ghRes.ok) {
-                alert("Banner excluído com sucesso!");
-                carregarBannersGitHub();
-            } else {
-                alert("Erro ao excluir banner no GitHub.");
+                const currentData = await getRes.json();
+                const latestSha = currentData.sha;
+
+                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                let banners = contentText ? JSON.parse(contentText) : [];
+
+                // 2. Remove o item escolhido
+                banners.splice(index, 1);
+
+                // 3. Atualiza o GitHub enviando o SHA novinho
+                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(banners, null, 2))));
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `token ${token}`, 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({
+                        message: `Removido banner do índice ${index}`,
+                        content: updatedContent,
+                        sha: latestSha
+                    })
+                });
+
+                if (ghRes.ok) {
+                    alert("Banner excluído com sucesso!");
+                    carregarBannersGitHub();
+                } else {
+                    const errRes = await ghRes.json();
+                    throw new Error(errRes.message || "Erro de permissão no GitHub.");
+                }
+            } catch (err) {
+                alert("Erro ao excluir banner: " + err.message);
             }
         }
 
