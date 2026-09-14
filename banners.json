@@ -30,5 +30,21 @@
     "clicavel": false,
     "tipoDestino": "LINK",
     "destinoId": ""
+  },
+  {
+    "id": "1789413941854",
+    "layoutType": "FULL_IMAGE",
+    "badge": "",
+    "titulo": "Banner Cheio",
+    "subtitulo": "",
+    "btnText": "CONFERIR AGORA ⚡",
+    "bgColor": "#000000",
+    "borderColor": "#9D00FF",
+    "accentColor": "#9D00FF",
+    "titleColor": "#FFFFFF",
+    "imagemUrl": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788535011/papo.jpg",
+    "clicavel": false,
+    "tipoDestino": "LINK",
+    "destinoId": ""
   }
 ]
