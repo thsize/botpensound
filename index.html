@@ -565,8 +565,14 @@
             body.innerHTML = '<tr><td colspan="5">Buscando banners do GitHub...</td></tr>';
 
             try {
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
-                const res = await fetch(ghUrl);
+                let token = document.getElementById('bannerGhToken')?.value.trim() || 
+                            document.getElementById('ghToken')?.value.trim() || 
+                            localStorage.getItem("gh_pat_token");
+
+                const headers = token ? { 'Authorization': `token ${token}` } : {};
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json?timestamp=${Date.now()}`;
+                
+                const res = await fetch(ghUrl, { headers, cache: 'no-store' });
                 if (!res.ok) {
                     globalBanners = [];
                     renderizarTabelaBanners([]);
@@ -577,7 +583,7 @@
                 globalBanners = contentText ? JSON.parse(contentText) : [];
                 renderizarTabelaBanners(globalBanners);
             } catch (e) {
-                body.innerHTML = '<tr><td colspan="5">Nenhum banner encontrado.</td></tr>';
+                body.innerHTML = '<tr><td colspan="5">Nenhum banner encontrado ou erro de conexão.</td></tr>';
             }
         }
 
@@ -590,7 +596,7 @@
                 return;
             }
 
-            banners.forEach((banner, index) => {
+            banners.forEach((banner) => {
                 const tr = document.createElement('tr');
                 const clicavelBadge = banner.clicavel 
                     ? `<span class="badge badge-success">SIM</span>` 
@@ -610,7 +616,7 @@
                     <td><b>${banner.titulo || 'Banner Customizado'}</b></td>
                     <td>${clicavelBadge}</td>
                     <td>
-                        <button class="btn-danger" onclick="excluirBanner(${index})">Excluir</button>
+                        <button class="btn-danger" onclick="excluirBanner('${banner.id}')">Excluir</button>
                     </td>
                 `;
                 body.appendChild(tr);
@@ -640,7 +646,7 @@
                 let bannersAtuais = [];
                 
                 const getRes = await fetch(ghUrl, {
-                    headers: { 'Authorization': `token ${token}` }
+                    headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
                 });
 
                 if (getRes.ok) {
@@ -727,7 +733,7 @@
             }
         });
 
-        async function excluirBanner(index) {
+        async function excluirBanner(bannerId) {
             let token = document.getElementById('bannerGhToken')?.value.trim() || 
                         document.getElementById('ghToken')?.value.trim() || 
                         localStorage.getItem("gh_pat_token");
@@ -744,10 +750,16 @@
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
                 
                 const getRes = await fetch(ghUrl, {
-                    headers: { 'Authorization': `token ${token}` }
+                    headers: { 
+                        'Authorization': `token ${token}`,
+                        'Cache-Control': 'no-cache'
+                    }
                 });
 
-                if (!getRes.ok) throw new Error("Não foi possível acessar o banners.json no GitHub.");
+                if (!getRes.ok) {
+                    const errorGet = await getRes.json();
+                    throw new Error(errorGet.message || "Não foi possível carregar o banners.json do GitHub.");
+                }
 
                 const currentData = await getRes.json();
                 const latestSha = currentData.sha;
@@ -755,9 +767,13 @@
                 const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
                 let banners = contentText ? JSON.parse(contentText) : [];
 
-                banners.splice(index, 1);
+                const novosBanners = banners.filter(b => String(b.id) !== String(bannerId));
 
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(banners, null, 2))));
+                if (banners.length === novosBanners.length) {
+                    throw new Error("O banner selecionado não foi localizado no arquivo remoto.");
+                }
+
+                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(novosBanners, null, 2))));
 
                 const ghRes = await fetch(ghUrl, {
                     method: 'PUT',
@@ -766,7 +782,7 @@
                         'Content-Type': 'application/json' 
                     },
                     body: JSON.stringify({
-                        message: `Removido banner do índice ${index}`,
+                        message: `Removido banner ID: ${bannerId}`,
                         content: updatedContent,
                         sha: latestSha
                     })
