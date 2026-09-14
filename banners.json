@@ -13,5 +13,20 @@
     "clicavel": false,
     "tipoDestino": "PACK",
     "destinoId": ""
+  },
+  {
+    "id": "1789389459209",
+    "layoutType": "CUSTOM",
+    "badge": "🔥 NOVIDADEee",
+    "titulo": "NOVOS PACOTES",
+    "subtitulo": "Confira os últimos lançamentos!",
+    "bgColor": "#22123b",
+    "borderColor": "#9d00ff",
+    "accentColor": "#9d00ff",
+    "titleColor": "#ffffff",
+    "imagemUrl": "",
+    "clicavel": false,
+    "tipoDestino": "PACK",
+    "destinoId": ""
   }
 ]
