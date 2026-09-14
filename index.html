@@ -35,7 +35,7 @@
             min-height: 100vh;
         }
 
-        /* BARRA LATERAL (SIDEBAR) */
+        /* BARRA LATERAL */
         .sidebar {
             width: 260px;
             background-color: var(--sidebar-bg);
@@ -53,18 +53,9 @@
             margin-bottom: 20px;
         }
 
-        .sidebar-brand h2 {
-            margin: 0;
-            font-size: 20px;
-            color: #FFFFFF;
-        }
+        .sidebar-brand h2 { margin: 0; font-size: 20px; color: #FFFFFF; }
 
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li {
             padding: 14px 20px;
             color: var(--text-sub);
@@ -88,7 +79,7 @@
             margin-left: 260px;
             flex: 1;
             padding: 30px;
-            max-width: 900px;
+            max-width: 950px;
         }
 
         .tab-content { display: none; }
@@ -117,7 +108,7 @@
             margin-top: 12px;
         }
 
-        input[type="text"], input[type="password"], input[type="url"], textarea, select {
+        input[type="text"], input[type="password"], input[type="url"], textarea, select, input[type="color"] {
             width: 100%;
             padding: 12px 14px;
             background-color: var(--card-inner);
@@ -125,6 +116,12 @@
             border: 1px solid #45475A;
             border-radius: 8px;
             font-size: 14px;
+        }
+
+        input[type="color"] {
+            height: 44px;
+            padding: 4px;
+            cursor: pointer;
         }
 
         input[type="file"] {
@@ -182,7 +179,6 @@
 
         /* TABELAS E LISTAS */
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -190,28 +186,20 @@
             border-radius: 8px;
             overflow: hidden;
         }
-
         th, td {
             padding: 12px 14px;
             text-align: left;
             border-bottom: 1px solid #313244;
             font-size: 14px;
         }
-
         th { background-color: #11111B; color: var(--accent-blue); }
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .badge-success { background-color: var(--accent-green); color: #11111B; }
         .badge-warning { background-color: var(--accent-gold); color: #11111B; }
-
         .action-btns { display: flex; gap: 8px; }
 
-        /* MODAL DE EDIÇÃO */
+        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -221,13 +209,95 @@
             align-items: center;
             z-index: 1000;
         }
-
         .modal-content {
             background-color: var(--card-bg);
             padding: 24px;
             border-radius: 12px;
             width: 90%;
             max-width: 500px;
+        }
+
+        /* ESTILOS DO EDITOR AVANÇADO DE BANNER */
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .banner-preview-box {
+            background-color: var(--card-inner);
+            border: 1px dashed var(--accent-blue);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .banner-mockup {
+            width: 100%;
+            height: 145px;
+            border-radius: 16dp;
+            border: 1.5px solid #9D00FF;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .banner-mockup .badge-tag {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 4px 8px;
+            font-size: 9px;
+            font-weight: bold;
+            color: #FFF;
+            border-bottom-right-radius: 10px;
+            border-top-left-radius: 14px;
+        }
+
+        .banner-mockup .info-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 2;
+        }
+
+        .banner-mockup .info-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .banner-mockup .info-sub {
+            font-size: 10px;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .banner-mockup .btn-action {
+            width: fit-content;
+            padding: 4px 10px;
+            font-size: 9px;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-top: 6px;
+            color: #FFF;
+        }
+
+        .banner-mockup .cover-preview {
+            width: 75px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            background-color: #222;
         }
     </style>
 </head>
@@ -317,19 +387,60 @@
             </div>
         </div>
 
-        <!-- ABA 3: GERENCIAR BANNERS -->
+        <!-- ABA 3: GERENCIAR BANNERS COM EDITOR AVANÇADO -->
         <div id="tab-banners" class="tab-content">
             <div class="card card-banner">
-                <h3>🖼️ Publicar Novo Banner de Lançamento</h3>
+                <h3>🎨 Editor Avançado de Banner</h3>
+                
+                <!-- PAINEL DE PRÉ-VISUALIZAÇÃO AO VIVO -->
+                <div class="banner-preview-box">
+                    <span style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold;">PRÉ-VISUALIZAÇÃO EM TEMPO REAL NO APP</span>
+                    <div id="bannerMockup" class="banner-mockup" style="background-color: #22123B; border-color: #9D00FF;">
+                        <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF;">🔥 NOVIDADES</div>
+                        
+                        <div class="info-area">
+                            <p id="prevTitulo" class="info-title" style="color: #FFFFFF;">NOVOS PACOTES</p>
+                            <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8;">Confira os lançamentos!</p>
+                            <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF;">VER NOVIDADES →</div>
+                        </div>
+
+                        <img id="prevCover" class="cover-preview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='75' height='100'><rect width='75' height='100' fill='%23333'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23777' font-size='10'>SEM CAPA</text></svg>">
+                    </div>
+                </div>
+
                 <form id="bannerForm">
-                    <label>Título do Banner:</label>
-                    <input type="text" id="bannerTitulo" placeholder="Ex: NOVOS PACOTES" required>
+                    <!-- TEXTOS PRINCIPAIS -->
+                    <label>Texto da Tag/Selo:</label>
+                    <input type="text" id="bannerBadge" value="🔥 NOVIDADES" oninput="atualizarPreview()" required>
+
+                    <label>Título Principal:</label>
+                    <input type="text" id="bannerTitulo" value="NOVOS PACOTES" oninput="atualizarPreview()" required>
 
                     <label>Subtítulo / Descrição:</label>
-                    <input type="text" id="bannerSubtitulo" placeholder="Ex: Confira os lançamentos de Pagodão!" required>
+                    <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!" oninput="atualizarPreview()" required>
 
-                    <label>Imagem da Capa (PNG/JPG):</label>
-                    <input type="file" id="bannerCapa" accept="image/png, image/jpeg" required>
+                    <!-- SELEÇÃO DE CORES -->
+                    <div class="editor-grid">
+                        <div>
+                            <label>Cor de Fundo do Card:</label>
+                            <input type="color" id="colorBgCard" value="#22123B" onchange="atualizarPreview()">
+                        </div>
+                        <div>
+                            <label>Cor da Borda do Card:</label>
+                            <input type="color" id="colorBorderCard" value="#9D00FF" onchange="atualizarPreview()">
+                        </div>
+                        <div>
+                            <label>Cor dos Destaques (Tag/Botão):</label>
+                            <input type="color" id="colorAccent" value="#9D00FF" onchange="atualizarPreview()">
+                        </div>
+                        <div>
+                            <label>Cor do Texto do Título:</label>
+                            <input type="color" id="colorTextTitle" value="#FFFFFF" onchange="atualizarPreview()">
+                        </div>
+                    </div>
+
+                    <label>Capa/Imagem Lateral (PNG/JPG):</label>
+                    <input type="file" id="bannerCapa" accept="image/png, image/jpeg" onchange="previewImage(this)">
 
                     <label style="margin-top:14px; display:flex; align-items:center; gap:8px; cursor:pointer;">
                         <input type="checkbox" id="bannerClicavel" onchange="toggleBannerDestino()" style="width:auto;">
@@ -347,7 +458,7 @@
                         <input type="text" id="bannerDestinoValue" placeholder="Ex: ID_DO_PACK ou https://link.com">
                     </div>
 
-                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
+                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER PERSONALIZADO</button>
                 </form>
             </div>
 
@@ -478,7 +589,41 @@
             if (tabId === 'tab-vip') carregarChavesSupabase();
         }
 
-        // --- GERENCIAMENTO DE BANNERS ---
+        // --- EDITOR DE BANNERS AO VIVO ---
+
+        function atualizarPreview() {
+            const badgeText = document.getElementById('bannerBadge').value;
+            const tituloText = document.getElementById('bannerTitulo').value;
+            const subText = document.getElementById('bannerSubtitulo').value;
+            const bgColor = document.getElementById('colorBgCard').value;
+            const borderColor = document.getElementById('colorBorderCard').value;
+            const accentColor = document.getElementById('colorAccent').value;
+            const titleColor = document.getElementById('colorTextTitle').value;
+
+            document.getElementById('prevBadge').innerText = badgeText;
+            document.getElementById('prevBadge').style.backgroundColor = accentColor;
+            
+            document.getElementById('prevTitulo').innerText = tituloText;
+            document.getElementById('prevTitulo').style.color = titleColor;
+
+            document.getElementById('prevSubtitulo').innerText = subText;
+            
+            document.getElementById('prevBtnAction').style.backgroundColor = accentColor;
+
+            const mockup = document.getElementById('bannerMockup');
+            mockup.style.backgroundColor = bgColor;
+            mockup.style.borderColor = borderColor;
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('prevCover').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
         function toggleBannerDestino() {
             const isChecked = document.getElementById('bannerClicavel').checked;
@@ -550,20 +695,30 @@
             btn.innerText = "Enviando imagem...";
 
             try {
-                const file = document.getElementById('bannerCapa').files[0];
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', UPLOAD_PRESET);
+                const fileInput = document.getElementById('bannerCapa');
+                let imageUrl = "";
 
-                const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                    method: 'POST', body: formData
-                }).then(r => r.json());
+                if (fileInput.files && fileInput.files[0]) {
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('upload_preset', UPLOAD_PRESET);
+
+                    const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                        method: 'POST', body: formData
+                    }).then(r => r.json());
+                    imageUrl = resImg.secure_url;
+                }
 
                 const novoBanner = {
                     id: Date.now().toString(),
+                    badge: document.getElementById('bannerBadge').value.trim(),
                     titulo: document.getElementById('bannerTitulo').value.trim(),
                     subtitulo: document.getElementById('bannerSubtitulo').value.trim(),
-                    imagemUrl: resImg.secure_url,
+                    bgColor: document.getElementById('colorBgCard').value,
+                    borderColor: document.getElementById('colorBorderCard').value,
+                    accentColor: document.getElementById('colorAccent').value,
+                    titleColor: document.getElementById('colorTextTitle').value,
+                    imagemUrl: imageUrl,
                     clicavel: document.getElementById('bannerClicavel').checked,
                     tipoDestino: document.getElementById('bannerTipoDestino').value,
                     destinoId: document.getElementById('bannerDestinoValue').value.trim()
@@ -589,15 +744,13 @@
 
                 if (!ghRes.ok) throw new Error("Erro ao salvar banners no GitHub.");
 
-                alert("Banner cadastrado com sucesso!");
-                document.getElementById('bannerForm').reset();
-                toggleBannerDestino();
+                alert("Banner personalizado cadastrado com sucesso!");
                 carregarBannersGitHub();
             } catch (err) {
                 alert("Erro ao publicar banner: " + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "PUBLICAR BANNER";
+                btn.innerText = "PUBLICAR BANNER PERSONALIZADO";
             }
         });
 
