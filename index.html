@@ -150,6 +150,7 @@
 
         .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
+        /* PREVIEW BANNER MOCKUP */
         .banner-preview-box {
             background-color: var(--card-inner); border: 1px dashed var(--accent-blue);
             border-radius: 12px; padding: 16px; display: flex; flex-direction: column;
@@ -159,37 +160,27 @@
         .banner-mockup {
             width: 100%; height: 145px; border-radius: 16px; border: 1.5px solid #9D00FF;
             position: relative; overflow: hidden; display: flex; align-items: center;
-            padding: 12px; box-sizing: border-box; transition: all 0.3s ease;
+            padding: 16px; box-sizing: border-box; transition: all 0.3s ease;
         }
 
         .banner-mockup .badge-tag {
-            position: absolute; top: 0; left: 0; padding: 4px 8px; font-size: 9px;
+            position: absolute; top: 0; left: 0; padding: 4px 10px; font-size: 9px;
             font-weight: bold; color: #FFF; border-bottom-right-radius: 10px; border-top-left-radius: 14px;
         }
 
         .banner-mockup .info-area {
-            flex: 1; display: flex; flex-direction: column; gap: 2px; z-index: 2;
+            flex: 1; display: flex; flex-direction: column; gap: 3px; z-index: 2;
         }
 
         .banner-mockup .info-title { font-size: 16px; font-weight: bold; margin: 0; }
         .banner-mockup .info-sub { font-size: 10px; margin: 0; opacity: 0.9; }
 
         .banner-mockup .btn-action {
-            width: fit-content; padding: 4px 10px; font-size: 9px; font-weight: bold;
+            width: fit-content; padding: 6px 12px; font-size: 9px; font-weight: bold;
             border-radius: 4px; margin-top: 6px; color: #FFF;
         }
 
-        .banner-mockup .cover-preview {
-            width: 75px; height: 100px; border-radius: 8px; object-fit: cover; background-color: #222;
-        }
-
-        /* BANNER IMAGEM CHEIA (FULL BANNER) */
-        .banner-mockup.full-image {
-            padding: 0;
-        }
-        .banner-mockup.full-image .full-banner-img {
-            width: 100%; height: 100%; object-fit: cover; display: block;
-        }
+        .banner-mockup.full-image { padding: 0; }
     </style>
 </head>
 <body>
@@ -274,29 +265,33 @@
             </div>
         </div>
 
-        <!-- ABA 3: GERENCIAR BANNERS (TEXTO OU CHEIO) -->
+        <!-- ABA 3: GERENCIAR BANNERS -->
         <div id="tab-banners" class="tab-content">
             <div class="card card-banner">
                 <h3>🎨 Editor de Banner</h3>
 
                 <label>Tipo de Banner:</label>
                 <select id="bannerLayoutType" onchange="alternarTipoLayout()">
-                    <option value="CUSTOM">Customizado (Textos + Cores + Capa)</option>
+                    <option value="CUSTOM">Customizado (Textos + Cores)</option>
                     <option value="FULL_IMAGE">Imagem Cheia (Preenche o Card Todo)</option>
                 </select>
                 
                 <div class="banner-preview-box" style="margin-top: 16px;">
                     <span style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold;">PRÉ-VISUALIZAÇÃO AO VIVO NO APP</span>
                     <div id="bannerMockup" class="banner-mockup" style="background-color: #22123B; border-color: #9D00FF;">
-                        <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF;">🔥 NOVIDADES</div>
                         
-                        <div id="prevInfoArea" class="info-area">
-                            <p id="prevTitulo" class="info-title" style="color: #FFFFFF;">NOVOS PACOTES</p>
-                            <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8;">Confira os lançamentos!</p>
-                            <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF;">VER NOVIDADES →</div>
+                        <!-- VIEW DO MODO CUSTOMIZADO -->
+                        <div id="customBannerView" style="width:100%; height:100%; display:flex; align-items:center;">
+                            <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF;">🔥 NOVIDADES</div>
+                            <div class="info-area">
+                                <p id="prevTitulo" class="info-title" style="color: #FFFFFF;">NOVOS PACOTES</p>
+                                <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8;">Confira os últimos lançamentos!</p>
+                                <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF;">VER NOVIDADES →</div>
+                            </div>
                         </div>
 
-                        <img id="prevCover" class="cover-preview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='75' height='100'><rect width='75' height='100' fill='%23333'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23777' font-size='10'>SEM CAPA</text></svg>">
+                        <!-- VIEW DO MODO IMAGEM CHEIA -->
+                        <img id="prevFullImg" src="" style="display:none; width:100%; height:100%; object-fit:cover;">
                     </div>
                 </div>
 
@@ -332,8 +327,10 @@
                         </div>
                     </div>
 
-                    <label id="lblBannerFile">Imagem da Capa (PNG/JPG):</label>
-                    <input type="file" id="bannerCapa" accept="image/png, image/jpeg" onchange="previewImage(this)">
+                    <div id="sectionFileField" style="display: none;">
+                        <label id="lblBannerFile">Imagem do Banner Cheio (PNG/JPG):</label>
+                        <input type="file" id="bannerCapa" accept="image/png, image/jpeg" onchange="previewImage(this)">
+                    </div>
 
                     <label style="margin-top:14px; display:flex; align-items:center; gap:8px; cursor:pointer;">
                         <input type="checkbox" id="bannerClicavel" onchange="toggleBannerDestino()" style="width:auto;">
@@ -361,7 +358,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Imagem</th>
+                                <th>Imagem/Prévia</th>
                                 <th>Tipo</th>
                                 <th>Título/Info</th>
                                 <th>Clicável?</th>
@@ -480,22 +477,28 @@
             if (tabId === 'tab-vip') carregarChavesSupabase();
         }
 
-        // --- ALTERNÂNCIA DE TIPO DE BANNER ---
+        // --- LÓGICA DO EDITOR DE BANNERS ---
 
         function alternarTipoLayout() {
             const layout = document.getElementById('bannerLayoutType').value;
             const sectionCustom = document.getElementById('sectionCustomFields');
+            const sectionFile = document.getElementById('sectionFileField');
+            const customView = document.getElementById('customBannerView');
+            const fullImg = document.getElementById('prevFullImg');
             const mockup = document.getElementById('bannerMockup');
-            const lblFile = document.getElementById('lblBannerFile');
 
             if (layout === 'FULL_IMAGE') {
                 sectionCustom.style.display = 'none';
+                sectionFile.style.display = 'block';
+                customView.style.display = 'none';
+                fullImg.style.display = 'block';
                 mockup.classList.add('full-image');
-                lblFile.innerText = "Banner em Imagem Cheia (Tamanho Recomendado: 1000x450 PNG/JPG):";
             } else {
                 sectionCustom.style.display = 'block';
+                sectionFile.style.display = 'none';
+                customView.style.display = 'flex';
+                fullImg.style.display = 'none';
                 mockup.classList.remove('full-image');
-                lblFile.innerText = "Imagem da Capa (PNG/JPG):";
             }
             atualizarPreview();
         }
@@ -503,21 +506,8 @@
         function atualizarPreview() {
             const layout = document.getElementById('bannerLayoutType').value;
             const mockup = document.getElementById('bannerMockup');
-            const prevCover = document.getElementById('prevCover');
 
-            if (layout === 'FULL_IMAGE') {
-                mockup.innerHTML = `<img class="full-banner-img" src="${prevCover.src}">`;
-            } else {
-                mockup.innerHTML = `
-                    <div id="prevBadge" class="badge-tag"></div>
-                    <div id="prevInfoArea" class="info-area">
-                        <p id="prevTitulo" class="info-title"></p>
-                        <p id="prevSubtitulo" class="info-sub"></p>
-                        <div id="prevBtnAction" class="btn-action">VER NOVIDADES →</div>
-                    </div>
-                    <img id="prevCover" class="cover-preview" src="${prevCover.src}">
-                `;
-
+            if (layout === 'CUSTOM') {
                 const badgeText = document.getElementById('bannerBadge').value;
                 const tituloText = document.getElementById('bannerTitulo').value;
                 const subText = document.getElementById('bannerSubtitulo').value;
@@ -529,7 +519,7 @@
                 const badgeEl = document.getElementById('prevBadge');
                 badgeEl.innerText = badgeText;
                 badgeEl.style.backgroundColor = accentColor;
-                
+
                 const titleEl = document.getElementById('prevTitulo');
                 titleEl.innerText = tituloText;
                 titleEl.style.color = titleColor;
@@ -546,9 +536,7 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const prevCover = document.getElementById('prevCover');
-                    if (prevCover) prevCover.src = e.target.result;
-                    atualizarPreview();
+                    document.getElementById('prevFullImg').src = e.target.result;
                 }
                 reader.readAsDataURL(input.files[0]);
             }
@@ -601,10 +589,14 @@
                     ? `<span class="badge badge-warning">IMAGEM CHEIA</span>`
                     : `<span class="badge badge-success">CUSTOM</span>`;
 
+                const thumbImg = banner.layoutType === 'FULL_IMAGE' && banner.imagemUrl
+                    ? `<img src="${banner.imagemUrl}" width="60" height="35" style="border-radius:6px; object-fit:cover;">`
+                    : `<div style="width:60px; height:35px; background:${banner.bgColor || '#333'}; border:1px solid ${banner.borderColor || '#555'}; border-radius:6px;"></div>`;
+
                 tr.innerHTML = `
-                    <td><img src="${banner.imagemUrl}" width="60" height="35" style="border-radius:6px; object-fit:cover;"></td>
+                    <td>${thumbImg}</td>
                     <td>${tipoBadge}</td>
-                    <td><b>${banner.titulo || 'Banner Imagem'}</b></td>
+                    <td><b>${banner.titulo || 'Banner Customizado'}</b></td>
                     <td>${clicavelBadge}</td>
                     <td>
                         <button class="btn-danger" onclick="excluirBanner(${index})">Excluir</button>
@@ -625,24 +617,27 @@
             }
 
             btn.disabled = true;
-            btn.innerText = "Enviando imagem...";
+            btn.innerText = "Processando banner...";
 
             try {
-                const fileInput = document.getElementById('bannerCapa');
+                const layoutType = document.getElementById('bannerLayoutType').value;
                 let imageUrl = "";
 
-                if (fileInput.files && fileInput.files[0]) {
-                    const formData = new FormData();
-                    formData.append('file', fileInput.files[0]);
-                    formData.append('upload_preset', UPLOAD_PRESET);
+                if (layoutType === 'FULL_IMAGE') {
+                    const fileInput = document.getElementById('bannerCapa');
+                    if (fileInput.files && fileInput.files[0]) {
+                        btn.innerText = "Enviando imagem...";
+                        const formData = new FormData();
+                        formData.append('file', fileInput.files[0]);
+                        formData.append('upload_preset', UPLOAD_PRESET);
 
-                    const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                        method: 'POST', body: formData
-                    }).then(r => r.json());
-                    imageUrl = resImg.secure_url;
+                        const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                            method: 'POST', body: formData
+                        }).then(r => r.json());
+                        imageUrl = resImg.secure_url;
+                    }
                 }
 
-                const layoutType = document.getElementById('bannerLayoutType').value;
                 const novoBanner = {
                     id: Date.now().toString(),
                     layoutType: layoutType,
