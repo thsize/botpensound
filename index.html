@@ -1,862 +1,1073 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PenSound Admin - Gestão Completa</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenSound Admin - Gestão Completa</title>
 
-    <!-- Lib para assinar JWT para notificação FCM -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
+    <!-- Lib para assinar JWT para notificação FCM -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
 
-    <style>
-        :root {
-            --bg-dark: #11111B;
-            --sidebar-bg: #1E1E2E;
-            --card-bg: #313244;
-            --card-inner: #181825;
-            --text-main: #CDD6F4;
-            --text-sub: #A6ADC8;
-            --accent-blue: #89B4FA;
-            --accent-green: #A6E3A1;
-            --accent-gold: #F9E2AF;
-            --accent-purple: #CBA6F7;
-            --accent-red: #F38BA8;
-        }
+    <style>
+        :root {
+            --bg-dark: #11111B;
+            --sidebar-bg: #1E1E2E;
+            --card-bg: #313244;
+            --card-inner: #181825;
+            --text-main: #CDD6F4;
+            --text-sub: #A6ADC8;
+            --accent-blue: #89B4FA;
+            --accent-green: #A6E3A1;
+            --accent-gold: #F9E2AF;
+            --accent-purple: #CBA6F7;
+            --accent-red: #F38BA8;
+        }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
-        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
 
-        /* BARRA LATERAL (SIDEBAR) */
-        .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            position: fixed;
-            height: 100vh;
-        }
+        /* BARRA LATERAL (SIDEBAR) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            position: fixed;
+            height: 100vh;
+        }
 
-        .sidebar-brand {
-            padding: 0 20px 20px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 20px;
-        }
+        .sidebar-brand {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
 
-        .sidebar-brand h2 {
-            margin: 0;
-            font-size: 20px;
-            color: #FFFFFF;
-        }
+        .sidebar-brand h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #FFFFFF;
+        }
 
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-        .sidebar-menu li {
-            padding: 14px 20px;
-            color: var(--text-sub);
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .sidebar-menu li {
+            padding: 14px 20px;
+            color: var(--text-sub);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-        .sidebar-menu li:hover, .sidebar-menu li.active {
-            background-color: var(--card-bg);
-            color: var(--accent-blue);
-            border-left: 4px solid var(--accent-blue);
-        }
+        .sidebar-menu li:hover, .sidebar-menu li.active {
+            background-color: var(--card-bg);
+            color: var(--accent-blue);
+            border-left: 4px solid var(--accent-blue);
+        }
 
-        /* CONTEÚDO PRINCIPAL */
-        .main-content {
-            margin-left: 260px;
-            flex: 1;
-            padding: 30px;
-            max-width: 900px;
-        }
+        /* CONTEÚDO PRINCIPAL */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 30px;
+            max-width: 900px;
+        }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
-        .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 20px; }
-        .card-vip h3 { color: var(--accent-gold); }
-        .card-pack h3 { color: var(--accent-purple); }
+        .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 20px; }
+        .card-vip h3 { color: var(--accent-gold); }
+        .card-pack h3 { color: var(--accent-purple); }
+        .card-banner h3 { color: var(--accent-blue); }
 
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-sub);
-            margin-bottom: 6px;
-            margin-top: 12px;
-        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            margin-top: 12px;
+        }
 
-        input[type="text"], input[type="password"], input[type="url"], textarea, select {
-            width: 100%;
-            padding: 12px 14px;
-            background-color: var(--card-inner);
-            color: #FFFFFF;
-            border: 1px solid #45475A;
-            border-radius: 8px;
-            font-size: 14px;
-        }
+        input[type="text"], input[type="password"], input[type="url"], textarea, select {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: var(--card-inner);
+            color: #FFFFFF;
+            border: 1px solid #45475A;
+            border-radius: 8px;
+            font-size: 14px;
+        }
 
-        input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--card-inner);
-            border: 1px dashed #45475A;
-            border-radius: 8px;
-            color: var(--text-sub);
-        }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--card-inner);
+            border: 1px dashed #45475A;
+            border-radius: 8px;
+            color: var(--text-sub);
+        }
 
-        button {
-            width: 100%;
-            padding: 12px 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 12px;
-            transition: opacity 0.2s;
-        }
+        button {
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: opacity 0.2s;
+        }
 
-        button:hover { opacity: 0.9; }
+        button:hover { opacity: 0.9; }
 
-        .btn-vip { background-color: var(--accent-gold); color: #11111B; }
-        .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
-        .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
-        .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
-        .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
+        .btn-vip { background-color: var(--accent-gold); color: #11111B; }
+        .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
+        .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
+        .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
 
-        .chave-resultado {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--accent-green);
-            text-align: center;
-            margin-top: 14px;
-            padding: 12px;
-            background-color: var(--card-inner);
-            border-radius: 8px;
-            border: 1px solid var(--accent-green);
-            user-select: all;
-            word-break: break-all;
-        }
+        .chave-resultado {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-green);
+            text-align: center;
+            margin-top: 14px;
+            padding: 12px;
+            background-color: var(--card-inner);
+            border-radius: 8px;
+            border: 1px solid var(--accent-green);
+            user-select: all;
+            word-break: break-all;
+        }
 
-        .pack-item {
-            background-color: var(--card-inner);
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            border: 1px solid #45475A;
-        }
+        .pack-item {
+            background-color: var(--card-inner);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #45475A;
+        }
 
-        .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
+        .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
 
-        /* TABELAS E LISTAS */
-        .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
+        /* TABELAS E LISTAS */
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: var(--card-inner);
-            border-radius: 8px;
-            overflow: hidden;
-        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-inner);
+            border-radius: 8px;
+            overflow: hidden;
+        }
 
-        th, td {
-            padding: 12px 14px;
-            text-align: left;
-            border-bottom: 1px solid #313244;
-            font-size: 14px;
-        }
+        th, td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid #313244;
+            font-size: 14px;
+        }
 
-        th { background-color: #11111B; color: var(--accent-blue); }
+        th { background-color: #11111B; color: var(--accent-blue); }
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        .badge-success { background-color: var(--accent-green); color: #11111B; }
-        .badge-warning { background-color: var(--accent-gold); color: #11111B; }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge-success { background-color: var(--accent-green); color: #11111B; }
+        .badge-warning { background-color: var(--accent-gold); color: #11111B; }
 
-        .action-btns { display: flex; gap: 8px; }
+        .action-btns { display: flex; gap: 8px; }
 
-        /* MODAL DE EDIÇÃO */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+        /* MODAL DE EDIÇÃO */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
 
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 24px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-        }
-    </style>
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- BARRA LATERAL -->
-    <div class="sidebar">
-        <div class="sidebar-brand">
-            <h2>⚡ PenSound Admin</h2>
-        </div>
-        <ul class="sidebar-menu">
-            <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
-            <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
-            <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
-        </ul>
-    </div>
-
-    <!-- CONTEÚDO PRINCIPAL -->
-    <div class="main-content">
-
-        <!-- ABA 1: PUBLICAR PACOTES -->
-        <div id="tab-publicar" class="tab-content active">
-            <div class="card card-pack">
-                <h3>📦 Envio de Pacotes em Lote</h3>
-                <form id="packForm">
-                    <div id="cardsContainer">
-                        <div class="pack-item">
-                            <h4>Pacote 1</h4>
-                            <label>Nome do Pacote:</label>
-                            <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
-                            
-                            <label>Categoria:</label>
-                            <select class="input-categoria">
-                                <option value="PAGODAO">PAGODÃO</option>
-                                <option value="ARROCHA">ARROCHA</option>
-                                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
-                                <option value="SAMBA">SAMBA</option>
-                                <option value="FORRO">FORRÓ</option>
-                                <option value="FUNK">FUNK</option>
-                                <option value="REPERTORIO">REPERTÓRIO</option>
-                                <option value="OUTROS">OUTROS</option>
-                            </select>
-                            
-                            <label>Capa do Pack (Imagem):</label>
-                            <input type="file" class="input-capa" accept="image/*" required>
-                            
-                            <label>Link Direto do ZIP (MediaFire Página/Google Drive):</label>
-                            <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
-                        </div>
-                    </div>
-
-                    <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
-
-                    <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON):</label>
-                    <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
-
-                    <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
-                    <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
-
-                    <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ABA 2: GERENCIAR PACOTES -->
-        <div id="tab-pacotes" class="tab-content">
-            <div class="card card-pack">
-                <h3>🎵 Lista de Pacotes Cadastrados</h3>
-                <input type="text" id="searchPacote" placeholder="🔎 Pesquisar pacote por nome ou categoria..." onkeyup="filtrarPacotes()">
-                
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Capa</th>
-                                <th>Nome</th>
-                                <th>Categoria</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaPacotesBody">
-                            <tr><td colspan="4">Carregando pacotes do GitHub...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ABA 3: GERENCIAR CHAVES VIP -->
-        <div id="tab-vip" class="tab-content">
-            <div class="card card-vip">
-                <h3>👑 Gerar Nova Chave VIP</h3>
-
-                <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
-                <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
-
-                <label for="vipTipoPlano">Selecione o Plano:</label>
-                <select id="vipTipoPlano">
-                    <option value="semanal">Semanal (7 Dias) - R$ 4,90</option>
-                    <option value="quinzenal">Quinzenal (15 Dias) - R$ 6,90</option>
-                    <option value="vitalicio">Vitalício (Para Sempre) - R$ 29,90</option>
-                </select>
-                
-                <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
-
-                <div id="boxResultadoVip" style="display: none;">
-                    <div class="chave-resultado" id="txtChaveGerada">---</div>
-                </div>
-            </div>
-
-            <div class="card card-vip">
-                <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
-                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP ou Device ID..." onkeyup="filtrarChavesVip()">
-                
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Chave</th>
-                                <th>Tipo</th>
-                                <th>Status / Dispositivo</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaChavesBody">
-                            <tr><td colspan="4">Carregando chaves do Supabase...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- MODAL DE EDIÇÃO DE PACOTE -->
-    <div id="modalEditPacote" class="modal">
-        <div class="modal-content">
-            <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
-            <input type="hidden" id="editPackIndex">
-            
-            <label>Nome do Pacote:</label>
-            <input type="text" id="editPackNome">
-            
-            <label>Categoria:</label>
-            <select id="editPackCategoria">
-                <option value="PAGODAO">PAGODÃO</option>
-                <option value="ARROCHA">ARROCHA</option>
-                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
-                <option value="SAMBA">SAMBA</option>
-                <option value="FORRO">FORRÓ</option>
-                <option value="FUNK">FUNK</option>
-                <option value="REPERTORIO">REPERTÓRIO</option>
-                <option value="OUTROS">OUTROS</option>
-            </select>
-            
-            <label>Link Direto do ZIP:</label>
-            <input type="url" id="editPackDownload">
-
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="button" class="btn-submit" onclick="salvarEdicaoPacote()" style="margin:0;">Salvar Alterações</button>
-                <button type="button" class="btn-danger" onclick="fecharModalEdit()" style="margin:0;">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const SUPABASE_URL = "https://yxrqkhbjytbxwwswbvel.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4cnFraGJqeXRieHd3c3didmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjkzMTksImV4cCI6MjEwMzg0NTMxOX0.zjgkZKrT3dfsRsygMA7QKC33HTrw4I-Y21CE4k-qcyU";
-
-        const CLOUD_NAME = "y5u5zkp7";
-        const UPLOAD_PRESET = "ftpuvxis";
-        const REPO = "thsize/botpensound";
-        const FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@painel-sky.iam.gserviceaccount.com";
-        const FIREBASE_PROJECT_ID = "painel-sky";
-
-        let globalPacotes = [];
-        let globalShaGitHub = "";
-        let globalChavesVip = [];
-
-        // ALTERNÂNCIA DE ABAS
-        function switchTab(tabId, evt) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
-
-            document.getElementById(tabId).classList.add('active');
-            if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
-
-            if (tabId === 'tab-pacotes') carregarPacotesGitHub();
-            if (tabId === 'tab-vip') carregarChavesSupabase();
-        }
-
-        // --- GERENCIAMENTO DE CHAVES VIP ---
-
-        document.getElementById('btnGerarVip').addEventListener('click', async () => {
-            const tipo = document.getElementById('vipTipoPlano').value;
-            const deviceIdInput = document.getElementById('vipDeviceIdInput').value.trim();
-            const btn = document.getElementById('btnGerarVip');
-            const boxResult = document.getElementById('boxResultadoVip');
-            const txtChave = document.getElementById('txtChaveGerada');
-
-            btn.disabled = true;
-            btn.innerText = "Gerando...";
-
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let p1 = '', p2 = '';
-            for (let i = 0; i < 4; i++) {
-                p1 += chars.charAt(Math.floor(Math.random() * chars.length));
-                p2 += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            const novaChave = `PENSOUND-${p1}-${p2}`;
-
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({
-                        chave: novaChave,
-                        tipo: tipo,
-                        utilizada: deviceIdInput ? true : false,
-                        device_id: deviceIdInput
-                    })
-                });
-
-                if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.message || "Erro ao salvar no Supabase.");
-                }
-
-                txtChave.innerText = novaChave;
-                boxResult.style.display = 'block';
-                document.getElementById('vipDeviceIdInput').value = '';
-                carregarChavesSupabase();
-            } catch (err) {
-                alert("Erro ao gerar chave: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "GERAR E SALVAR CHAVE NO SUPABASE";
-            }
-        });
-
-        async function carregarChavesSupabase() {
-            const body = document.getElementById('listaChavesBody');
-            body.innerHTML = '<tr><td colspan="4">Carregando chaves...</td></tr>';
-
-            try {
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=created_at.desc`, {
-                    method: 'GET',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!res.ok) {
-                    res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*`, {
-                        method: 'GET',
-                        headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                }
-
-                if (!res.ok) {
-                    const err = await res.json();
-                    body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-red)">Erro no Supabase: ${err.message || res.statusText}</td></tr>`;
-                    return;
-                }
-
-                const data = await res.json();
-                globalChavesVip = Array.isArray(data) ? data : [];
-                renderizarTabelaChaves(globalChavesVip);
-            } catch (e) {
-                console.error(e);
-                body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-red)">Erro de Conexão: ${e.message}</td></tr>`;
-            }
-        }
-
-        function renderizarTabelaChaves(chaves) {
-            const body = document.getElementById('listaChavesBody');
-            body.innerHTML = '';
-
-            if (chaves.length === 0) {
-                body.innerHTML = '<tr><td colspan="4">Nenhuma chave VIP encontrada.</td></tr>';
-                return;
-            }
-
-            chaves.forEach(item => {
-                const tr = document.createElement('tr');
-                const statusHtml = item.utilizada 
-                    ? `<span class="badge badge-warning">Ativado (${item.device_id ? item.device_id : 'Sem ID'})</span>`
-                    : `<span class="badge badge-success">Livre (Aguardando Ativação)</span>`;
-
-                tr.innerHTML = `
-                    <td><b>${item.chave}</b></td>
-                    <td>${item.tipo ? item.tipo.toUpperCase() : 'SEMANAL'}</td>
-                    <td>${statusHtml}</td>
-                    <td>
-                        <button class="btn-danger" onclick="excluirChaveVip('${item.chave}')">Excluir</button>
-                    </td>
-                `;
-                body.appendChild(tr);
-            });
-        }
-
-        function filtrarChavesVip() {
-            const termo = document.getElementById('searchChave').value.toLowerCase();
-            const filtradas = globalChavesVip.filter(c => 
-                c.chave.toLowerCase().includes(termo) || 
-                (c.device_id && c.device_id.toLowerCase().includes(termo))
-            );
-            renderizarTabelaChaves(filtradas);
-        }
-
-        async function excluirChaveVip(chave) {
-            if (!confirm(`Deseja realmente excluir a chave ${chave}? O usuário VIP associado a ela perderá o acesso no app.`)) return;
-
-            try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?chave=eq.${chave}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    }
-                });
-
-                if (res.ok) {
-                    alert("Chave VIP excluída com sucesso!");
-                    carregarChavesSupabase();
-                } else {
-                    alert("Erro ao excluir chave no banco.");
-                }
-            } catch (e) {
-                alert("Falha na conexão ao excluir chave.");
-            }
-        }
-
-        // --- GERENCIAMENTO DE PACOTES (GITHUB) ---
-
-        async function carregarPacotesGitHub() {
-            const body = document.getElementById('listaPacotesBody');
-            body.innerHTML = '<tr><td colspan="4">Buscando do GitHub...</td></tr>';
-
-            try {
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const currentData = await fetch(ghUrl).then(r => r.json());
-                globalShaGitHub = currentData.sha;
-
-                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
-                globalPacotes = contentText ? JSON.parse(contentText) : [];
-
-                renderizarTabelaPacotes(globalPacotes);
-            } catch (e) {
-                body.innerHTML = '<tr><td colspan="4">Erro ao carregar pacotes. Verifique o repositório.</td></tr>';
-            }
-        }
-
-        function renderizarTabelaPacotes(pacotes) {
-            const body = document.getElementById('listaPacotesBody');
-            body.innerHTML = '';
-
-            if (pacotes.length === 0) {
-                body.innerHTML = '<tr><td colspan="4">Nenhum pacote publicado.</td></tr>';
-                return;
-            }
-
-            pacotes.forEach((pack, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><img src="${pack.capa || pack.cover_url}" width="45" height="45" style="border-radius:6px; object-fit:cover;"></td>
-                    <td><b>${pack.nome || pack.title}</b></td>
-                    <td><span class="badge badge-success">${pack.categoria || pack.type}</span></td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="btn-edit" onclick="abrirEdicaoPacote(${index})">Editar</button>
-                            <button class="btn-danger" onclick="excluirPacote(${index})">Excluir</button>
-                        </div>
-                    </td>
-                `;
-                body.appendChild(tr);
-            });
-        }
-
-        function filtrarPacotes() {
-            const termo = document.getElementById('searchPacote').value.toLowerCase();
-            const filtrados = globalPacotes.filter(p => 
-                (p.nome && p.nome.toLowerCase().includes(termo)) || 
-                (p.categoria && p.categoria.toLowerCase().includes(termo))
-            );
-            renderizarTabelaPacotes(filtrados);
-        }
-
-        function abrirEdicaoPacote(index) {
-            const pack = globalPacotes[index];
-            document.getElementById('editPackIndex').value = index;
-            document.getElementById('editPackNome').value = pack.nome || pack.title;
-            document.getElementById('editPackCategoria').value = pack.categoria || pack.type;
-            document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
-
-            document.getElementById('modalEditPacote').style.display = 'flex';
-        }
-
-        function fecharModalEdit() {
-            document.getElementById('modalEditPacote').style.display = 'none';
-        }
-
-        async function salvarEdicaoPacote() {
-            const token = document.getElementById('ghToken').value;
-            if (!token) {
-                alert("Por favor, digite seu Token do GitHub (PAT) na aba de Envio para autorizar a alteração.");
-                return;
-            }
-
-            const index = document.getElementById('editPackIndex').value;
-            const novoNome = document.getElementById('editPackNome').value.trim();
-            const novaCategoria = document.getElementById('editPackCategoria').value;
-            const novoDownload = document.getElementById('editPackDownload').value.trim();
-
-            globalPacotes[index].nome = novoNome;
-            globalPacotes[index].title = novoNome;
-            globalPacotes[index].categoria = novaCategoria;
-            globalPacotes[index].type = novaCategoria;
-            globalPacotes[index].download = novoDownload;
-            globalPacotes[index].zip_url = novoDownload;
-
-            await atualizarArquivoGitHub(token, `Editado pacote ${novoNome}`);
-            fecharModalEdit();
-            carregarPacotesGitHub();
-        }
-
-        async function excluirPacote(index) {
-            const pack = globalPacotes[index];
-            if (!confirm(`Deseja excluir o pacote "${pack.nome || pack.title}"?`)) return;
-
-            const token = prompt("Digite seu Token do GitHub (PAT) para confirmar a exclusão:");
-            if (!token) return;
-
-            globalPacotes.splice(index, 1);
-            await atualizarArquivoGitHub(token, `Removido pacote ${pack.nome || pack.title}`);
-            carregarPacotesGitHub();
-        }
-
-        async function atualizarArquivoGitHub(token, commitMessage) {
-            try {
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalPacotes, null, 2))));
-
-                const ghRes = await fetch(ghUrl, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: commitMessage,
-                        content: updatedContent,
-                        sha: globalShaGitHub
-                    })
-                });
-
-                if (ghRes.ok) {
-                    alert("Operação salva no GitHub com sucesso!");
-                } else {
-                    alert("Erro ao atualizar GitHub. Verifique seu Token.");
-                }
-            } catch (e) {
-                alert("Erro de comunicação com o GitHub.");
-            }
-        }
-
-        // --- PUBLICAR NOVOS PACOTES EM LOTE ---
-
-        let packCount = 1;
-        document.getElementById('btnAddPack').addEventListener('click', () => {
-            packCount++;
-            const container = document.getElementById('cardsContainer');
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'pack-item';
-            cardDiv.innerHTML = `
-                <h4>Pacote ${packCount}</h4>
-                <label>Nome do Pacote:</label>
-                <input type="text" class="input-nome" placeholder="Nome do Pacote ${packCount}" required>
-                <label>Categoria:</label>
-                <select class="input-categoria">
-                    <option value="PAGODAO">PAGODÃO</option>
-                    <option value="ARROCHA">ARROCHA</option>
-                    <option value="ARROCHADEIRA">ARROCHADEIRA</option>
-                    <option value="SAMBA">SAMBA</option>
-                    <option value="FORRO">FORRÓ</option>
-                    <option value="FUNK">FUNK</option>
-                    <option value="REPERTORIO">REPERTÓRIO</option>
-                    <option value="OUTROS">OUTROS</option>
-                </select>
-                <label>Capa do Pack (Imagem):</label>
-                <input type="file" class="input-capa" accept="image/*" required>
-                <label>Link Direto do ZIP:</label>
-                <input type="url" class="input-download" placeholder="https://..." required>
-            `;
-            container.appendChild(cardDiv);
-        });
-
-        async function getFirebaseAccessToken(privateKey) {
-            const now = Math.floor(Date.now() / 1000);
-            const claim = {
-                iss: FIREBASE_CLIENT_EMAIL,
-                scope: "https://www.googleapis.com/auth/firebase.messaging",
-                aud: "https://oauth2.googleapis.com/token",
-                exp: now + 3600,
-                iat: now
-            };
-
-            const header = { alg: "RS256", typ: "JWT" };
-            const jwtToken = KJUR.jws.JWS.sign("RS256", JSON.stringify(header), JSON.stringify(claim), privateKey);
-
-            const response = await fetch("https://oauth2.googleapis.com/token", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwtToken}`
-            });
-
-            const data = await response.json();
-            return data.access_token;
-        }
-
-        async function dispararNotificacaoV1(tokenAccessToken, packNome, packCategoria) {
-            const fcmUrl = `https://fcm.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/messages:send`;
-            await fetch(fcmUrl, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${tokenAccessToken}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    message: {
-                        topic: "todos",
-                        notification: {
-                            title: "🔥 Novo Pack Liberado!",
-                            body: `O pacote "${packNome}" [${packCategoria}] já está disponível no PenSound!`
-                        },
-                        android: {
-                            priority: "HIGH",
-                            notification: { sound: "default", channel_id: "pensound_notifications" }
-                        }
-                    }
-                })
-            });
-        }
-
-        document.getElementById('packForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmit');
-            btn.disabled = true;
-
-            try {
-                const token = document.getElementById('ghToken').value;
-                const privateKey = document.getElementById('firebaseKeyInput').value.trim();
-                const cards = document.querySelectorAll('.pack-item');
-
-                btn.innerText = "Lendo repositório...";
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
-                const currentData = await fetch(ghUrl).then(r => r.json());
-
-                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
-                let content = contentText ? JSON.parse(contentText) : [];
-
-                let pacotesAdicionados = 0;
-                let ultimosPacotes = [];
-
-                for (let i = 0; i < cards.length; i++) {
-                    const card = cards[i];
-                    const nome = card.querySelector('.input-nome').value.trim();
-                    const categoria = card.querySelector('.input-categoria').value;
-                    const file = card.querySelector('.input-capa').files[0];
-                    const download = card.querySelector('.input-download').value.trim();
-
-                    if (nome && file && download) {
-                        btn.innerText = `Enviando imagem ${i + 1} de ${cards.length}...`;
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        formData.append('upload_preset', UPLOAD_PRESET);
-
-                        const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                            method: 'POST', body: formData
-                        }).then(r => r.json());
-
-                        const novoPack = {
-                            id: (Date.now() + i).toString(),
-                            nome: nome, title: nome,
-                            categoria: categoria, type: categoria,
-                            capa: resImg.secure_url, cover_url: resImg.secure_url,
-                            download: download, zip_url: download
-                        };
-
-                        content.push(novoPack);
-                        ultimosPacotes.push(novoPack);
-                        pacotesAdicionados++;
-                    }
-                }
-
-                btn.innerText = "Atualizando GitHub...";
-                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
-                const ghRes = await fetch(ghUrl, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: `Adicionados ${pacotesAdicionados} pacotes`,
-                        content: updatedContent, sha: currentData.sha
-                    })
-                });
-
-                if (!ghRes.ok) throw new Error("Erro no GitHub PAT.");
-
-                btn.innerText = "Enviando notificações...";
-                const accessToken = await getFirebaseAccessToken(privateKey);
-                for (const pack of ultimosPacotes) {
-                    await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
-                }
-
-                alert(`${pacotesAdicionados} pacote(s) publicado(s) com sucesso!`);
-                location.reload();
-            } catch (err) {
-                alert('Erro ao publicar: ' + err.message);
-                btn.disabled = false;
-                btn.innerText = "PUBLICAR E NOTIFICAR APP";
-            }
-        });
-    </script>
+    <!-- BARRA LATERAL -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h2>⚡ PenSound Admin</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
+            <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
+            <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
+            <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
+        </ul>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="main-content">
+
+        <!-- ABA 1: PUBLICAR PACOTES -->
+        <div id="tab-publicar" class="tab-content active">
+            <div class="card card-pack">
+                <h3>📦 Envio de Pacotes em Lote</h3>
+                <form id="packForm">
+                    <div id="cardsContainer">
+                        <div class="pack-item">
+                            <h4>Pacote 1</h4>
+                            <label>Nome do Pacote:</label>
+                            <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
+                            
+                            <label>Categoria:</label>
+                            <select class="input-categoria">
+                                <option value="PAGODAO">PAGODÃO</option>
+                                <option value="ARROCHA">ARROCHA</option>
+                                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
+                                <option value="SAMBA">SAMBA</option>
+                                <option value="FORRO">FORRÓ</option>
+                                <option value="FUNK">FUNK</option>
+                                <option value="REPERTORIO">REPERTÓRIO</option>
+                                <option value="OUTROS">OUTROS</option>
+                            </select>
+                            
+                            <label>Capa do Pack (Imagem):</label>
+                            <input type="file" class="input-capa" accept="image/*" required>
+                            
+                            <label>Link Direto do ZIP (MediaFire Página/Google Drive):</label>
+                            <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
+
+                    <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON):</label>
+                    <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
+
+                    <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
+                    <input type="password" id="ghToken" required placeholder="ghp_xxxx...">
+
+                    <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ABA 2: GERENCIAR PACOTES -->
+        <div id="tab-pacotes" class="tab-content">
+            <div class="card card-pack">
+                <h3>🎵 Lista de Pacotes Cadastrados</h3>
+                <input type="text" id="searchPacote" placeholder="🔎 Pesquisar pacote por nome ou categoria..." onkeyup="filtrarPacotes()">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Capa</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaPacotesBody">
+                            <tr><td colspan="4">Carregando pacotes do GitHub...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 3: GERENCIAR BANNERS -->
+        <div id="tab-banners" class="tab-content">
+            <div class="card card-banner">
+                <h3>🖼️ Publicar Novo Banner de Lançamento</h3>
+                <form id="bannerForm">
+                    <label>Título do Banner:</label>
+                    <input type="text" id="bannerTitulo" placeholder="Ex: NOVOS PACOTES" required>
+
+                    <label>Subtítulo / Descrição:</label>
+                    <input type="text" id="bannerSubtitulo" placeholder="Ex: Confira os lançamentos de Pagodão!" required>
+
+                    <label>Imagem da Capa (PNG/JPG):</label>
+                    <input type="file" id="bannerCapa" accept="image/png, image/jpeg" required>
+
+                    <label style="margin-top:14px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="bannerClicavel" onchange="toggleBannerDestino()" style="width:auto;">
+                        <span>Tornar Banner Clicável?</span>
+                    </label>
+
+                    <div id="boxBannerDestino" style="display: none; background-color: var(--card-inner); padding: 14px; border-radius: 8px; margin-top: 10px; border: 1px solid #45475A;">
+                        <label style="margin-top:0;">Tipo de Ação ao Clicar:</label>
+                        <select id="bannerTipoDestino">
+                            <option value="PACK">Abrir Pacote Específico do App</option>
+                            <option value="LINK">Abrir Link Externo no Navegador</option>
+                        </select>
+
+                        <label>ID do Pacote ou Link Completo (https://):</label>
+                        <input type="text" id="bannerDestinoValue" placeholder="Ex: ID_DO_PACK ou https://link.com">
+                    </div>
+
+                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
+                </form>
+            </div>
+
+            <div class="card card-banner">
+                <h3>🖼️ Banners Publicados</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Imagem</th>
+                                <th>Título</th>
+                                <th>Clicável?</th>
+                                <th>Destino</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaBannersBody">
+                            <tr><td colspan="5">Carregando banners...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 4: GERENCIAR CHAVES VIP -->
+        <div id="tab-vip" class="tab-content">
+            <div class="card card-vip">
+                <h3>👑 Gerar Nova Chave VIP</h3>
+
+                <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
+                <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
+
+                <label for="vipTipoPlano">Selecione o Plano:</label>
+                <select id="vipTipoPlano">
+                    <option value="semanal">Semanal (7 Dias) - R$ 4,90</option>
+                    <option value="quinzenal">Quinzenal (15 Dias) - R$ 6,90</option>
+                    <option value="vitalicio">Vitalício (Para Sempre) - R$ 29,90</option>
+                </select>
+                
+                <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
+
+                <div id="boxResultadoVip" style="display: none;">
+                    <div class="chave-resultado" id="txtChaveGerada">---</div>
+                </div>
+            </div>
+
+            <div class="card card-vip">
+                <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
+                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP ou Device ID..." onkeyup="filtrarChavesVip()">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Chave</th>
+                                <th>Tipo</th>
+                                <th>Status / Dispositivo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaChavesBody">
+                            <tr><td colspan="4">Carregando chaves do Supabase...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DE PACOTE -->
+    <div id="modalEditPacote" class="modal">
+        <div class="modal-content">
+            <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
+            <input type="hidden" id="editPackIndex">
+            
+            <label>Nome do Pacote:</label>
+            <input type="text" id="editPackNome">
+            
+            <label>Categoria:</label>
+            <select id="editPackCategoria">
+                <option value="PAGODAO">PAGODÃO</option>
+                <option value="ARROCHA">ARROCHA</option>
+                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
+                <option value="SAMBA">SAMBA</option>
+                <option value="FORRO">FORRÓ</option>
+                <option value="FUNK">FUNK</option>
+                <option value="REPERTORIO">REPERTÓRIO</option>
+                <option value="OUTROS">OUTROS</option>
+            </select>
+            
+            <label>Link Direto do ZIP:</label>
+            <input type="url" id="editPackDownload">
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" class="btn-submit" onclick="salvarEdicaoPacote()" style="margin:0;">Salvar Alterações</button>
+                <button type="button" class="btn-danger" onclick="fecharModalEdit()" style="margin:0;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://yxrqkhbjytbxwwswbvel.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4cnFraGJqeXRieHd3c3didmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjkzMTksImV4cCI6MjEwMzg0NTMxOX0.zjgkZKrT3dfsRsygMA7QKC33HTrw4I-Y21CE4k-qcyU";
+
+        const CLOUD_NAME = "y5u5zkp7";
+        const UPLOAD_PRESET = "ftpuvxis";
+        const REPO = "thsize/botpensound";
+        const FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@painel-sky.iam.gserviceaccount.com";
+        const FIREBASE_PROJECT_ID = "painel-sky";
+
+        let globalPacotes = [];
+        let globalShaGitHub = "";
+        let globalBanners = [];
+        let globalShaBannersGitHub = "";
+        let globalChavesVip = [];
+
+        // ALTERNÂNCIA DE ABAS
+        function switchTab(tabId, evt) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+
+            if (tabId === 'tab-pacotes') carregarPacotesGitHub();
+            if (tabId === 'tab-banners') carregarBannersGitHub();
+            if (tabId === 'tab-vip') carregarChavesSupabase();
+        }
+
+        // --- GERENCIAMENTO DE BANNERS ---
+
+        function toggleBannerDestino() {
+            const isChecked = document.getElementById('bannerClicavel').checked;
+            document.getElementById('boxBannerDestino').style.display = isChecked ? 'block' : 'none';
+        }
+
+        async function carregarBannersGitHub() {
+            const body = document.getElementById('listaBannersBody');
+            body.innerHTML = '<tr><td colspan="5">Buscando banners do GitHub...</td></tr>';
+
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                const res = await fetch(ghUrl);
+                if (!res.ok) {
+                    globalBanners = [];
+                    renderizarTabelaBanners([]);
+                    return;
+                }
+                const currentData = await res.json();
+                globalShaBannersGitHub = currentData.sha;
+
+                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                globalBanners = contentText ? JSON.parse(contentText) : [];
+                renderizarTabelaBanners(globalBanners);
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="5">Nenhum banner encontrado ou arquivo novo.</td></tr>';
+            }
+        }
+
+        function renderizarTabelaBanners(banners) {
+            const body = document.getElementById('listaBannersBody');
+            body.innerHTML = '';
+
+            if (banners.length === 0) {
+                body.innerHTML = '<tr><td colspan="5">Nenhum banner cadastrado.</td></tr>';
+                return;
+            }
+
+            banners.forEach((banner, index) => {
+                const tr = document.createElement('tr');
+                const clicavelBadge = banner.clicavel 
+                    ? `<span class="badge badge-success">SIM</span>` 
+                    : `<span class="badge badge-warning">NÃO</span>`;
+
+                tr.innerHTML = `
+                    <td><img src="${banner.imagemUrl}" width="60" height="40" style="border-radius:6px; object-fit:cover;"></td>
+                    <td><b>${banner.titulo}</b><br><small style="color:var(--text-sub)">${banner.subtitulo}</small></td>
+                    <td>${clicavelBadge}</td>
+                    <td>${banner.clicavel ? `[${banner.tipoDestino}] ${banner.destinoId}` : '-'}</td>
+                    <td>
+                        <button class="btn-danger" onclick="excluirBanner(${index})">Excluir</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        document.getElementById('bannerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitBanner');
+            const token = document.getElementById('ghToken').value;
+
+            if (!token) {
+                alert("Digite seu Token do GitHub (PAT) na primeira aba antes de enviar o banner.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Enviando imagem...";
+
+            try {
+                const file = document.getElementById('bannerCapa').files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', UPLOAD_PRESET);
+
+                const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                    method: 'POST', body: formData
+                }).then(r => r.json());
+
+                const novoBanner = {
+                    id: Date.now().toString(),
+                    titulo: document.getElementById('bannerTitulo').value.trim(),
+                    subtitulo: document.getElementById('bannerSubtitulo').value.trim(),
+                    imagemUrl: resImg.secure_url,
+                    clicavel: document.getElementById('bannerClicavel').checked,
+                    tipoDestino: document.getElementById('bannerTipoDestino').value,
+                    destinoId: document.getElementById('bannerDestinoValue').value.trim()
+                };
+
+                btn.innerText = "Salvando no GitHub...";
+                globalBanners.push(novoBanner);
+
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalBanners, null, 2))));
+
+                const bodyPayload = {
+                    message: `Adicionado banner ${novoBanner.titulo}`,
+                    content: updatedContent
+                };
+                if (globalShaBannersGitHub) bodyPayload.sha = globalShaBannersGitHub;
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bodyPayload)
+                });
+
+                if (!ghRes.ok) throw new Error("Erro ao salvar banners no GitHub.");
+
+                alert("Banner cadastrado com sucesso!");
+                document.getElementById('bannerForm').reset();
+                toggleBannerDestino();
+                carregarBannersGitHub();
+            } catch (err) {
+                alert("Erro ao publicar banner: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "PUBLICAR BANNER";
+            }
+        });
+
+        async function excluirBanner(index) {
+            const token = document.getElementById('ghToken').value || prompt("Digite seu Token do GitHub (PAT):");
+            if (!token) return;
+
+            if (!confirm(`Deseja realmente excluir o banner "${globalBanners[index].titulo}"?`)) return;
+
+            globalBanners.splice(index, 1);
+            const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+            const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalBanners, null, 2))));
+
+            const ghRes = await fetch(ghUrl, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: `Removido banner ${index}`,
+                    content: updatedContent,
+                    sha: globalShaBannersGitHub
+                })
+            });
+
+            if (ghRes.ok) {
+                alert("Banner excluído com sucesso!");
+                carregarBannersGitHub();
+            } else {
+                alert("Erro ao excluir banner no GitHub.");
+            }
+        }
+
+        // --- GERENCIAMENTO DE CHAVES VIP ---
+
+        document.getElementById('btnGerarVip').addEventListener('click', async () => {
+            const tipo = document.getElementById('vipTipoPlano').value;
+            const deviceIdInput = document.getElementById('vipDeviceIdInput').value.trim();
+            const btn = document.getElementById('btnGerarVip');
+            const boxResult = document.getElementById('boxResultadoVip');
+            const txtChave = document.getElementById('txtChaveGerada');
+
+            btn.disabled = true;
+            btn.innerText = "Gerando...";
+
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let p1 = '', p2 = '';
+            for (let i = 0; i < 4; i++) {
+                p1 += chars.charAt(Math.floor(Math.random() * chars.length));
+                p2 += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const novaChave = `PENSOUND-${p1}-${p2}`;
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        chave: novaChave,
+                        tipo: tipo,
+                        utilizada: deviceIdInput ? true : false,
+                        device_id: deviceIdInput
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.message || "Erro ao salvar no Supabase.");
+                }
+
+                txtChave.innerText = novaChave;
+                boxResult.style.display = 'block';
+                document.getElementById('vipDeviceIdInput').value = '';
+                carregarChavesSupabase();
+            } catch (err) {
+                alert("Erro ao gerar chave: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "GERAR E SALVAR CHAVE NO SUPABASE";
+            }
+        });
+
+        async function carregarChavesSupabase() {
+            const body = document.getElementById('listaChavesBody');
+            body.innerHTML = '<tr><td colspan="4">Carregando chaves...</td></tr>';
+
+            try {
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=created_at.desc`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) {
+                    res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*`, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-red)">Erro no Supabase: ${err.message || res.statusText}</td></tr>`;
+                    return;
+                }
+
+                const data = await res.json();
+                globalChavesVip = Array.isArray(data) ? data : [];
+                renderizarTabelaChaves(globalChavesVip);
+            } catch (e) {
+                console.error(e);
+                body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-red)">Erro de Conexão: ${e.message}</td></tr>`;
+            }
+        }
+
+        function renderizarTabelaChaves(chaves) {
+            const body = document.getElementById('listaChavesBody');
+            body.innerHTML = '';
+
+            if (chaves.length === 0) {
+                body.innerHTML = '<tr><td colspan="4">Nenhuma chave VIP encontrada.</td></tr>';
+                return;
+            }
+
+            chaves.forEach(item => {
+                const tr = document.createElement('tr');
+                const statusHtml = item.utilizada 
+                    ? `<span class="badge badge-warning">Ativado (${item.device_id ? item.device_id : 'Sem ID'})</span>`
+                    : `<span class="badge badge-success">Livre (Aguardando Ativação)</span>`;
+
+                tr.innerHTML = `
+                    <td><b>${item.chave}</b></td>
+                    <td>${item.tipo ? item.tipo.toUpperCase() : 'SEMANAL'}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <button class="btn-danger" onclick="excluirChaveVip('${item.chave}')">Excluir</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function filtrarChavesVip() {
+            const termo = document.getElementById('searchChave').value.toLowerCase();
+            const filtradas = globalChavesVip.filter(c => 
+                c.chave.toLowerCase().includes(termo) || 
+                (c.device_id && c.device_id.toLowerCase().includes(termo))
+            );
+            renderizarTabelaChaves(filtradas);
+        }
+
+        async function excluirChaveVip(chave) {
+            if (!confirm(`Deseja realmente excluir a chave ${chave}? O usuário VIP associado a ela perderá o acesso no app.`)) return;
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?chave=eq.${chave}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (res.ok) {
+                    alert("Chave VIP excluída com sucesso!");
+                    carregarChavesSupabase();
+                } else {
+                    alert("Erro ao excluir chave no banco.");
+                }
+            } catch (e) {
+                alert("Falha na conexão ao excluir chave.");
+            }
+        }
+
+        // --- GERENCIAMENTO DE PACOTES (GITHUB) ---
+
+        async function carregarPacotesGitHub() {
+            const body = document.getElementById('listaPacotesBody');
+            body.innerHTML = '<tr><td colspan="4">Buscando do GitHub...</td></tr>';
+
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                const currentData = await fetch(ghUrl).then(r => r.json());
+                globalShaGitHub = currentData.sha;
+
+                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                globalPacotes = contentText ? JSON.parse(contentText) : [];
+
+                renderizarTabelaPacotes(globalPacotes);
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="4">Erro ao carregar pacotes. Verifique o repositório.</td></tr>';
+            }
+        }
+
+        function renderizarTabelaPacotes(pacotes) {
+            const body = document.getElementById('listaPacotesBody');
+            body.innerHTML = '';
+
+            if (pacotes.length === 0) {
+                body.innerHTML = '<tr><td colspan="4">Nenhum pacote publicado.</td></tr>';
+                return;
+            }
+
+            pacotes.forEach((pack, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><img src="${pack.capa || pack.cover_url}" width="45" height="45" style="border-radius:6px; object-fit:cover;"></td>
+                    <td><b>${pack.nome || pack.title}</b></td>
+                    <td><span class="badge badge-success">${pack.categoria || pack.type}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-edit" onclick="abrirEdicaoPacote(${index})">Editar</button>
+                            <button class="btn-danger" onclick="excluirPacote(${index})">Excluir</button>
+                        </div>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function filtrarPacotes() {
+            const termo = document.getElementById('searchPacote').value.toLowerCase();
+            const filtrados = globalPacotes.filter(p => 
+                (p.nome && p.nome.toLowerCase().includes(termo)) || 
+                (p.categoria && p.categoria.toLowerCase().includes(termo))
+            );
+            renderizarTabelaPacotes(filtrados);
+        }
+
+        function abrirEdicaoPacote(index) {
+            const pack = globalPacotes[index];
+            document.getElementById('editPackIndex').value = index;
+            document.getElementById('editPackNome').value = pack.nome || pack.title;
+            document.getElementById('editPackCategoria').value = pack.categoria || pack.type;
+            document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
+
+            document.getElementById('modalEditPacote').style.display = 'flex';
+        }
+
+        function fecharModalEdit() {
+            document.getElementById('modalEditPacote').style.display = 'none';
+        }
+
+        async function salvarEdicaoPacote() {
+            const token = document.getElementById('ghToken').value;
+            if (!token) {
+                alert("Por favor, digite seu Token do GitHub (PAT) na aba de Envio para autorizar a alteração.");
+                return;
+            }
+
+            const index = document.getElementById('editPackIndex').value;
+            const novoNome = document.getElementById('editPackNome').value.trim();
+            const novaCategoria = document.getElementById('editPackCategoria').value;
+            const novoDownload = document.getElementById('editPackDownload').value.trim();
+
+            globalPacotes[index].nome = novoNome;
+            globalPacotes[index].title = novoNome;
+            globalPacotes[index].categoria = novaCategoria;
+            globalPacotes[index].type = novaCategoria;
+            globalPacotes[index].download = novoDownload;
+            globalPacotes[index].zip_url = novoDownload;
+
+            await atualizarArquivoGitHub(token, `Editado pacote ${novoNome}`);
+            fecharModalEdit();
+            carregarPacotesGitHub();
+        }
+
+        async function excluirPacote(index) {
+            const pack = globalPacotes[index];
+            if (!confirm(`Deseja excluir o pacote "${pack.nome || pack.title}"?`)) return;
+
+            const token = prompt("Digite seu Token do GitHub (PAT) para confirmar a exclusão:");
+            if (!token) return;
+
+            globalPacotes.splice(index, 1);
+            await atualizarArquivoGitHub(token, `Removido pacote ${pack.nome || pack.title}`);
+            carregarPacotesGitHub();
+        }
+
+        async function atualizarArquivoGitHub(token, commitMessage) {
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(globalPacotes, null, 2))));
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: commitMessage,
+                        content: updatedContent,
+                        sha: globalShaGitHub
+                    })
+                });
+
+                if (ghRes.ok) {
+                    alert("Operação salva no GitHub com sucesso!");
+                } else {
+                    alert("Erro ao atualizar GitHub. Verifique seu Token.");
+                }
+            } catch (e) {
+                alert("Erro de comunicação com o GitHub.");
+            }
+        }
+
+        // --- PUBLICAR NOVOS PACOTES EM LOTE ---
+
+        let packCount = 1;
+        document.getElementById('btnAddPack').addEventListener('click', () => {
+            packCount++;
+            const container = document.getElementById('cardsContainer');
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'pack-item';
+            cardDiv.innerHTML = `
+                <h4>Pacote ${packCount}</h4>
+                <label>Nome do Pacote:</label>
+                <input type="text" class="input-nome" placeholder="Nome do Pacote ${packCount}" required>
+                <label>Categoria:</label>
+                <select class="input-categoria">
+                    <option value="PAGODAO">PAGODÃO</option>
+                    <option value="ARROCHA">ARROCHA</option>
+                    <option value="ARROCHADEIRA">ARROCHADEIRA</option>
+                    <option value="SAMBA">SAMBA</option>
+                    <option value="FORRO">FORRÓ</option>
+                    <option value="FUNK">FUNK</option>
+                    <option value="REPERTORIO">REPERTÓRIO</option>
+                    <option value="OUTROS">OUTROS</option>
+                </select>
+                <label>Capa do Pack (Imagem):</label>
+                <input type="file" class="input-capa" accept="image/*" required>
+                <label>Link Direto do ZIP:</label>
+                <input type="url" class="input-download" placeholder="https://..." required>
+            `;
+            container.appendChild(cardDiv);
+        });
+
+        async function getFirebaseAccessToken(privateKey) {
+            const now = Math.floor(Date.now() / 1000);
+            const claim = {
+                iss: FIREBASE_CLIENT_EMAIL,
+                scope: "https://www.googleapis.com/auth/firebase.messaging",
+                aud: "https://oauth2.googleapis.com/token",
+                exp: now + 3600,
+                iat: now
+            };
+
+            const header = { alg: "RS256", typ: "JWT" };
+            const jwtToken = KJUR.jws.JWS.sign("RS256", JSON.stringify(header), JSON.stringify(claim), privateKey);
+
+            const response = await fetch("https://oauth2.googleapis.com/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwtToken}`
+            });
+
+            const data = await response.json();
+            return data.access_token;
+        }
+
+        async function dispararNotificacaoV1(tokenAccessToken, packNome, packCategoria) {
+            const fcmUrl = `https://fcm.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/messages:send`;
+            await fetch(fcmUrl, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${tokenAccessToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: {
+                        topic: "todos",
+                        notification: {
+                            title: "🔥 Novo Pack Liberado!",
+                            body: `O pacote "${packNome}" [${packCategoria}] já está disponível no PenSound!`
+                        },
+                        android: {
+                            priority: "HIGH",
+                            notification: { sound: "default", channel_id: "pensound_notifications" }
+                        }
+                    }
+                })
+            });
+        }
+
+        document.getElementById('packForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+
+            try {
+                const token = document.getElementById('ghToken').value;
+                const privateKey = document.getElementById('firebaseKeyInput').value.trim();
+                const cards = document.querySelectorAll('.pack-item');
+
+                btn.innerText = "Lendo repositório...";
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                const currentData = await fetch(ghUrl).then(r => r.json());
+
+                const contentText = decodeURIComponent(escape(atob(currentData.content))).trim();
+                let content = contentText ? JSON.parse(contentText) : [];
+
+                let pacotesAdicionados = 0;
+                let ultimosPacotes = [];
+
+                for (let i = 0; i < cards.length; i++) {
+                    const card = cards[i];
+                    const nome = card.querySelector('.input-nome').value.trim();
+                    const categoria = card.querySelector('.input-categoria').value;
+                    const file = card.querySelector('.input-capa').files[0];
+                    const download = card.querySelector('.input-download').value.trim();
+
+                    if (nome && file && download) {
+                        btn.innerText = `Enviando imagem ${i + 1} de ${cards.length}...`;
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('upload_preset', UPLOAD_PRESET);
+
+                        const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                            method: 'POST', body: formData
+                        }).then(r => r.json());
+
+                        const novoPack = {
+                            id: (Date.now() + i).toString(),
+                            nome: nome, title: nome,
+                            categoria: categoria, type: categoria,
+                            capa: resImg.secure_url, cover_url: resImg.secure_url,
+                            download: download, zip_url: download
+                        };
+
+                        content.push(novoPack);
+                        ultimosPacotes.push(novoPack);
+                        pacotesAdicionados++;
+                    }
+                }
+
+                btn.innerText = "Atualizando GitHub...";
+                const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `Adicionados ${pacotesAdicionados} pacotes`,
+                        content: updatedContent, sha: currentData.sha
+                    })
+                });
+
+                if (!ghRes.ok) throw new Error("Erro no GitHub PAT.");
+
+                btn.innerText = "Enviando notificações...";
+                const accessToken = await getFirebaseAccessToken(privateKey);
+                for (const pack of ultimosPacotes) {
+                    await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
+                }
+
+                alert(`${pacotesAdicionados} pacote(s) publicado(s) com sucesso!`);
+                location.reload();
+            } catch (err) {
+                alert('Erro ao publicar: ' + err.message);
+                btn.disabled = false;
+                btn.innerText = "PUBLICAR E NOTIFICAR APP";
+            }
+        });
+    </script>
 </body>
 </html>
