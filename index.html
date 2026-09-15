@@ -232,6 +232,13 @@
                             
                             <label>Link Direto do ZIP (MediaFire Página/Google Drive):</label>
                             <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
+
+                            <!-- OPÇÃO PREVIEW DE ÁUDIO -->
+                            <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload com corte max 40s):</label>
+                            <input type="file" class="input-audio-preview" accept="audio/*">
+
+                            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
+                            <input type="url" class="input-audio-url" placeholder="https://res.cloudinary.com/.../audio.mp3">
                         </div>
                     </div>
 
@@ -261,11 +268,12 @@
                                 <th>Capa</th>
                                 <th>Nome</th>
                                 <th>Categoria</th>
+                                <th>Preview</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="listaPacotesBody">
-                            <tr><td colspan="4">Carregando pacotes do GitHub...</td></tr>
+                            <tr><td colspan="5">Carregando pacotes do GitHub...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -452,6 +460,9 @@
             <label>Link Direto do ZIP:</label>
             <input type="url" id="editPackDownload">
 
+            <label>Link do Preview de Áudio (MP3):</label>
+            <input type="url" id="editPackPreviewUrl" placeholder="https://raw.githubusercontent.com/.../audio.wav">
+
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button type="button" class="btn-submit" onclick="salvarEdicaoPacote()" style="margin:0;">Salvar Alterações</button>
                 <button type="button" class="btn-danger" onclick="fecharModalEdit()" style="margin:0;">Cancelar</button>
@@ -510,7 +521,6 @@
             if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = trimmed;
         }
 
-        // ALTERNÂNCIA DE ABAS
         function switchTab(tabId, evt) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
@@ -521,6 +531,60 @@
             if (tabId === 'tab-pacotes') carregarPacotesGitHub();
             if (tabId === 'tab-banners') carregarBannersGitHub();
             if (tabId === 'tab-vip') carregarChavesSupabase();
+        }
+
+        /* --- WEB AUDIO API: FUNÇÃO DE CORTE DE ÁUDIO PARA 40S --- */
+        async function cortarAudioPara40Segundos(file) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const arrayBuffer = await file.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+            const duracaoCorte = Math.min(audioBuffer.duration, 40);
+            const sampleRate = audioBuffer.sampleRate;
+            const totalFrames = Math.floor(duracaoCorte * sampleRate);
+
+            const offlineContext = new OfflineAudioContext(
+                audioBuffer.numberOfChannels,
+                totalFrames,
+                sampleRate
+            );
+
+            const source = offlineContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(offlineContext.destination);
+            source.start(0);
+
+            const renderedBuffer = await offlineContext.startRendering();
+            return audioBufferToWavBlob(renderedBuffer);
+        }
+
+        function audioBufferToWavBlob(buffer) {
+            let numOfChan = buffer.numberOfChannels,
+                length = buffer.length * numOfChan * 2 + 44,
+                out = new DataView(new ArrayBuffer(length)),
+                channels = [], i, sample, offset = 0, pos = 0;
+
+            function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
+            function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
+
+            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+            setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * numOfChan);
+            setUint16(numOfChan * 2); setUint16(16);
+            setUint32(0x61746164); setUint32(length - pos - 4);
+
+            for (i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+
+            while (offset < buffer.length) {
+                for (i = 0; i < numOfChan; i++) {
+                    sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    out.setInt16(pos, sample, true); pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([out], { type: 'audio/wav' });
         }
 
         // --- LÓGICA DO EDITOR DE BANNERS ---
@@ -742,7 +806,8 @@
                     destinoId: document.getElementById('bannerDestinoValue').value.trim()
                 };
 
-                bannersAtuais.push(novoBanner);
+                // CORRIGIDO: unshift() coloca o banner novo no TOPO da lista!
+                bannersAtuais.unshift(novoBanner);
 
                 btn.innerText = "Gravando dados no GitHub...";
                 const updatedContent = utf8ToBase64(JSON.stringify(bannersAtuais, null, 2));
@@ -1002,7 +1067,7 @@
 
         async function carregarPacotesGitHub() {
             const body = document.getElementById('listaPacotesBody');
-            body.innerHTML = '<tr><td colspan="4">Buscando do GitHub...</td></tr>';
+            body.innerHTML = '<tr><td colspan="5">Buscando do GitHub...</td></tr>';
 
             try {
                 let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
@@ -1019,7 +1084,7 @@
 
                 renderizarTabelaPacotes(globalPacotes);
             } catch (e) {
-                body.innerHTML = '<tr><td colspan="4">Erro ao carregar pacotes. Verifique o repositório.</td></tr>';
+                body.innerHTML = '<tr><td colspan="5">Erro ao carregar pacotes. Verifique o repositório.</td></tr>';
             }
         }
 
@@ -1028,17 +1093,22 @@
             body.innerHTML = '';
 
             if (pacotes.length === 0) {
-                body.innerHTML = '<tr><td colspan="4">Nenhum pacote publicado.</td></tr>';
+                body.innerHTML = '<tr><td colspan="5">Nenhum pacote publicado.</td></tr>';
                 return;
             }
 
             pacotes.forEach((pack) => {
                 const tr = document.createElement('tr');
                 const packId = pack.id || pack.nome || pack.title;
+                const temAudio = (pack.previewUrl || pack.preview_url) 
+                    ? `<span class="badge badge-success">🎧 COM ÁUDIO</span>` 
+                    : `<span class="badge badge-warning">SEM ÁUDIO</span>`;
+
                 tr.innerHTML = `
                     <td><img src="${pack.capa || pack.cover_url}" width="45" height="45" style="border-radius:6px; object-fit:cover;"></td>
                     <td><b>${pack.nome || pack.title}</b></td>
                     <td><span class="badge badge-success">${pack.categoria || pack.type}</span></td>
+                    <td>${temAudio}</td>
                     <td>
                         <div class="action-btns">
                             <button class="btn-edit" onclick="abrirEdicaoPacote('${packId}')">Editar</button>
@@ -1067,6 +1137,7 @@
             document.getElementById('editPackNome').value = pack.nome || pack.title;
             document.getElementById('editPackCategoria').value = pack.categoria || pack.type;
             document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
+            document.getElementById('editPackPreviewUrl').value = pack.previewUrl || pack.preview_url || "";
 
             document.getElementById('modalEditPacote').style.display = 'flex';
         }
@@ -1094,6 +1165,7 @@
             const novoNome = document.getElementById('editPackNome').value.trim();
             const novaCategoria = document.getElementById('editPackCategoria').value;
             const novoDownload = document.getElementById('editPackDownload').value.trim();
+            const novoPreview = document.getElementById('editPackPreviewUrl').value.trim();
 
             globalPacotes[index].nome = novoNome;
             globalPacotes[index].title = novoNome;
@@ -1101,6 +1173,8 @@
             globalPacotes[index].type = novaCategoria;
             globalPacotes[index].download = novoDownload;
             globalPacotes[index].zip_url = novoDownload;
+            globalPacotes[index].previewUrl = novoPreview;
+            globalPacotes[index].preview_url = novoPreview;
 
             await atualizarArquivoGitHub(token, `Editado pacote ${novoNome}`);
             fecharModalEdit();
@@ -1201,7 +1275,7 @@
             }
         }
 
-        // --- PUBLICAR NOVOS PACOTES EM LOTE ---
+        // --- PUBLICAR NOVOS PACOTES EM LOTE COM SUPORTE A ÁUDIO PREVIEW ---
 
         let packCount = 1;
         document.getElementById('btnAddPack').addEventListener('click', () => {
@@ -1228,6 +1302,10 @@
                 <input type="file" class="input-capa" accept="image/*" required>
                 <label>Link Direto do ZIP:</label>
                 <input type="url" class="input-download" placeholder="https://..." required>
+                <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload com corte max 40s):</label>
+                <input type="file" class="input-audio-preview" accept="audio/*">
+                <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
+                <input type="url" class="input-audio-url" placeholder="https://res.cloudinary.com/.../audio.mp3">
             `;
             container.appendChild(cardDiv);
         });
@@ -1318,6 +1396,9 @@
                     const categoria = card.querySelector('.input-categoria').value;
                     const file = card.querySelector('.input-capa').files[0];
                     const download = card.querySelector('.input-download').value.trim();
+                    
+                    const inputAudioFile = card.querySelector('.input-audio-preview');
+                    const inputAudioUrl = card.querySelector('.input-audio-url').value.trim();
 
                     if (nome && file && download) {
                         btn.innerText = `Enviando imagem ${i + 1} de ${cards.length}...`;
@@ -1333,12 +1414,43 @@
                             throw new Error(`Falha ao fazer upload da imagem do pacote ${i + 1}.`);
                         }
 
+                        let previewUrlFinal = "";
+
+                        // TRATAMENTO DO PREVIEW DE ÁUDIO
+                        if (inputAudioUrl !== "") {
+                            previewUrlFinal = inputAudioUrl;
+                        } else if (inputAudioFile && inputAudioFile.files && inputAudioFile.files[0]) {
+                            btn.innerText = `Cortando áudio do pacote ${i + 1} (max 40s)...`;
+                            const audioCortadoBlob = await cortarAudioPara40Segundos(inputAudioFile.files[0]);
+
+                            btn.innerText = `Enviando áudio ${i + 1} para o GitHub...`;
+                            const fileName = `preview_${Date.now()}_${i}.wav`;
+                            const pathGitHub = `previews/${fileName}`;
+
+                            const reader = new FileReader();
+                            reader.readAsDataURL(audioCortadoBlob);
+                            await new Promise(resolve => reader.onloadend = resolve);
+                            const base64Audio = reader.result.split(',')[1];
+
+                            await fetch(`https://api.github.com/repos/${REPO}/contents/${pathGitHub}`, {
+                                method: 'PUT',
+                                headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    message: `Add preview ${fileName}`,
+                                    content: base64Audio
+                                })
+                            });
+
+                            previewUrlFinal = `https://raw.githubusercontent.com/${REPO}/main/${pathGitHub}`;
+                        }
+
                         const novoPack = {
                             id: (Date.now() + i).toString(),
                             nome: nome, title: nome,
                             categoria: categoria, type: categoria,
                             capa: resImg.secure_url, cover_url: resImg.secure_url,
-                            download: download, zip_url: download
+                            download: download, zip_url: download,
+                            previewUrl: previewUrlFinal, preview_url: previewUrlFinal
                         };
 
                         content.push(novoPack);
