@@ -460,8 +460,11 @@
             <label>Link Direto do ZIP:</label>
             <input type="url" id="editPackDownload">
 
-            <label>Link do Preview de Áudio (MP3):</label>
-            <input type="url" id="editPackPreviewUrl" placeholder="https://raw.githubusercontent.com/.../audio.wav">
+            <label style="color: var(--accent-green);">🎵 Selecionar Novo Arquivo de Preview (Upload do MP3):</label>
+            <input type="file" id="editPackAudioFile" accept="audio/*">
+
+            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Preview (MP3/WAV):</label>
+            <input type="url" id="editPackPreviewUrl" placeholder="https://raw.githubusercontent.com/.../audio.mp3">
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button type="button" class="btn-submit" onclick="salvarEdicaoPacote()" style="margin:0;">Salvar Alterações</button>
@@ -806,7 +809,6 @@
                     destinoId: document.getElementById('bannerDestinoValue').value.trim()
                 };
 
-                // CORRIGIDO: unshift() coloca o banner novo no TOPO da lista!
                 bannersAtuais.unshift(novoBanner);
 
                 btn.innerText = "Gravando dados no GitHub...";
@@ -1138,6 +1140,7 @@
             document.getElementById('editPackCategoria').value = pack.categoria || pack.type;
             document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
             document.getElementById('editPackPreviewUrl').value = pack.previewUrl || pack.preview_url || "";
+            document.getElementById('editPackAudioFile').value = "";
 
             document.getElementById('modalEditPacote').style.display = 'flex';
         }
@@ -1165,7 +1168,34 @@
             const novoNome = document.getElementById('editPackNome').value.trim();
             const novaCategoria = document.getElementById('editPackCategoria').value;
             const novoDownload = document.getElementById('editPackDownload').value.trim();
-            const novoPreview = document.getElementById('editPackPreviewUrl').value.trim();
+            const inputAudioUrl = document.getElementById('editPackPreviewUrl').value.trim();
+            const inputAudioFile = document.getElementById('editPackAudioFile');
+
+            let previewUrlFinal = globalPacotes[index].previewUrl || globalPacotes[index].preview_url || "";
+
+            if (inputAudioUrl !== "") {
+                previewUrlFinal = inputAudioUrl;
+            } else if (inputAudioFile && inputAudioFile.files && inputAudioFile.files[0]) {
+                const file = inputAudioFile.files[0];
+                const fileName = `preview_${Date.now()}.mp3`;
+                const pathGitHub = `previews/${fileName}`;
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                await new Promise(resolve => reader.onloadend = resolve);
+                const base64Audio = reader.result.split(',')[1];
+
+                await fetch(`https://api.github.com/repos/${REPO}/contents/${pathGitHub}`, {
+                    method: 'PUT',
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `Upload preview editado ${fileName}`,
+                        content: base64Audio
+                    })
+                });
+
+                previewUrlFinal = `https://raw.githubusercontent.com/${REPO}/main/${pathGitHub}`;
+            }
 
             globalPacotes[index].nome = novoNome;
             globalPacotes[index].title = novoNome;
@@ -1173,8 +1203,8 @@
             globalPacotes[index].type = novaCategoria;
             globalPacotes[index].download = novoDownload;
             globalPacotes[index].zip_url = novoDownload;
-            globalPacotes[index].previewUrl = novoPreview;
-            globalPacotes[index].preview_url = novoPreview;
+            globalPacotes[index].previewUrl = previewUrlFinal;
+            globalPacotes[index].preview_url = previewUrlFinal;
 
             await atualizarArquivoGitHub(token, `Editado pacote ${novoNome}`);
             fecharModalEdit();
@@ -1416,7 +1446,6 @@
 
                         let previewUrlFinal = "";
 
-                        // TRATAMENTO DO PREVIEW DE ÁUDIO
                         if (inputAudioUrl !== "") {
                             previewUrlFinal = inputAudioUrl;
                         } else if (inputAudioFile && inputAudioFile.files && inputAudioFile.files[0]) {
