@@ -7,6 +7,10 @@
 
     <!-- Lib para assinar JWT para notificação FCM -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
+    
+    <!-- Wavesurfer.js e Plugin Regions para Editor Visual de Áudio -->
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.min.js"></script>
 
     <style>
         :root {
@@ -86,7 +90,7 @@
             color: var(--text-sub); margin-bottom: 6px; margin-top: 12px;
         }
 
-        input[type="text"], input[type="password"], input[type="url"], textarea, select, input[type="color"] {
+        input[type="text"], input[type="password"], input[type="url"], input[type="number"], textarea, select, input[type="color"] {
             width: 100%; padding: 12px 14px; background-color: var(--card-inner);
             color: #FFFFFF; border: 1px solid #45475A; border-radius: 8px; font-size: 14px;
         }
@@ -111,6 +115,7 @@
         .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
+        .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
 
         .chave-resultado {
             font-size: 18px; font-weight: bold; color: var(--accent-green);
@@ -150,42 +155,17 @@
         }
         .modal-content {
             background-color: var(--card-bg); padding: 24px; border-radius: 12px;
-            width: 90%; max-width: 500px;
+            width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
         }
 
-        /* PREVIEW BANNER */
-        .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-
-        .banner-preview-box {
-            background-color: var(--card-inner); border: 1px dashed var(--accent-blue);
-            border-radius: 12px; padding: 16px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; margin-bottom: 16px;
+        /* EDITOR VISUAL WAVESURFER */
+        .audio-editor-box {
+            background-color: #11111B; border: 1px solid var(--accent-purple);
+            border-radius: 8px; padding: 12px; margin-top: 10px; display: none;
         }
-
-        .banner-mockup {
-            width: 100%; height: 145px; border-radius: 16px; border: 1.5px solid #9D00FF;
-            position: relative; overflow: hidden; display: flex; align-items: center;
-            padding: 16px; box-sizing: border-box; transition: all 0.3s ease;
-        }
-
-        .banner-mockup .badge-tag {
-            position: absolute; top: 0; left: 0; padding: 4px 10px; font-size: 9px;
-            font-weight: bold; color: #FFF; border-bottom-right-radius: 10px; border-top-left-radius: 14px;
-        }
-
-        .banner-mockup .info-area {
-            flex: 1; display: flex; flex-direction: column; gap: 3px; z-index: 2;
-        }
-
-        .banner-mockup .info-title { font-size: 16px; font-weight: bold; margin: 0; }
-        .banner-mockup .info-sub { font-size: 10px; margin: 0; opacity: 0.9; }
-
-        .banner-mockup .btn-action {
-            width: fit-content; padding: 6px 12px; font-size: 9px; font-weight: bold;
-            border-radius: 4px; margin-top: 6px; color: #FFF;
-        }
-
-        .banner-mockup.full-image { padding: 0; }
+        .waveform-container { width: 100%; height: 80px; margin-bottom: 10px; }
+        .audio-editor-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .audio-editor-controls div { flex: 1; min-width: 120px; }
     </style>
 </head>
 <body>
@@ -210,7 +190,7 @@
                 <h3>📦 Envio de Pacotes em Lote</h3>
                 <form id="packForm">
                     <div id="cardsContainer">
-                        <div class="pack-item">
+                        <div class="pack-item" id="pack-item-1">
                             <h4>Pacote 1</h4>
                             <label>Nome do Pacote:</label>
                             <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
@@ -233,9 +213,24 @@
                             <label>Link Direto do ZIP (MediaFire Página/Google Drive):</label>
                             <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
 
-                            <!-- OPÇÃO PREVIEW DE ÁUDIO -->
-                            <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload com corte automático max 40s):</label>
-                            <input type="file" class="input-audio-preview" accept="audio/*">
+                            <!-- EDITOR DE PREVIEW DE ÁUDIO -->
+                            <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload + Editor Visual):</label>
+                            <input type="file" class="input-audio-preview" accept="audio/*" onchange="carregarEditorAudio(this, 1)">
+
+                            <div class="audio-editor-box" id="editor-box-1">
+                                <div id="waveform-1" class="waveform-container"></div>
+                                <div class="audio-editor-controls">
+                                    <button type="button" class="btn-edit btn-small" id="btn-play-1" onclick="togglePlayAudio(1)">▶️ Ouvir Trecho</button>
+                                    <div>
+                                        <label style="margin:0; font-size:11px;">Início (seg):</label>
+                                        <input type="number" id="start-time-1" value="0" min="0" step="0.5" onchange="atualizarRegiaoManual(1)">
+                                    </div>
+                                    <div>
+                                        <label style="margin:0; font-size:11px;">Fim (seg):</label>
+                                        <input type="number" id="end-time-1" value="40" min="1" step="0.5" onchange="atualizarRegiaoManual(1)">
+                                    </div>
+                                </div>
+                            </div>
 
                             <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
                             <input type="url" class="input-audio-url" placeholder="https://res.cloudinary.com/.../audio.mp3">
@@ -460,11 +455,26 @@
             <label>Link Direto do ZIP:</label>
             <input type="url" id="editPackDownload">
 
-            <!-- PREVIEW DE ÁUDIO NO EDITAR PACOTE -->
-            <label style="color: var(--accent-green);">🎵 Novo Preview de Áudio (Upload com corte automático max 40s):</label>
-            <input type="file" id="editPackAudioFile" accept="audio/*">
+            <!-- EDITOR DE PREVIEW DE ÁUDIO NO MODAL -->
+            <label style="color: var(--accent-green);">🎵 Novo Preview de Áudio (Upload + Editor Visual):</label>
+            <input type="file" id="editPackAudioFile" accept="audio/*" onchange="carregarEditorAudio(this, 'edit')">
 
-            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
+            <div class="audio-editor-box" id="editor-box-edit">
+                <div id="waveform-edit" class="waveform-container"></div>
+                <div class="audio-editor-controls">
+                    <button type="button" class="btn-edit btn-small" id="btn-play-edit" onclick="togglePlayAudio('edit')">▶️ Ouvir Trecho</button>
+                    <div>
+                        <label style="margin:0; font-size:11px;">Início (seg):</label>
+                        <input type="number" id="start-time-edit" value="0" min="0" step="0.5" onchange="atualizarRegiaoManual('edit')">
+                    </div>
+                    <div>
+                        <label style="margin:0; font-size:11px;">Fim (seg):</label>
+                        <input type="number" id="end-time-edit" value="40" min="1" step="0.5" onchange="atualizarRegiaoManual('edit')">
+                    </div>
+                </div>
+            </div>
+
+            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Preview (MP3/WAV):</label>
             <input type="url" id="editPackPreviewUrl" placeholder="https://raw.githubusercontent.com/.../audio.mp3">
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -488,6 +498,10 @@
         let globalShaGitHub = "";
         let globalBanners = [];
         let globalChavesVip = [];
+
+        // Armazena as instâncias do Wavesurfer e Regions por ID
+        const wavesurfers = {};
+        const wsRegions = {};
 
         function utf8ToBase64(str) {
             return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
@@ -537,26 +551,114 @@
             if (tabId === 'tab-vip') carregarChavesSupabase();
         }
 
-        /* --- WEB AUDIO API: FUNÇÃO DE CORTE DE ÁUDIO PARA 40S --- */
-        async function cortarAudioPara40Segundos(file) {
+        /* --- EDITOR VISUAL E CORTE CUSTOMIZADO DE ÁUDIO COM WAVESURFER --- */
+
+        function carregarEditorAudio(input, instanceId) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const editorBox = document.getElementById(`editor-box-${instanceId}`);
+            editorBox.style.display = 'block';
+
+            // Destrói instância anterior se existir
+            if (wavesurfers[instanceId]) {
+                wavesurfers[instanceId].destroy();
+            }
+
+            // Inicializa Wavesurfer
+            const ws = WaveSurfer.create({
+                container: `#waveform-${instanceId}`,
+                waveColor: '#45475A',
+                progressColor: '#89B4FA',
+                cursorColor: '#CBA6F7',
+                barWidth: 2,
+                height: 80
+            });
+
+            const wsRegionPlugin = ws.registerPlugin(WaveSurfer.Regions.create());
+
+            wavesurfers[instanceId] = ws;
+            wsRegions[instanceId] = wsRegionPlugin;
+
+            const fileUrl = URL.createObjectURL(file);
+            ws.load(fileUrl);
+
+            ws.on('ready', () => {
+                const duration = ws.getDuration();
+                const defaultEnd = Math.min(duration, 40);
+
+                document.getElementById(`start-time-${instanceId}`).value = 0;
+                document.getElementById(`end-time-${instanceId}`).value = defaultEnd.toFixed(1);
+
+                // Cria região de seleção interativa
+                const activeRegion = wsRegionPlugin.addRegion({
+                    start: 0,
+                    end: defaultEnd,
+                    color: 'rgba(166, 227, 161, 0.3)',
+                    drag: true,
+                    resize: true
+                });
+
+                activeRegion.on('update-end', () => {
+                    document.getElementById(`start-time-${instanceId}`).value = activeRegion.start.toFixed(1);
+                    document.getElementById(`end-time-${instanceId}`).value = activeRegion.end.toFixed(1);
+                });
+            });
+        }
+
+        function togglePlayAudio(instanceId) {
+            const ws = wavesurfers[instanceId];
+            const regPlugin = wsRegions[instanceId];
+            const btn = document.getElementById(`btn-play-${instanceId}`);
+
+            if (!ws) return;
+
+            if (ws.isPlaying()) {
+                ws.pause();
+                btn.innerText = "▶️ Ouvir Trecho";
+            } else {
+                const regions = regPlugin.getRegions();
+                if (regions.length > 0) {
+                    regions[0].play();
+                } else {
+                    ws.play();
+                }
+                btn.innerText = "⏸️ Pausar";
+            }
+        }
+
+        function atualizarRegiaoManual(instanceId) {
+            const ws = wavesurfers[instanceId];
+            const regPlugin = wsRegions[instanceId];
+            if (!ws || !regPlugin) return;
+
+            let start = parseFloat(document.getElementById(`start-time-${instanceId}`).value) || 0;
+            let end = parseFloat(document.getElementById(`end-time-${instanceId}`).value) || 40;
+
+            const regions = regPlugin.getRegions();
+            if (regions.length > 0) {
+                regions[0].setOptions({ start: start, end: end });
+            }
+        }
+
+        async function recortarAudioCustomizado(file, startTime, endTime) {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const arrayBuffer = await file.arrayBuffer();
             const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-            const duracaoCorte = Math.min(audioBuffer.duration, 40);
-            const sampleRate = audioBuffer.sampleRate;
-            const totalFrames = Math.floor(duracaoCorte * sampleRate);
+            const startFrame = Math.floor(startTime * audioBuffer.sampleRate);
+            const endFrame = Math.floor(Math.min(endTime, audioBuffer.duration) * audioBuffer.sampleRate);
+            const totalFrames = Math.max(1, endFrame - startFrame);
 
             const offlineContext = new OfflineAudioContext(
                 audioBuffer.numberOfChannels,
                 totalFrames,
-                sampleRate
+                audioBuffer.sampleRate
             );
 
             const source = offlineContext.createBufferSource();
             source.buffer = audioBuffer;
             source.connect(offlineContext.destination);
-            source.start(0);
+            source.start(0, startTime, endTime - startTime);
 
             const renderedBuffer = await offlineContext.startRendering();
             return audioBufferToWavBlob(renderedBuffer);
@@ -1142,6 +1244,7 @@
             document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
             document.getElementById('editPackPreviewUrl').value = pack.previewUrl || pack.preview_url || "";
             document.getElementById('editPackAudioFile').value = "";
+            document.getElementById('editor-box-edit').style.display = 'none';
 
             document.getElementById('modalEditPacote').style.display = 'flex';
         }
@@ -1182,8 +1285,11 @@
                 if (inputAudioUrl !== "") {
                     previewUrlFinal = inputAudioUrl;
                 } else if (inputAudioFile && inputAudioFile.files && inputAudioFile.files[0]) {
-                    btn.innerText = "Cortando áudio (max 40s)...";
-                    const audioCortadoBlob = await cortarAudioPara40Segundos(inputAudioFile.files[0]);
+                    btn.innerText = "Cortando áudio selecionado...";
+                    const startTime = parseFloat(document.getElementById('start-time-edit').value) || 0;
+                    const endTime = parseFloat(document.getElementById('end-time-edit').value) || 40;
+
+                    const audioCortadoBlob = await recortarAudioCustomizado(inputAudioFile.files[0], startTime, endTime);
 
                     btn.innerText = "Enviando áudio para o GitHub...";
                     const fileName = `preview_${Date.now()}.wav`;
@@ -1321,7 +1427,7 @@
             }
         }
 
-        // --- PUBLICAR NOVOS PACOTES EM LOTE COM SUPORTE A ÁUDIO PREVIEW ---
+        // --- PUBLICAR NOVOS PACOTES EM LOTE ---
 
         let packCount = 1;
         document.getElementById('btnAddPack').addEventListener('click', () => {
@@ -1329,6 +1435,7 @@
             const container = document.getElementById('cardsContainer');
             const cardDiv = document.createElement('div');
             cardDiv.className = 'pack-item';
+            cardDiv.id = `pack-item-${packCount}`;
             cardDiv.innerHTML = `
                 <h4>Pacote ${packCount}</h4>
                 <label>Nome do Pacote:</label>
@@ -1348,8 +1455,24 @@
                 <input type="file" class="input-capa" accept="image/*" required>
                 <label>Link Direto do ZIP:</label>
                 <input type="url" class="input-download" placeholder="https://..." required>
-                <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload com corte automático max 40s):</label>
-                <input type="file" class="input-audio-preview" accept="audio/*">
+                <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload + Editor Visual):</label>
+                <input type="file" class="input-audio-preview" accept="audio/*" onchange="carregarEditorAudio(this, ${packCount})">
+
+                <div class="audio-editor-box" id="editor-box-${packCount}">
+                    <div id="waveform-${packCount}" class="waveform-container"></div>
+                    <div class="audio-editor-controls">
+                        <button type="button" class="btn-edit btn-small" id="btn-play-${packCount}" onclick="togglePlayAudio(${packCount})">▶️ Ouvir Trecho</button>
+                        <div>
+                            <label style="margin:0; font-size:11px;">Início (seg):</label>
+                            <input type="number" id="start-time-${packCount}" value="0" min="0" step="0.5" onchange="atualizarRegiaoManual(${packCount})">
+                        </div>
+                        <div>
+                            <label style="margin:0; font-size:11px;">Fim (seg):</label>
+                            <input type="number" id="end-time-${packCount}" value="40" min="1" step="0.5" onchange="atualizarRegiaoManual(${packCount})">
+                        </div>
+                    </div>
+                </div>
+
                 <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
                 <input type="url" class="input-audio-url" placeholder="https://res.cloudinary.com/.../audio.mp3">
             `;
@@ -1438,6 +1561,7 @@
 
                 for (let i = 0; i < cards.length; i++) {
                     const card = cards[i];
+                    const instanceId = i + 1;
                     const nome = card.querySelector('.input-nome').value.trim();
                     const categoria = card.querySelector('.input-categoria').value;
                     const file = card.querySelector('.input-capa').files[0];
@@ -1465,8 +1589,11 @@
                         if (inputAudioUrl !== "") {
                             previewUrlFinal = inputAudioUrl;
                         } else if (inputAudioFile && inputAudioFile.files && inputAudioFile.files[0]) {
-                            btn.innerText = `Cortando áudio do pacote ${i + 1} (max 40s)...`;
-                            const audioCortadoBlob = await cortarAudioPara40Segundos(inputAudioFile.files[0]);
+                            btn.innerText = `Cortando áudio do pacote ${i + 1}...`;
+                            const startTime = parseFloat(document.getElementById(`start-time-${instanceId}`)?.value) || 0;
+                            const endTime = parseFloat(document.getElementById(`end-time-${instanceId}`)?.value) || 40;
+
+                            const audioCortadoBlob = await recortarAudioCustomizado(inputAudioFile.files[0], startTime, endTime);
 
                             btn.innerText = `Enviando áudio ${i + 1} para o GitHub...`;
                             const fileName = `preview_${Date.now()}_${i}.wav`;
