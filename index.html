@@ -234,7 +234,7 @@
                             <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
 
                             <!-- OPÇÃO PREVIEW DE ÁUDIO -->
-                            <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload com corte max 40s):</label>
+                            <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload com corte automático max 40s):</label>
                             <input type="file" class="input-audio-preview" accept="audio/*">
 
                             <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
@@ -460,14 +460,15 @@
             <label>Link Direto do ZIP:</label>
             <input type="url" id="editPackDownload">
 
-            <label style="color: var(--accent-green);">🎵 Selecionar Novo Arquivo de Preview (Upload do MP3):</label>
+            <!-- PREVIEW DE ÁUDIO NO EDITAR PACOTE -->
+            <label style="color: var(--accent-green);">🎵 Novo Preview de Áudio (Upload com corte automático max 40s):</label>
             <input type="file" id="editPackAudioFile" accept="audio/*">
 
-            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Preview (MP3/WAV):</label>
+            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
             <input type="url" id="editPackPreviewUrl" placeholder="https://raw.githubusercontent.com/.../audio.mp3">
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="button" class="btn-submit" onclick="salvarEdicaoPacote()" style="margin:0;">Salvar Alterações</button>
+                <button type="button" id="btnSalvarEditPack" class="btn-submit" onclick="salvarEdicaoPacote()" style="margin:0;">Salvar Alterações</button>
                 <button type="button" class="btn-danger" onclick="fecharModalEdit()" style="margin:0;">Cancelar</button>
             </div>
         </div>
@@ -1150,6 +1151,7 @@
         }
 
         async function salvarEdicaoPacote() {
+            const btn = document.getElementById('btnSalvarEditPack');
             let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
             if (!token) {
                 token = prompt("Digite seu Token do GitHub (PAT) para salvar:");
@@ -1165,50 +1167,64 @@
                 return;
             }
 
-            const novoNome = document.getElementById('editPackNome').value.trim();
-            const novaCategoria = document.getElementById('editPackCategoria').value;
-            const novoDownload = document.getElementById('editPackDownload').value.trim();
-            const inputAudioUrl = document.getElementById('editPackPreviewUrl').value.trim();
-            const inputAudioFile = document.getElementById('editPackAudioFile');
+            btn.disabled = true;
+            btn.innerText = "Processando...";
 
-            let previewUrlFinal = globalPacotes[index].previewUrl || globalPacotes[index].preview_url || "";
+            try {
+                const novoNome = document.getElementById('editPackNome').value.trim();
+                const novaCategoria = document.getElementById('editPackCategoria').value;
+                const novoDownload = document.getElementById('editPackDownload').value.trim();
+                const inputAudioUrl = document.getElementById('editPackPreviewUrl').value.trim();
+                const inputAudioFile = document.getElementById('editPackAudioFile');
 
-            if (inputAudioUrl !== "") {
-                previewUrlFinal = inputAudioUrl;
-            } else if (inputAudioFile && inputAudioFile.files && inputAudioFile.files[0]) {
-                const file = inputAudioFile.files[0];
-                const fileName = `preview_${Date.now()}.mp3`;
-                const pathGitHub = `previews/${fileName}`;
+                let previewUrlFinal = globalPacotes[index].previewUrl || globalPacotes[index].preview_url || "";
 
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                await new Promise(resolve => reader.onloadend = resolve);
-                const base64Audio = reader.result.split(',')[1];
+                if (inputAudioUrl !== "") {
+                    previewUrlFinal = inputAudioUrl;
+                } else if (inputAudioFile && inputAudioFile.files && inputAudioFile.files[0]) {
+                    btn.innerText = "Cortando áudio (max 40s)...";
+                    const audioCortadoBlob = await cortarAudioPara40Segundos(inputAudioFile.files[0]);
 
-                await fetch(`https://api.github.com/repos/${REPO}/contents/${pathGitHub}`, {
-                    method: 'PUT',
-                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: `Upload preview editado ${fileName}`,
-                        content: base64Audio
-                    })
-                });
+                    btn.innerText = "Enviando áudio para o GitHub...";
+                    const fileName = `preview_${Date.now()}.wav`;
+                    const pathGitHub = `previews/${fileName}`;
 
-                previewUrlFinal = `https://raw.githubusercontent.com/${REPO}/main/${pathGitHub}`;
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioCortadoBlob);
+                    await new Promise(resolve => reader.onloadend = resolve);
+                    const base64Audio = reader.result.split(',')[1];
+
+                    await fetch(`https://api.github.com/repos/${REPO}/contents/${pathGitHub}`, {
+                        method: 'PUT',
+                        headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: `Update preview ${fileName}`,
+                            content: base64Audio
+                        })
+                    });
+
+                    previewUrlFinal = `https://raw.githubusercontent.com/${REPO}/main/${pathGitHub}`;
+                }
+
+                globalPacotes[index].nome = novoNome;
+                globalPacotes[index].title = novoNome;
+                globalPacotes[index].categoria = novaCategoria;
+                globalPacotes[index].type = novaCategoria;
+                globalPacotes[index].download = novoDownload;
+                globalPacotes[index].zip_url = novoDownload;
+                globalPacotes[index].previewUrl = previewUrlFinal;
+                globalPacotes[index].preview_url = previewUrlFinal;
+
+                btn.innerText = "Atualizando GitHub...";
+                await atualizarArquivoGitHub(token, `Editado pacote ${novoNome}`);
+                fecharModalEdit();
+                carregarPacotesGitHub();
+            } catch (err) {
+                alert("Erro ao salvar edição: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Salvar Alterações";
             }
-
-            globalPacotes[index].nome = novoNome;
-            globalPacotes[index].title = novoNome;
-            globalPacotes[index].categoria = novaCategoria;
-            globalPacotes[index].type = novaCategoria;
-            globalPacotes[index].download = novoDownload;
-            globalPacotes[index].zip_url = novoDownload;
-            globalPacotes[index].previewUrl = previewUrlFinal;
-            globalPacotes[index].preview_url = previewUrlFinal;
-
-            await atualizarArquivoGitHub(token, `Editado pacote ${novoNome}`);
-            fecharModalEdit();
-            carregarPacotesGitHub();
         }
 
         async function excluirPacote(targetId) {
@@ -1332,7 +1348,7 @@
                 <input type="file" class="input-capa" accept="image/*" required>
                 <label>Link Direto do ZIP:</label>
                 <input type="url" class="input-download" placeholder="https://..." required>
-                <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload com corte max 40s):</label>
+                <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload com corte automático max 40s):</label>
                 <input type="file" class="input-audio-preview" accept="audio/*">
                 <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
                 <input type="url" class="input-audio-url" placeholder="https://res.cloudinary.com/.../audio.mp3">
