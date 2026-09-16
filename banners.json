@@ -58,12 +58,13 @@
     "borderColor": "#9D00FF",
     "accentColor": "#9D00FF",
     "titleColor": "#FFFFFF",
-    "imagemUrl": "",
+    "imagemUrl": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1789584648/4997076299100654836_1.jpg",
     "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1789584648/4997076299100654836_1.jpg",
     "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1789584648/4997076299100654836_1.jpg",
     "clicavel": true,
     "tipoDestino": "PACK",
-    "destinoId": "1789584653978"
+    "destinoId": "1789584653978",
+    "imagemBg": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1789584648/4997076299100654836_1.jpg"
   },
   {
     "id": "1789582662682",
