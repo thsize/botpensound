@@ -43,7 +43,11 @@
     "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788535011/papo.jpg",
     "imagemBg": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788535011/papo.jpg",
     "download": "https://www.mediafire.com/file/9dmx5c1bo0pxqdi/PAPO_DE_CRIA_-_ABRIL_2026.zip/file",
-    "zip_url": "https://www.mediafire.com/file/9dmx5c1bo0pxqdi/PAPO_DE_CRIA_-_ABRIL_2026.zip/file"
+    "zip_url": "https://www.mediafire.com/file/9dmx5c1bo0pxqdi/PAPO_DE_CRIA_-_ABRIL_2026.zip/file",
+    "type": "PAGODAO",
+    "category": "PAGODAO",
+    "previewUrl": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_1789583023392.wav",
+    "preview_url": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_1789583023392.wav"
   },
   {
     "id": "1788535012103",
