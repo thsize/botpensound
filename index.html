@@ -84,6 +84,7 @@
         .card-vip h3 { color: var(--accent-gold); }
         .card-pack h3 { color: var(--accent-purple); }
         .card-banner h3 { color: var(--accent-blue); }
+        .card-update h3 { color: var(--accent-red); }
 
         label {
             display: block; font-size: 13px; font-weight: 600;
@@ -113,6 +114,7 @@
         .btn-vip { background-color: var(--accent-gold); color: #11111B; }
         .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
         .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
+        .btn-update { background-color: var(--accent-red); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
@@ -178,6 +180,7 @@
             <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
             <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
             <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
+            <li onclick="switchTab('tab-update', event)">🚀 Atualização do App</li>
         </ul>
     </div>
 
@@ -429,6 +432,29 @@
             </div>
         </div>
 
+        <!-- ABA 5: GERENCIAR ATUALIZAÇÃO DO APP -->
+        <div id="tab-update" class="tab-content">
+            <div class="card card-update">
+                <h3>🚀 Controle de Atualização Obrigatória (Supabase)</h3>
+                <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">
+                    Sempre que você subir um novo APK e quiser que **todos os usuários com versões antigas sejam bloqueados** até baixarem a nova versão, atualize o versionCode mínimo e o link abaixo.
+                </p>
+
+                <form id="updateForm">
+                    <label>Versão Mínima Exigida (versionCode no Android):</label>
+                    <input type="number" id="updateVersaoMinima" min="1" placeholder="Ex: 2" required>
+
+                    <label>Link Direto para Download do Novo APK:</label>
+                    <input type="url" id="updateUrlApk" placeholder="https://seusite.com/pensound-v2.apk" required>
+
+                    <label>Mensagem de Aviso Exibida na Tela do Usuário:</label>
+                    <textarea id="updateMensagem" rows="3" placeholder="Uma nova versão do PenSound está disponível com melhorias!" required></textarea>
+
+                    <button type="submit" id="btnSalvarUpdate" class="btn-update">FORÇAR ATUALIZAÇÃO NO SUPABASE</button>
+                </form>
+            </div>
+        </div>
+
     </div>
 
     <!-- MODAL DE EDIÇÃO DE PACOTE -->
@@ -549,7 +575,73 @@
             if (tabId === 'tab-pacotes') carregarPacotesGitHub();
             if (tabId === 'tab-banners') carregarBannersGitHub();
             if (tabId === 'tab-vip') carregarChavesSupabase();
+            if (tabId === 'tab-update') carregarConfiguracaoUpdate();
         }
+
+        /* --- LÓGICA DE GERENCIAMENTO DE ATUALIZAÇÃO (SUPABASE) --- */
+
+        async function carregarConfiguracaoUpdate() {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/app_config?select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        const config = data[0];
+                        document.getElementById('updateVersaoMinima').value = config.versao_minima || 1;
+                        document.getElementById('updateUrlApk').value = config.url_atualizacao || '';
+                        document.getElementById('updateMensagem').value = config.mensagem_atualizacao || '';
+                    }
+                }
+            } catch (err) {
+                console.error("Erro ao carregar app_config:", err);
+            }
+        }
+
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarUpdate');
+            btn.disabled = true;
+            btn.innerText = "Salvando no Supabase...";
+
+            const versaoMinima = parseInt(document.getElementById('updateVersaoMinima').value);
+            const urlApk = document.getElementById('updateUrlApk').value.trim();
+            const mensagem = document.getElementById('updateMensagem').value.trim();
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/app_config?id=eq.1`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        versao_minima: versaoMinima,
+                        url_atualizacao: urlApk,
+                        mensagem_atualizacao: mensagem
+                    })
+                });
+
+                if (response.ok) {
+                    alert("Atualização forçada salva com sucesso! Todos os apps abaixo desta versão serão bloqueados.");
+                } else {
+                    const err = await response.json();
+                    throw new Error(err.message || "Erro ao atualizar tabela no Supabase.");
+                }
+            } catch (err) {
+                alert("Erro ao salvar atualização: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "FORÇAR ATUALIZAÇÃO NO SUPABASE";
+            }
+        });
 
         /* --- EDITOR VISUAL E CORTE CUSTOMIZADO DE ÁUDIO COM WAVESURFER --- */
 
@@ -559,12 +651,10 @@
             const editorBox = document.getElementById(`editor-box-${instanceId}`);
             editorBox.style.display = 'block';
 
-            // Destrói instância anterior se existir
             if (wavesurfers[instanceId]) {
                 wavesurfers[instanceId].destroy();
             }
 
-            // Inicializa Wavesurfer
             const ws = WaveSurfer.create({
                 container: `#waveform-${instanceId}`,
                 waveColor: '#45475A',
@@ -589,7 +679,6 @@
                 document.getElementById(`start-time-${instanceId}`).value = 0;
                 document.getElementById(`end-time-${instanceId}`).value = defaultEnd.toFixed(1);
 
-                // Cria região de seleção interativa
                 const activeRegion = wsRegionPlugin.addRegion({
                     start: 0,
                     end: defaultEnd,
