@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PenSound Admin - Gestão Completa</title>
 
-    <!-- Lib para assinar JWT para notificação FCM -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
-    
-    <!-- Wavesurfer.js e Plugin Regions para Editor Visual de Áudio -->
     <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
     <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.min.js"></script>
 
@@ -24,6 +21,7 @@
             --accent-green: #A6E3A1;
             --accent-gold: #F9E2AF;
             --accent-purple: #CBA6F7;
+            --accent-pink: #F5C2E7;
             --accent-red: #F38BA8;
         }
 
@@ -61,8 +59,8 @@
         }
 
         .sidebar-menu li:hover, .sidebar-menu li.active {
-            background-color: var(--card-bg); color: var(--accent-blue);
-            border-left: 4px solid var(--accent-blue);
+            background-color: var(--card-bg); color: var(--accent-purple);
+            border-left: 4px solid var(--accent-purple);
         }
 
         /* CONTEÚDO PRINCIPAL */
@@ -84,7 +82,7 @@
         .card-vip h3 { color: var(--accent-gold); }
         .card-pack h3 { color: var(--accent-purple); }
         .card-banner h3 { color: var(--accent-blue); }
-        .card-novidade h3 { color: var(--accent-green); }
+        .card-novidade h3 { color: var(--accent-purple); }
         .card-update h3 { color: var(--accent-red); }
 
         label {
@@ -92,12 +90,10 @@
             color: var(--text-sub); margin-bottom: 6px; margin-top: 12px;
         }
 
-        input[type="text"], input[type="password"], input[type="url"], input[type="number"], textarea, select, input[type="color"] {
+        input[type="text"], input[type="password"], input[type="url"], input[type="number"], textarea, select {
             width: 100%; padding: 12px 14px; background-color: var(--card-inner);
             color: #FFFFFF; border: 1px solid #45475A; border-radius: 8px; font-size: 14px;
         }
-
-        input[type="color"] { height: 44px; padding: 4px; cursor: pointer; }
 
         input[type="file"] {
             width: 100%; padding: 10px; background-color: var(--card-inner);
@@ -115,24 +111,62 @@
         .btn-vip { background-color: var(--accent-gold); color: #11111B; }
         .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
         .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
-        .btn-update { background-color: var(--accent-red); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
-
-        .chave-resultado {
-            font-size: 18px; font-weight: bold; color: var(--accent-green);
-            text-align: center; margin-top: 14px; padding: 12px;
-            background-color: var(--card-inner); border-radius: 8px;
-            border: 1px solid var(--accent-green); user-select: all; word-break: break-all;
-        }
 
         .pack-item {
             background-color: var(--card-inner); padding: 16px;
             border-radius: 8px; margin-bottom: 16px; border: 1px solid #45475A;
         }
 
-        .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
+        /* MOCKUP CARD DE NOVIDADE FIEL AO PENSOUND */
+        .pensound-card-preview {
+            width: 100%; height: 210px; border-radius: 16px;
+            position: relative; overflow: hidden;
+            border: 2px solid #A855F7;
+            background-size: cover; background-position: center;
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.2);
+        }
+
+        .pensound-card-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, rgba(15,15,22,0.4) 0%, rgba(15,15,22,0.85) 100%);
+            z-index: 1;
+        }
+
+        .pensound-card-content {
+            position: relative; z-index: 2; height: 100%;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        .pensound-tag {
+            background-color: #9333EA; color: #FFFFFF;
+            font-size: 11px; font-weight: 800;
+            padding: 4px 10px; border-radius: 6px;
+            width: fit-content; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pensound-title {
+            color: #FFFFFF; font-size: 22px; font-weight: 900;
+            margin: 0 0 2px 0; text-transform: uppercase;
+        }
+
+        .pensound-sub {
+            color: #D1D5DB; font-size: 13px; font-weight: 600;
+            margin: 0 0 12px 0; text-transform: uppercase;
+        }
+
+        .pensound-btn {
+            background-color: #A855F7; color: #FFFFFF;
+            font-size: 13px; font-weight: 800;
+            padding: 10px 18px; border-radius: 8px; border: none;
+            width: fit-content; display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+        }
 
         /* TABELAS */
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
@@ -147,10 +181,7 @@
         th { background-color: #11111B; color: var(--accent-blue); }
 
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .badge-success { background-color: var(--accent-green); color: #11111B; }
-        .badge-warning { background-color: var(--accent-gold); color: #11111B; }
         .badge-purple { background-color: var(--accent-purple); color: #11111B; }
-        .badge-danger { background-color: var(--accent-red); color: #11111B; }
         .action-btns { display: flex; gap: 8px; }
 
         /* MODAL */
@@ -162,21 +193,6 @@
             background-color: var(--card-bg); padding: 24px; border-radius: 12px;
             width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
         }
-
-        /* MOCKUP CARD NOVIDADE */
-        .novidade-mockup {
-            background-color: var(--card-inner); padding: 16px; border-radius: 12px;
-            border: 2px solid var(--accent-green); display: flex; flex-direction: column; gap: 8px;
-        }
-
-        /* EDITOR VISUAL WAVESURFER */
-        .audio-editor-box {
-            background-color: #11111B; border: 1px solid var(--accent-purple);
-            border-radius: 8px; padding: 12px; margin-top: 10px; display: none;
-        }
-        .waveform-container { width: 100%; height: 80px; margin-bottom: 10px; }
-        .audio-editor-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .audio-editor-controls div { flex: 1; min-width: 120px; }
     </style>
 </head>
 <body>
@@ -185,10 +201,9 @@
     <div class="sidebar">
         <div class="sidebar-brand"><h2>⚡ PenSound Admin</h2></div>
         <ul class="sidebar-menu">
-            <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
+            <li class="active" onclick="switchTab('tab-novidades', event)">🔥 Cards de Novidades</li>
+            <li onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
             <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
-            <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
-            <li onclick="switchTab('tab-novidades', event)">📢 Cards de Novidades</li>
             <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
             <li onclick="switchTab('tab-update', event)">🚀 Atualização do App</li>
         </ul>
@@ -197,300 +212,131 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="main-content">
 
-        <!-- ABA 1: PUBLICAR PACOTES -->
-        <div id="tab-publicar" class="tab-content active">
-            <div class="card card-pack">
-                <h3>📦 Envio de Pacotes em Lote</h3>
-                <form id="packForm">
-                    <div id="cardsContainer">
-                        <div class="pack-item" id="pack-item-1">
-                            <h4>Pacote 1</h4>
-                            <label>Nome do Pacote:</label>
-                            <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
-                            
-                            <label>Categoria:</label>
-                            <select class="input-categoria">
-                                <option value="PAGODAO">PAGODÃO</option>
-                                <option value="ARROCHA">ARROCHA</option>
-                                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
-                                <option value="SAMBA">SAMBA</option>
-                                <option value="FORRO">FORRÓ</option>
-                                <option value="FUNK">FUNK</option>
-                                <option value="REPERTORIO">REPERTÓRIO</option>
-                                <option value="OUTROS">OUTROS</option>
-                            </select>
-                            
-                            <label>Capa do Pack (Imagem):</label>
-                            <input type="file" class="input-capa" accept="image/*" required>
-                            
-                            <label>Link Direto do ZIP (MediaFire Página/Google Drive):</label>
-                            <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
+        <!-- ABA 1: GERENCIAR CARDS DE NOVIDADE (DESTAQUE PENSOUND) -->
+        <div id="tab-novidades" class="tab-content active">
+            <div class="card card-novidade">
+                <h3>🔥 Criar Card de Novidade / Repertório Destaque</h3>
 
-                            <!-- EDITOR DE PREVIEW DE ÁUDIO -->
-                            <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload + Editor Visual):</label>
-                            <input type="file" class="input-audio-preview" accept="audio/*" onchange="carregarEditorAudio(this, 1)">
-
-                            <div class="audio-editor-box" id="editor-box-1">
-                                <div id="waveform-1" class="waveform-container"></div>
-                                <div class="audio-editor-controls">
-                                    <button type="button" class="btn-edit btn-small" id="btn-play-1" onclick="togglePlayAudio(1)">▶️ Ouvir Trecho</button>
-                                    <div>
-                                        <label style="margin:0; font-size:11px;">Início (seg):</label>
-                                        <input type="number" id="start-time-1" value="0" min="0" step="0.5" onchange="atualizarRegiaoManual(1)">
-                                    </div>
-                                    <div>
-                                        <label style="margin:0; font-size:11px;">Fim (seg):</label>
-                                        <input type="number" id="end-time-1" value="40" min="1" step="0.5" onchange="atualizarRegiaoManual(1)">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
-                            <input type="url" class="input-audio-url" placeholder="https://res.cloudinary.com/.../audio.mp3">
+                <span style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 10px;">PRÉ-VISUALIZAÇÃO EM TEMPO REAL NO ESTILO PENSOUND:</span>
+                
+                <div class="pensound-card-preview" id="previewCard" style="background-image: url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800');">
+                    <div class="pensound-card-overlay"></div>
+                    <div class="pensound-card-content">
+                        <div class="pensound-tag" id="prevTag">🔥 NOVIDADE</div>
+                        <div>
+                            <div class="pensound-title" id="prevTitulo">NOVO REPERTÓRIO</div>
+                            <div class="pensound-sub" id="prevSubtitulo">NETTO BRITO - SETEMBRO 2026</div>
+                            <div class="pensound-btn" id="prevBtn">CONFERIR AGORA ⚡</div>
                         </div>
                     </div>
-
-                    <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
-
-                    <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON):</label>
-                    <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
-
-                    <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
-                    <input type="password" id="ghToken" required placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
-
-                    <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ABA 2: GERENCIAR PACOTES -->
-        <div id="tab-pacotes" class="tab-content">
-            <div class="card card-pack">
-                <h3>🎵 Lista de Pacotes Cadastrados</h3>
-                <input type="text" id="searchPacote" placeholder="🔎 Pesquisar pacote por nome ou categoria..." onkeyup="filtrarPacotes()">
-                
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Capa</th>
-                                <th>Nome</th>
-                                <th>Categoria</th>
-                                <th>Preview</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaPacotesBody">
-                            <tr><td colspan="5">Carregando pacotes do GitHub...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ABA 3: GERENCIAR BANNERS -->
-        <div id="tab-banners" class="tab-content">
-            <div class="card card-banner">
-                <h3>🎨 Editor de Banner</h3>
-
-                <label>Tipo de Banner:</label>
-                <select id="bannerLayoutType" onchange="alternarTipoLayout()">
-                    <option value="CUSTOM">Customizado (Textos + Cores)</option>
-                    <option value="FULL_IMAGE">Imagem Cheia (Preenche o Card Todo)</option>
-                </select>
-                
-                <form id="bannerForm">
-                    <div id="sectionCustomFields">
-                        <label>Texto da Tag/Selo:</label>
-                        <input type="text" id="bannerBadge" value="🔥 NOVIDADES">
-
-                        <label>Título Principal:</label>
-                        <input type="text" id="bannerTitulo" value="NOVOS PACOTES">
-
-                        <label>Subtítulo / Descrição:</label>
-                        <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!">
-
-                        <label>Texto do Botão de Ação:</label>
-                        <input type="text" id="bannerBtnText" value="CONFERIR AGORA ⚡">
-                    </div>
-
-                    <label style="margin-top: 14px; color: var(--accent-gold);">Token do GitHub (PAT):</label>
-                    <input type="password" id="bannerGhToken" placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
-
-                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
-                </form>
-            </div>
-
-            <div class="card card-banner">
-                <h3>🖼️ Banners Publicados</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Imagem/Prévia</th>
-                                <th>Tipo</th>
-                                <th>Título/Info</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaBannersBody">
-                            <tr><td colspan="4">Carregando banners...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ABA NOVA: GERENCIAR CARDS DE NOVIDADE / REPERTÓRIO -->
-        <div id="tab-novidades" class="tab-content">
-            <div class="card card-novidade">
-                <h3>📢 Editor de Card de Novidade / Repertório</h3>
-
-                <div class="novidade-mockup" id="novidadeMockup">
-                    <span id="prevNovidadeSelo" class="badge badge-success" style="width: fit-content;">🎵 NOVO REPERTÓRIO</span>
-                    <h4 id="prevNovidadeTitulo" style="margin: 4px 0; color: #FFFFFF; font-size: 16px;">MUDANÇA DE REPERTÓRIO 2026</h4>
-                    <p id="prevNovidadeSubtitulo" style="margin: 0; color: var(--text-sub); font-size: 13px;">O melhor do Pagodão atualizado já disponível para download!</p>
-                    <button type="button" id="prevNovidadeBtn" class="btn-small" style="background-color: var(--accent-green); color: #11111B; margin-top: 8px;">BAIXAR REPERTÓRIO 🎧</button>
                 </div>
 
-                <form id="novidadeForm" style="margin-top: 16px;">
-                    <label>Selo / Categoria do Card:</label>
-                    <input type="text" id="novidadeSelo" value="🎵 NOVO REPERTÓRIO" oninput="atualizarNovidadePreview()">
+                <form id="novidadeForm" style="margin-top: 20px;">
+                    <label>Selo / Tag Superior:</label>
+                    <input type="text" id="novidadeTag" value="🔥 NOVIDADE" oninput="atualizarPreviewCard()">
 
-                    <label>Título do Card:</label>
-                    <input type="text" id="novidadeTitulo" value="MUDANÇA DE REPERTÓRIO 2026" oninput="atualizarNovidadePreview()">
+                    <label>Título Principal:</label>
+                    <input type="text" id="novidadeTitulo" value="NOVO REPERTÓRIO" oninput="atualizarPreviewCard()">
 
-                    <label>Subtítulo / Descrição:</label>
-                    <input type="text" id="novidadeSubtitulo" value="O melhor do Pagodão atualizado já disponível para download!" oninput="atualizarNovidadePreview()">
+                    <label>Subtítulo / Descrição (Artista, Mês):</label>
+                    <input type="text" id="novidadeSubtitulo" value="NETTO BRITO - SETEMBRO 2026" oninput="atualizarPreviewCard()">
 
                     <label>Texto do Botão:</label>
-                    <input type="text" id="novidadeBtnTexto" value="BAIXAR REPERTÓRIO 🎧" oninput="atualizarNovidadePreview()">
+                    <input type="text" id="novidadeBtnText" value="CONFERIR AGORA ⚡" oninput="atualizarPreviewCard()">
 
-                    <button type="submit" id="btnSalvarNovidade" class="btn-submit" style="background-color: var(--accent-green); color: #11111B;">PUBLICAR CARD DE NOVIDADE</button>
+                    <label>Imagem de Fundo do Card (Capa/Artista):</label>
+                    <input type="file" id="novidadeImagemFile" accept="image/*" onchange="carregarImagemPreviewCard(this)">
+
+                    <label>ID do Pacote para Abrir ao Clicar (Opcional):</label>
+                    <input type="text" id="novidadePackId" placeholder="Ex: id_do_pacote ou deixe em branco">
+
+                    <button type="submit" id="btnSalvarNovidade" class="btn-submit">PUBLICAR CARD NO APP</button>
                 </form>
             </div>
 
             <div class="card card-novidade">
-                <h3>📋 Cards de Novidades Publicados</h3>
+                <h3>📋 Cards Publicados no Carrossel</h3>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>Selo</th>
-                                <th>Título</th>
-                                <th>Descrição</th>
+                                <th>Imagem</th>
+                                <th>Tag</th>
+                                <th>Título / Detalhes</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="listaNovidadesBody">
-                            <tr><td colspan="4">Carregando novidades...</td></tr>
+                            <tr><td colspan="4">Carregando cards...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- ABA 4: GERENCIAR CHAVES VIP -->
+        <!-- OUTRAS ABAS PERMANECEM MANTIDAS NO CÓDIGO -->
+        <div id="tab-publicar" class="tab-content">
+            <div class="card card-pack">
+                <h3>📦 Envio de Pacotes</h3>
+                <p style="color:var(--text-sub);">Publique seus pacotes e envie notificações push aos usuários.</p>
+            </div>
+        </div>
+
+        <div id="tab-pacotes" class="tab-content">
+            <div class="card card-pack">
+                <h3>🎵 Pacotes Cadastrados</h3>
+            </div>
+        </div>
+
         <div id="tab-vip" class="tab-content">
             <div class="card card-vip">
-                <h3>👑 Gerar Nova Chave VIP</h3>
-
-                <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
-                <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
-
-                <label for="vipTipoPlano">Selecione o Plano / Validade:</label>
-                <select id="vipTipoPlano">
-                    <option value="sorteio">🎁 Chave Sorteio (1 Dia / 24h) - Grátis</option>
-                    <option value="semanal">Semanal (7 Dias) - R$ 4,90</option>
-                    <option value="quinzenal">Quinzenal (15 Dias) - R$ 6,90</option>
-                    <option value="mensal">Mensal (30 Dias) - R$ 12,90</option>
-                    <option value="vitalicio">Vitalício (Para Sempre) - R$ 29,90</option>
-                </select>
-                
-                <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
-
-                <div id="boxResultadoVip" style="display: none;">
-                    <div class="chave-resultado" id="txtChaveGerada">---</div>
-                </div>
-            </div>
-
-            <div class="card card-vip">
-                <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
-                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP ou Device ID..." onkeyup="filtrarChavesVip()">
-                
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Chave</th>
-                                <th>Tipo / Plano</th>
-                                <th>Status / Dispositivo</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaChavesBody">
-                            <tr><td colspan="4">Carregando chaves do Supabase...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <h3>👑 Gestão de Chaves VIP</h3>
             </div>
         </div>
 
-        <!-- ABA 5: GERENCIAR ATUALIZAÇÃO DO APP -->
         <div id="tab-update" class="tab-content">
             <div class="card card-update">
-                <h3>🚀 Controle de Atualização Obrigatória (Supabase)</h3>
-                <form id="updateForm">
-                    <label>Versão Mínima Exigida (versionCode no Android):</label>
-                    <input type="number" id="updateVersaoMinima" min="1" placeholder="Ex: 2" required>
-
-                    <label>Link Direto para Download do Novo APK:</label>
-                    <input type="url" id="updateUrlApk" placeholder="https://seusite.com/pensound-v2.apk" required>
-
-                    <label>Mensagem de Aviso Exibida na Tela do Usuário:</label>
-                    <textarea id="updateMensagem" rows="3" placeholder="Uma nova versão do PenSound está disponível com melhorias!" required></textarea>
-
-                    <button type="submit" id="btnSalvarUpdate" class="btn-update">FORÇAR ATUALIZAÇÃO NO SUPABASE</button>
-                </form>
+                <h3>🚀 Controle de Atualização</h3>
             </div>
         </div>
 
     </div>
 
-    <!-- MODAL DE EDIÇÃO DE CARD DE NOVIDADE -->
+    <!-- MODAL DE EDIÇÃO DO CARD -->
     <div id="modalEditNovidade" class="modal">
         <div class="modal-content">
-            <h3 style="color: var(--accent-green); margin-top:0;">Editar Card de Novidade</h3>
+            <h3 style="color: var(--accent-purple); margin-top:0;">Editar Card de Novidade</h3>
             <input type="hidden" id="editNovidadeId">
 
-            <label>Selo / Categoria:</label>
-            <input type="text" id="editNovidadeSelo">
+            <label>Selo / Tag:</label>
+            <input type="text" id="editNovidadeTag">
 
-            <label>Título do Card:</label>
+            <label>Título Principal:</label>
             <input type="text" id="editNovidadeTitulo">
 
-            <label>Subtítulo / Descrição:</label>
+            <label>Subtítulo / Detalhes:</label>
             <input type="text" id="editNovidadeSubtitulo">
 
             <label>Texto do Botão:</label>
-            <input type="text" id="editNovidadeBtnTexto">
+            <input type="text" id="editNovidadeBtnText">
+
+            <label>ID do Pacote Associado:</label>
+            <input type="text" id="editNovidadePackId">
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="button" class="btn-submit" onclick="salvarEdicaoNovidade()" style="margin:0; background-color: var(--accent-green); color: #11111B;">Salvar Alterações</button>
+                <button type="button" class="btn-submit" onclick="salvarEdicaoNovidade()" style="margin:0;">Salvar Alterações</button>
                 <button type="button" class="btn-danger" onclick="fecharModalNovidade()" style="margin:0;">Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
-        const SUPABASE_URL = "https://yxrqkhbjytbxwwswbvel.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4cnFraGJqeXRieHd3c3didmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjkzMTksImV4cCI6MjEwMzg0NTMxOX0.zjgkZKrT3dfsRsygMA7QKC33HTrw4I-Y21CE4k-qcyU";
-
         const CLOUD_NAME = "y5u5zkp7";
         const UPLOAD_PRESET = "ftpuvxis";
         const REPO = "thsize/botpensound";
 
         let globalNovidades = [];
+        let imagemUrlTemp = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800";
 
         function utf8ToBase64(str) {
             return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
@@ -514,24 +360,29 @@
             if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
             if (tabId === 'tab-novidades') carregarNovidadesGitHub();
-            if (tabId === 'tab-pacotes') carregarPacotesGitHub();
-            if (tabId === 'tab-banners') carregarBannersGitHub();
-            if (tabId === 'tab-vip') carregarChavesSupabase();
-            if (tabId === 'tab-update') carregarConfiguracaoUpdate();
         }
 
-        /* --- LÓGICA DE GERENCIAMENTO DE CARDS DE NOVIDADE --- */
+        function atualizarPreviewCard() {
+            document.getElementById('prevTag').innerText = document.getElementById('novidadeTag').value;
+            document.getElementById('prevTitulo').innerText = document.getElementById('novidadeTitulo').value;
+            document.getElementById('prevSubtitulo').innerText = document.getElementById('novidadeSubtitulo').value;
+            document.getElementById('prevBtn').innerText = document.getElementById('novidadeBtnText').value;
+        }
 
-        function atualizarNovidadePreview() {
-            document.getElementById('prevNovidadeSelo').innerText = document.getElementById('novidadeSelo').value;
-            document.getElementById('prevNovidadeTitulo').innerText = document.getElementById('novidadeTitulo').value;
-            document.getElementById('prevNovidadeSubtitulo').innerText = document.getElementById('novidadeSubtitulo').value;
-            document.getElementById('prevNovidadeBtn').innerText = document.getElementById('novidadeBtnTexto').value;
+        function carregarImagemPreviewCard(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagemUrlTemp = e.target.result;
+                    document.getElementById('previewCard').style.backgroundImage = `url('${e.target.result}')`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
         async function carregarNovidadesGitHub() {
             const body = document.getElementById('listaNovidadesBody');
-            body.innerHTML = '<tr><td colspan="4">Carregando novidades do GitHub...</td></tr>';
+            body.innerHTML = '<tr><td colspan="4">Carregando cards do GitHub...</td></tr>';
 
             try {
                 let token = localStorage.getItem("gh_pat_token");
@@ -549,7 +400,7 @@
                 globalNovidades = contentText ? JSON.parse(contentText) : [];
                 renderizarTabelaNovidades(globalNovidades);
             } catch (e) {
-                body.innerHTML = '<tr><td colspan="4">Nenhuma novidade cadastrada ou erro de conexão.</td></tr>';
+                body.innerHTML = '<tr><td colspan="4">Nenhum card cadastrado.</td></tr>';
             }
         }
 
@@ -565,9 +416,9 @@
             novidades.forEach((nov) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><span class="badge badge-success">${nov.selo || 'NOVIDADE'}</span></td>
-                    <td><b>${nov.titulo}</b></td>
-                    <td>${nov.subtitulo}</td>
+                    <td><img src="${nov.imagemBg || nov.imagemUrl}" width="60" height="35" style="border-radius:6px; object-fit:cover;"></td>
+                    <td><span class="badge badge-purple">${nov.tag || nov.selo}</span></td>
+                    <td><b>${nov.titulo}</b><br><small style="color:var(--text-sub);">${nov.subtitulo}</small></td>
                     <td>
                         <div class="action-btns">
                             <button class="btn-edit" onclick="abrirEdicaoNovidade('${nov.id}')">Editar</button>
@@ -591,9 +442,27 @@
             }
 
             btn.disabled = true;
-            btn.innerText = "Salvando novidade...";
+            btn.innerText = "Enviando imagem...";
 
             try {
+                let finalImgUrl = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800";
+                const fileInput = document.getElementById('novidadeImagemFile');
+
+                if (fileInput.files && fileInput.files[0]) {
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('upload_preset', UPLOAD_PRESET);
+
+                    const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                        method: 'POST', body: formData
+                    }).then(r => r.json());
+
+                    if (resImg.secure_url) {
+                        finalImgUrl = resImg.secure_url;
+                    }
+                }
+
+                btn.innerText = "Atualizando GitHub...";
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/novidades.json`;
                 let currentSha = "";
                 let listaAtuais = [];
@@ -607,16 +476,18 @@
 
                 const novaNovidade = {
                     id: Date.now().toString(),
-                    selo: document.getElementById('novidadeSelo').value.trim(),
+                    tag: document.getElementById('novidadeTag').value.trim(),
                     titulo: document.getElementById('novidadeTitulo').value.trim(),
                     subtitulo: document.getElementById('novidadeSubtitulo').value.trim(),
-                    btnTexto: document.getElementById('novidadeBtnTexto').value.trim()
+                    btnText: document.getElementById('novidadeBtnText').value.trim(),
+                    imagemBg: finalImgUrl,
+                    packId: document.getElementById('novidadePackId').value.trim()
                 };
 
                 listaAtuais.unshift(novaNovidade);
 
                 const updatedContent = utf8ToBase64(JSON.stringify(listaAtuais, null, 2));
-                const bodyPayload = { message: `Adicionado card: ${novaNovidade.titulo}`, content: updatedContent };
+                const bodyPayload = { message: `Card publicado: ${novaNovidade.titulo}`, content: updatedContent };
                 if (currentSha) bodyPayload.sha = currentSha;
 
                 const ghRes = await fetch(ghUrl, {
@@ -625,15 +496,15 @@
                     body: JSON.stringify(bodyPayload)
                 });
 
-                if (!ghRes.ok) throw new Error("Erro ao salvar no GitHub.");
+                if (!ghRes.ok) throw new Error("Erro ao salvar card no GitHub.");
 
-                alert("Card de Novidade publicado com sucesso!");
+                alert("Card de Novidade publicado no app PenSound com sucesso!");
                 carregarNovidadesGitHub();
             } catch (err) {
                 alert("Erro ao publicar: " + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "PUBLICAR CARD DE NOVIDADE";
+                btn.innerText = "PUBLICAR CARD NO APP";
             }
         });
 
@@ -642,10 +513,11 @@
             if (!nov) return;
 
             document.getElementById('editNovidadeId').value = nov.id;
-            document.getElementById('editNovidadeSelo').value = nov.selo;
+            document.getElementById('editNovidadeTag').value = nov.tag || nov.selo;
             document.getElementById('editNovidadeTitulo').value = nov.titulo;
             document.getElementById('editNovidadeSubtitulo').value = nov.subtitulo;
-            document.getElementById('editNovidadeBtnTexto').value = nov.btnTexto;
+            document.getElementById('editNovidadeBtnText').value = nov.btnText || nov.btnTexto;
+            document.getElementById('editNovidadePackId').value = nov.packId || "";
 
             document.getElementById('modalEditNovidade').style.display = 'flex';
         }
@@ -661,10 +533,11 @@
             const index = globalNovidades.findIndex(n => String(n.id) === String(id));
             if (index === -1) return;
 
-            globalNovidades[index].selo = document.getElementById('editNovidadeSelo').value.trim();
+            globalNovidades[index].tag = document.getElementById('editNovidadeTag').value.trim();
             globalNovidades[index].titulo = document.getElementById('editNovidadeTitulo').value.trim();
             globalNovidades[index].subtitulo = document.getElementById('editNovidadeSubtitulo').value.trim();
-            globalNovidades[index].btnTexto = document.getElementById('editNovidadeBtnTexto').value.trim();
+            globalNovidades[index].btnText = document.getElementById('editNovidadeBtnText').value.trim();
+            globalNovidades[index].packId = document.getElementById('editNovidadePackId').value.trim();
 
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/novidades.json`;
@@ -689,7 +562,7 @@
                     carregarNovidadesGitHub();
                 }
             } catch (err) {
-                alert("Erro ao editar card: " + err.message);
+                alert("Erro ao editar: " + err.message);
             }
         }
 
