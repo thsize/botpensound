@@ -333,7 +333,7 @@
                         <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!" oninput="atualizarPreview()">
 
                         <label>Texto do Botão de Ação:</label>
-                        <input type="text" id="bannerBtnText" value="CONFERIR AGORA ⚡" placeholder="Ex: BAIXAR AGORA ⚡, OUVIR AGORA 🎧" oninput="atualizarPreview()">
+                        <input type="text" id="bannerBtnText" value="CONFERIR AGORA ⚡" placeholder="Ex: CONFERIR AGORA ⚡, OUVIR AGORA 🎧" oninput="atualizarPreview()">
 
                         <div class="editor-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
                             <div>
@@ -494,7 +494,6 @@
                 <option value="OUTROS">OUTROS</option>
             </select>
 
-            <!-- CAMPO ADICIONADO PARA TROCAR A FOTO -->
             <label style="color: var(--accent-gold);">📸 Trocar Imagem da Capa (Opcional):</label>
             <input type="file" id="editPackCapaFile" accept="image/*">
             <p style="margin: 4px 0 0 0; font-size: 11px; color: var(--text-sub);">Selecione uma imagem apenas se quiser substituir a foto de capa do card e do banner carrossel.</p>
@@ -1366,7 +1365,6 @@
             document.getElementById('modalEditPacote').style.display = 'none';
         }
 
-        // SALVAR EDIÇÃO COM RENOVAÇÃO DE CAPA EM PACOTES.JSON E BANNERS.JSON
         async function salvarEdicaoPacote() {
             const btn = document.getElementById('btnSalvarEditPack');
             let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
@@ -1397,7 +1395,6 @@
 
                 let capaUrlFinal = globalPacotes[index].capa || globalPacotes[index].cover_url || "";
 
-                // UPLOAD DE NOVA IMAGEM SE SELECIONADA
                 if (inputCapaFile && inputCapaFile.files && inputCapaFile.files[0]) {
                     btn.innerText = "Enviando nova imagem...";
                     const formData = new FormData();
@@ -1447,7 +1444,6 @@
                     previewUrlFinal = `https://raw.githubusercontent.com/${REPO}/main/${pathGitHub}`;
                 }
 
-                // ATUALIZA PACOTE
                 globalPacotes[index].nome = novoNome;
                 globalPacotes[index].title = novoNome;
                 globalPacotes[index].categoria = novaCategoria;
@@ -1460,7 +1456,6 @@
                 globalPacotes[index].previewUrl = previewUrlFinal;
                 globalPacotes[index].preview_url = previewUrlFinal;
 
-                // ATUALIZA TAMBÉM O BANNER NO BANNERS.JSON SE A FOTO FOI TROCADA OU O BANNER EXISTIR
                 try {
                     btn.innerText = "Atualizando banners.json...";
                     const bannersUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
@@ -1480,6 +1475,7 @@
                                 b.nome = novoNome;
                                 b.title = novoNome;
                                 b.titulo = novoNome;
+                                b.btnText = "CONFERIR AGORA ⚡";
                                 bChanged = true;
                             }
                         });
@@ -1833,7 +1829,7 @@
                             subtitulo: "Disponível para download!",
                             categoria: categoria,
                             type: categoria,
-                            btnText: "BAIXAR PACOTE 🎧",
+                            btnText: "CONFERIR AGORA ⚡",
                             bgColor: "#22123B",
                             borderColor: "#9D00FF",
                             accentColor: "#9D00FF",
