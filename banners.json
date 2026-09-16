@@ -35,12 +35,13 @@
     "borderColor": "#9D00FF",
     "accentColor": "#9D00FF",
     "titleColor": "#FFFFFF",
-    "imagemUrl": "",
+    "imagemUrl": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1789584654/Screenshot_2026-09-16_at_15-47-22_Pin_em_forr%C3%B3.png",
     "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1789584654/Screenshot_2026-09-16_at_15-47-22_Pin_em_forr%C3%B3.png",
     "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1789584654/Screenshot_2026-09-16_at_15-47-22_Pin_em_forr%C3%B3.png",
     "clicavel": true,
     "tipoDestino": "PACK",
-    "destinoId": "1789584660639"
+    "destinoId": "1789584660639",
+    "imagemBg": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1789584654/Screenshot_2026-09-16_at_15-47-22_Pin_em_forr%C3%B3.png"
   },
   {
     "id": "1789584653978",
