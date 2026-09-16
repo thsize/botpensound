@@ -34,7 +34,9 @@
             margin: 0; padding: 0;
             background-color: var(--bg-dark);
             color: var(--text-main);
-            display: flex; min-height: 100vh;
+            display: flex; 
+            min-height: 100vh;
+            flex-direction: row;
         }
 
         /* BARRA LATERAL */
@@ -42,7 +44,7 @@
             width: 260px; background-color: var(--sidebar-bg);
             padding: 20px 0; display: flex; flex-direction: column;
             border-right: 1px solid rgba(255, 255, 255, 0.05);
-            position: fixed; height: 100vh;
+            position: fixed; height: 100vh; z-index: 100;
         }
 
         .sidebar-brand {
@@ -68,6 +70,7 @@
         /* CONTEÚDO PRINCIPAL */
         .main-content {
             margin-left: 260px; flex: 1; padding: 30px; max-width: 950px;
+            width: 100%;
         }
 
         .tab-content { display: none; }
@@ -137,7 +140,7 @@
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
         table {
             width: 100%; border-collapse: collapse; background-color: var(--card-inner);
-            border-radius: 8px; overflow: hidden;
+            border-radius: 8px; overflow: hidden; min-width: 500px;
         }
         th, td {
             padding: 12px 14px; text-align: left;
@@ -170,6 +173,24 @@
         .waveform-container { width: 100%; height: 80px; margin-bottom: 10px; }
         .audio-editor-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .audio-editor-controls div { flex: 1; min-width: 120px; }
+
+        /* OTIMIZACÃO PARA ANDROID / DISPOSITIVOS MÓVEIS */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%; height: auto; position: relative; padding: 10px 0;
+                border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            .sidebar-brand { padding: 0 15px 10px 15px; margin-bottom: 10px; text-align: center; }
+            .sidebar-menu { display: flex; overflow-x: auto; white-space: nowrap; padding: 0 10px; }
+            .sidebar-menu li { padding: 10px 14px; font-size: 13px; border-left: none; border-bottom: 3px solid transparent; }
+            .sidebar-menu li:hover, .sidebar-menu li.active { border-left: none; border-bottom: 3px solid var(--accent-blue); }
+            
+            .main-content { margin-left: 0; padding: 15px; width: 100%; }
+            .card { padding: 16px; }
+            .audio-editor-controls { flex-direction: column; align-items: stretch; }
+            .action-btns { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
@@ -302,17 +323,17 @@
                 
                 <div class="banner-preview-box" style="margin-top: 16px;">
                     <span style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold;">PRÉ-VISUALIZAÇÃO AO VIVO NO APP</span>
-                    <div id="bannerMockup" class="banner-mockup" style="background-color: #22123B; border-color: #9D00FF;">
-                        <div id="customBannerView" style="width:100%; height:100%; display:flex; align-items:center;">
-                            <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF;">🔥 NOVIDADES</div>
-                            <div class="info-area">
-                                <p id="prevTitulo" class="info-title" style="color: #FFFFFF;">NOVO REPERTÓRIO</p>
-                                <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8;">Confira os últimos lançamentos!</p>
-                                <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF;">CONFERIR AGORA ⚡</div>
+                    <div id="bannerMockup" class="banner-mockup" style="background-color: #22123B; border-color: #9D00FF; min-height: 100px; border-radius: 8px; padding: 12px; display:flex; align-items:center;">
+                        <div id="customBannerView" style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
+                            <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF; color:#fff; width:fit-content; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">🔥 NOVIDADES</div>
+                            <div class="info-area" style="margin-top:6px;">
+                                <p id="prevTitulo" class="info-title" style="color: #FFFFFF; font-weight:bold; margin:0 0 4px 0;">NOVO REPERTÓRIO</p>
+                                <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8; margin:0 0 8px 0; font-size:12px;">Confira os últimos lançamentos!</p>
+                                <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF; color:#fff; padding:6px 12px; border-radius:6px; display:inline-block; font-size:12px; font-weight:bold;">CONFERIR AGORA ⚡</div>
                             </div>
                         </div>
 
-                        <img id="prevFullImg" src="" style="display:none; width:100%; height:100%; object-fit:cover;">
+                        <img id="prevFullImg" src="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:6px;">
                     </div>
                 </div>
 
@@ -330,7 +351,7 @@
                         <label>Texto do Botão de Ação:</label>
                         <input type="text" id="bannerBtnText" value="CONFERIR AGORA ⚡" placeholder="Ex: BAIXAR AGORA ⚡, OUVIR AGORA 🎧" oninput="atualizarPreview()">
 
-                        <div class="editor-grid">
+                        <div class="editor-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
                             <div>
                                 <label>Cor de Fundo:</label>
                                 <input type="color" id="colorBgCard" value="#22123B" onchange="atualizarPreview()">
@@ -803,20 +824,17 @@
             const sectionFile = document.getElementById('sectionFileField');
             const customView = document.getElementById('customBannerView');
             const fullImg = document.getElementById('prevFullImg');
-            const mockup = document.getElementById('bannerMockup');
 
             if (layout === 'FULL_IMAGE') {
                 sectionCustom.style.display = 'none';
                 sectionFile.style.display = 'block';
                 customView.style.display = 'none';
                 fullImg.style.display = 'block';
-                mockup.classList.add('full-image');
             } else {
                 sectionCustom.style.display = 'block';
                 sectionFile.style.display = 'none';
                 customView.style.display = 'flex';
                 fullImg.style.display = 'none';
-                mockup.classList.remove('full-image');
             }
             atualizarPreview();
         }
@@ -1765,10 +1783,10 @@
                         else if (catUpper === "PAGODAO") tagTexto = "⚡ NOVO PAGODÃO";
                         else if (catUpper === "ARROCHA") tagTexto = "⚡ NOVO ARROCHA";
 
-                        // MONTA O CARD PARA O BANNERS.JSON
+                        // MONTA O CARD CUSTOMIZADO PARA O BANNERS.JSON
                         novosBanners.push({
                             id: packId,
-                            layoutType: "FULL_IMAGE",
+                            layoutType: "CUSTOM",
                             tag: tagTexto,
                             badge: tagTexto,
                             nome: nome,
@@ -1778,12 +1796,13 @@
                             categoria: categoria,
                             type: categoria,
                             btnText: "BAIXAR PACOTE 🎧",
+                            bgColor: "#22123B",
+                            borderColor: "#9D00FF",
+                            accentColor: "#9D00FF",
+                            titleColor: "#FFFFFF",
+                            imagemUrl: "",
                             capa: resImg.secure_url,
                             cover_url: resImg.secure_url,
-                            imagemBg: resImg.secure_url,
-                            imagemUrl: resImg.secure_url,
-                            download: download,
-                            zip_url: download,
                             clicavel: true,
                             tipoDestino: "PACK",
                             destinoId: packId
