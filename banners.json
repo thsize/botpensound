@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "id": "1789581115418",
+    "layoutType": "CUSTOM",
+    "badge": "AVISO!!",
+    "tag": "AVISO!!",
+    "titulo": "NOVA VERSAO DISPONIVEL EM BREVE",
+    "title": "NOVA VERSAO DISPONIVEL EM BREVE",
+    "subtitulo": "RT STUDIO",
+    "btnText": "MENSAGEM",
+    "bgColor": "#22123b",
+    "borderColor": "#9d00ff",
+    "accentColor": "#9d00ff",
+    "titleColor": "#ffffff",
+    "imagemUrl": "",
+    "capa": "",
+    "imagemBg": "",
+    "clicavel": true,
+    "tipoDestino": "LINK",
+    "destinoId": "https://pensound.netlify.app/"
+  }
+]
