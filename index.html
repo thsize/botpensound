@@ -148,6 +148,8 @@
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .badge-success { background-color: var(--accent-green); color: #11111B; }
         .badge-warning { background-color: var(--accent-gold); color: #11111B; }
+        .badge-purple { background-color: var(--accent-purple); color: #11111B; }
+        .badge-danger { background-color: var(--accent-red); color: #11111B; }
         .action-btns { display: flex; gap: 8px; }
 
         /* MODAL */
@@ -396,10 +398,12 @@
                 <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
                 <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
 
-                <label for="vipTipoPlano">Selecione o Plano:</label>
+                <label for="vipTipoPlano">Selecione o Plano / Validade:</label>
                 <select id="vipTipoPlano">
+                    <option value="sorteio">🎁 Chave Sorteio (1 Dia / 24h) - Grátis</option>
                     <option value="semanal">Semanal (7 Dias) - R$ 4,90</option>
                     <option value="quinzenal">Quinzenal (15 Dias) - R$ 6,90</option>
+                    <option value="mensal">Mensal (30 Dias) - R$ 12,90</option>
                     <option value="vitalicio">Vitalício (Para Sempre) - R$ 29,90</option>
                 </select>
                 
@@ -419,7 +423,7 @@
                         <thead>
                             <tr>
                                 <th>Chave</th>
-                                <th>Tipo</th>
+                                <th>Tipo / Plano</th>
                                 <th>Status / Dispositivo</th>
                                 <th>Ações</th>
                             </tr>
@@ -1104,7 +1108,7 @@
             }
         }
 
-        // --- GERENCIAMENTO DE CHAVES VIP ---
+        // --- GERENCIAMENTO DE CHAVES VIP & SORTEIO (SUPABASE) ---
 
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
@@ -1116,13 +1120,16 @@
             btn.disabled = true;
             btn.innerText = "Gerando...";
 
+            // Define o prefixo do código de acordo com o plano
+            const prefixo = tipo === 'sorteio' ? 'SORTEIO' : 'PENSOUND';
+
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let p1 = '', p2 = '';
             for (let i = 0; i < 4; i++) {
                 p1 += chars.charAt(Math.floor(Math.random() * chars.length));
                 p2 += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            const novaChave = `PENSOUND-${p1}-${p2}`;
+            const novaChave = `${prefixo}-${p1}-${p2}`;
 
             try {
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip`, {
@@ -1213,9 +1220,20 @@
                     ? `<span class="badge badge-warning">Ativado (${item.device_id ? item.device_id : 'Sem ID'})</span>`
                     : `<span class="badge badge-success">Livre (Aguardando Ativação)</span>`;
 
+                let tipoBadgeClass = "badge-success";
+                let tipoTexto = item.tipo ? item.tipo.toUpperCase() : 'SEMANAL';
+
+                if (item.tipo === 'sorteio') {
+                    tipoBadgeClass = "badge-purple";
+                    tipoTexto = "🎁 SORTEIO (1 DIA)";
+                } else if (item.tipo === 'vitalicio') {
+                    tipoBadgeClass = "badge-warning";
+                    tipoTexto = "👑 VITALÍCIO";
+                }
+
                 tr.innerHTML = `
                     <td><b>${item.chave}</b></td>
-                    <td>${item.tipo ? item.tipo.toUpperCase() : 'SEMANAL'}</td>
+                    <td><span class="badge ${tipoBadgeClass}">${tipoTexto}</span></td>
                     <td>${statusHtml}</td>
                     <td>
                         <button class="btn-danger" onclick="excluirChaveVip('${item.chave}')">Excluir</button>
