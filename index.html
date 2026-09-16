@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PenSound Admin - Gestão Completa</title>
 
+    <!-- Lib para assinar JWT para notificação FCM -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
+    
+    <!-- Wavesurfer.js e Plugin Regions para Editor Visual de Áudio -->
     <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
     <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.min.js"></script>
 
@@ -21,7 +24,6 @@
             --accent-green: #A6E3A1;
             --accent-gold: #F9E2AF;
             --accent-purple: #CBA6F7;
-            --accent-pink: #F5C2E7;
             --accent-red: #F38BA8;
         }
 
@@ -111,16 +113,26 @@
         .btn-vip { background-color: var(--accent-gold); color: #11111B; }
         .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
         .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
+        .btn-update { background-color: var(--accent-red); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
+
+        .chave-resultado {
+            font-size: 18px; font-weight: bold; color: var(--accent-green);
+            text-align: center; margin-top: 14px; padding: 12px;
+            background-color: var(--card-inner); border-radius: 8px;
+            border: 1px solid var(--accent-green); user-select: all; word-break: break-all;
+        }
 
         .pack-item {
             background-color: var(--card-inner); padding: 16px;
             border-radius: 8px; margin-bottom: 16px; border: 1px solid #45475A;
         }
 
-        /* MOCKUP CARD DE NOVIDADE FIEL AO PENSOUND */
+        .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
+
+        /* MOCKUP CARD DE NOVIDADE ESTILO PENSOUND */
         .pensound-card-preview {
             width: 100%; height: 210px; border-radius: 16px;
             position: relative; overflow: hidden;
@@ -133,7 +145,7 @@
 
         .pensound-card-overlay {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(180deg, rgba(15,15,22,0.4) 0%, rgba(15,15,22,0.85) 100%);
+            background: linear-gradient(180deg, rgba(15,15,22,0.3) 0%, rgba(15,15,22,0.85) 100%);
             z-index: 1;
         }
 
@@ -147,7 +159,6 @@
             font-size: 11px; font-weight: 800;
             padding: 4px 10px; border-radius: 6px;
             width: fit-content; text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .pensound-title {
@@ -165,7 +176,6 @@
             font-size: 13px; font-weight: 800;
             padding: 10px 18px; border-radius: 8px; border: none;
             width: fit-content; display: flex; align-items: center; gap: 6px;
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
         }
 
         /* TABELAS */
@@ -181,6 +191,8 @@
         th { background-color: #11111B; color: var(--accent-blue); }
 
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .badge-success { background-color: var(--accent-green); color: #11111B; }
+        .badge-warning { background-color: var(--accent-gold); color: #11111B; }
         .badge-purple { background-color: var(--accent-purple); color: #11111B; }
         .action-btns { display: flex; gap: 8px; }
 
@@ -193,6 +205,15 @@
             background-color: var(--card-bg); padding: 24px; border-radius: 12px;
             width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
         }
+
+        /* EDITOR VISUAL WAVESURFER */
+        .audio-editor-box {
+            background-color: #11111B; border: 1px solid var(--accent-purple);
+            border-radius: 8px; padding: 12px; margin-top: 10px; display: none;
+        }
+        .waveform-container { width: 100%; height: 80px; margin-bottom: 10px; }
+        .audio-editor-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .audio-editor-controls div { flex: 1; min-width: 120px; }
     </style>
 </head>
 <body>
@@ -201,9 +222,10 @@
     <div class="sidebar">
         <div class="sidebar-brand"><h2>⚡ PenSound Admin</h2></div>
         <ul class="sidebar-menu">
-            <li class="active" onclick="switchTab('tab-novidades', event)">🔥 Cards de Novidades</li>
+            <li class="active" onclick="switchTab('tab-novidades', event)">📢 Cards de Novidades</li>
             <li onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
             <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
+            <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
             <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
             <li onclick="switchTab('tab-update', event)">🚀 Atualização do App</li>
         </ul>
@@ -212,7 +234,7 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="main-content">
 
-        <!-- ABA 1: GERENCIAR CARDS DE NOVIDADE (DESTAQUE PENSOUND) -->
+        <!-- ABA 1: CARDS DE NOVIDADE / REPERTÓRIO (DESTAQUE) -->
         <div id="tab-novidades" class="tab-content active">
             <div class="card card-novidade">
                 <h3>🔥 Criar Card de Novidade / Repertório Destaque</h3>
@@ -247,8 +269,11 @@
                     <label>Imagem de Fundo do Card (Capa/Artista):</label>
                     <input type="file" id="novidadeImagemFile" accept="image/*" onchange="carregarImagemPreviewCard(this)">
 
-                    <label>ID do Pacote para Abrir ao Clicar (Opcional):</label>
+                    <label>ID do Pacote Associado (Opcional):</label>
                     <input type="text" id="novidadePackId" placeholder="Ex: id_do_pacote ou deixe em branco">
+
+                    <label style="color: var(--accent-gold);">Token do GitHub (PAT):</label>
+                    <input type="password" id="ghTokenNovidade" placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
 
                     <button type="submit" id="btnSalvarNovidade" class="btn-submit">PUBLICAR CARD NO APP</button>
                 </form>
@@ -274,35 +299,215 @@
             </div>
         </div>
 
-        <!-- OUTRAS ABAS PERMANECEM MANTIDAS NO CÓDIGO -->
+        <!-- ABA 2: PUBLICAR PACOTES -->
         <div id="tab-publicar" class="tab-content">
             <div class="card card-pack">
-                <h3>📦 Envio de Pacotes</h3>
-                <p style="color:var(--text-sub);">Publique seus pacotes e envie notificações push aos usuários.</p>
+                <h3>📦 Envio de Pacotes em Lote</h3>
+                <form id="packForm">
+                    <div id="cardsContainer">
+                        <div class="pack-item" id="pack-item-1">
+                            <h4>Pacote 1</h4>
+                            <label>Nome do Pacote:</label>
+                            <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
+                            
+                            <label>Categoria:</label>
+                            <select class="input-categoria">
+                                <option value="PAGODAO">PAGODÃO</option>
+                                <option value="ARROCHA">ARROCHA</option>
+                                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
+                                <option value="SAMBA">SAMBA</option>
+                                <option value="FORRO">FORRÓ</option>
+                                <option value="FUNK">FUNK</option>
+                                <option value="REPERTORIO">REPERTÓRIO</option>
+                                <option value="OUTROS">OUTROS</option>
+                            </select>
+                            
+                            <label>Capa do Pack (Imagem):</label>
+                            <input type="file" class="input-capa" accept="image/*" required>
+                            
+                            <label>Link Direto do ZIP (MediaFire Página/Google Drive):</label>
+                            <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
+
+                            <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload + Editor Visual):</label>
+                            <input type="file" class="input-audio-preview" accept="audio/*" onchange="carregarEditorAudio(this, 1)">
+
+                            <div class="audio-editor-box" id="editor-box-1">
+                                <div id="waveform-1" class="waveform-container"></div>
+                                <div class="audio-editor-controls">
+                                    <button type="button" class="btn-edit btn-small" id="btn-play-1" onclick="togglePlayAudio(1)">▶️ Ouvir Trecho</button>
+                                    <div>
+                                        <label style="margin:0; font-size:11px;">Início (seg):</label>
+                                        <input type="number" id="start-time-1" value="0" min="0" step="0.5" onchange="atualizarRegiaoManual(1)">
+                                    </div>
+                                    <div>
+                                        <label style="margin:0; font-size:11px;">Fim (seg):</label>
+                                        <input type="number" id="end-time-1" value="40" min="1" step="0.5" onchange="atualizarRegiaoManual(1)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
+                            <input type="url" class="input-audio-url" placeholder="https://res.cloudinary.com/.../audio.mp3">
+                        </div>
+                    </div>
+
+                    <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
+
+                    <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON):</label>
+                    <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
+
+                    <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
+                    <input type="password" id="ghToken" required placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
+
+                    <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
+                </form>
             </div>
         </div>
 
+        <!-- ABA 3: GERENCIAR PACOTES -->
         <div id="tab-pacotes" class="tab-content">
             <div class="card card-pack">
-                <h3>🎵 Pacotes Cadastrados</h3>
+                <h3>🎵 Lista de Pacotes Cadastrados</h3>
+                <input type="text" id="searchPacote" placeholder="🔎 Pesquisar pacote por nome ou categoria..." onkeyup="filtrarPacotes()">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Capa</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Preview</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaPacotesBody">
+                            <tr><td colspan="5">Carregando pacotes do GitHub...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
+        <!-- ABA 4: GERENCIAR BANNERS -->
+        <div id="tab-banners" class="tab-content">
+            <div class="card card-banner">
+                <h3>🎨 Editor de Banner</h3>
+
+                <label>Tipo de Banner:</label>
+                <select id="bannerLayoutType">
+                    <option value="CUSTOM">Customizado (Textos + Cores)</option>
+                    <option value="FULL_IMAGE">Imagem Cheia (Preenche o Card Todo)</option>
+                </select>
+                
+                <form id="bannerForm">
+                    <label>Texto da Tag/Selo:</label>
+                    <input type="text" id="bannerBadge" value="🔥 NOVIDADES">
+
+                    <label>Título Principal:</label>
+                    <input type="text" id="bannerTitulo" value="NOVOS PACOTES">
+
+                    <label>Subtítulo / Descrição:</label>
+                    <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!">
+
+                    <label>Texto do Botão de Ação:</label>
+                    <input type="text" id="bannerBtnText" value="CONFERIR AGORA ⚡">
+
+                    <label style="margin-top: 14px; color: var(--accent-gold);">Token do GitHub (PAT):</label>
+                    <input type="password" id="bannerGhToken" placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
+
+                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
+                </form>
+            </div>
+
+            <div class="card card-banner">
+                <h3>🖼️ Banners Publicados</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Imagem/Prévia</th>
+                                <th>Tipo</th>
+                                <th>Título/Info</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaBannersBody">
+                            <tr><td colspan="4">Carregando banners...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 5: GERENCIAR CHAVES VIP -->
         <div id="tab-vip" class="tab-content">
             <div class="card card-vip">
-                <h3>👑 Gestão de Chaves VIP</h3>
+                <h3>👑 Gerar Nova Chave VIP</h3>
+
+                <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
+                <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
+
+                <label for="vipTipoPlano">Selecione o Plano / Validade:</label>
+                <select id="vipTipoPlano">
+                    <option value="sorteio">🎁 Chave Sorteio (1 Dia / 24h) - Grátis</option>
+                    <option value="semanal">Semanal (7 Dias) - R$ 4,90</option>
+                    <option value="quinzenal">Quinzenal (15 Dias) - R$ 6,90</option>
+                    <option value="mensal">Mensal (30 Dias) - R$ 12,90</option>
+                    <option value="vitalicio">Vitalício (Para Sempre) - R$ 29,90</option>
+                </select>
+                
+                <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
+
+                <div id="boxResultadoVip" style="display: none;">
+                    <div class="chave-resultado" id="txtChaveGerada">---</div>
+                </div>
+            </div>
+
+            <div class="card card-vip">
+                <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
+                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP ou Device ID..." onkeyup="filtrarChavesVip()">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Chave</th>
+                                <th>Tipo / Plano</th>
+                                <th>Status / Dispositivo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaChavesBody">
+                            <tr><td colspan="4">Carregando chaves do Supabase...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
+        <!-- ABA 6: GERENCIAR ATUALIZAÇÃO DO APP -->
         <div id="tab-update" class="tab-content">
             <div class="card card-update">
-                <h3>🚀 Controle de Atualização</h3>
+                <h3>🚀 Controle de Atualização Obrigatória (Supabase)</h3>
+                <form id="updateForm">
+                    <label>Versão Mínima Exigida (versionCode no Android):</label>
+                    <input type="number" id="updateVersaoMinima" min="1" placeholder="Ex: 2" required>
+
+                    <label>Link Direto para Download do Novo APK:</label>
+                    <input type="url" id="updateUrlApk" placeholder="https://seusite.com/pensound-v2.apk" required>
+
+                    <label>Mensagem de Aviso Exibida na Tela do Usuário:</label>
+                    <textarea id="updateMensagem" rows="3" placeholder="Uma nova versão do PenSound está disponível com melhorias!" required></textarea>
+
+                    <button type="submit" id="btnSalvarUpdate" class="btn-update">FORÇAR ATUALIZAÇÃO NO SUPABASE</button>
+                </form>
             </div>
         </div>
 
     </div>
 
-    <!-- MODAL DE EDIÇÃO DO CARD -->
+    <!-- MODAL DE EDIÇÃO DE CARD DE NOVIDADE -->
     <div id="modalEditNovidade" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--accent-purple); margin-top:0;">Editar Card de Novidade</h3>
@@ -331,12 +536,14 @@
     </div>
 
     <script>
+        const SUPABASE_URL = "https://yxrqkhbjytbxwwswbvel.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4cnFraGJqeXRieHd3c3didmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjkzMTksImV4cCI6MjEwMzg0NTMxOX0.zjgkZKrT3dfsRsygMA7QKC33HTrw4I-Y21CE4k-qcyU";
+
         const CLOUD_NAME = "y5u5zkp7";
         const UPLOAD_PRESET = "ftpuvxis";
         const REPO = "thsize/botpensound";
 
         let globalNovidades = [];
-        let imagemUrlTemp = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800";
 
         function utf8ToBase64(str) {
             return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
@@ -352,6 +559,24 @@
             return cleanToken.startsWith('github_pat_') ? { 'Authorization': `Bearer ${cleanToken}` } : { 'Authorization': `token ${cleanToken}` };
         }
 
+        function salvarTokenLocal(val) {
+            const token = val.trim();
+            localStorage.setItem("gh_pat_token", token);
+            if (document.getElementById('ghTokenNovidade')) document.getElementById('ghTokenNovidade').value = token;
+            if (document.getElementById('ghToken')) document.getElementById('ghToken').value = token;
+            if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = token;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const tokenSalvo = localStorage.getItem("gh_pat_token");
+            if (tokenSalvo) {
+                if (document.getElementById('ghTokenNovidade')) document.getElementById('ghTokenNovidade').value = tokenSalvo;
+                if (document.getElementById('ghToken')) document.getElementById('ghToken').value = tokenSalvo;
+                if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = tokenSalvo;
+            }
+            carregarNovidadesGitHub();
+        });
+
         function switchTab(tabId, evt) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
@@ -360,7 +585,13 @@
             if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
             if (tabId === 'tab-novidades') carregarNovidadesGitHub();
+            if (tabId === 'tab-pacotes') carregarPacotesGitHub();
+            if (tabId === 'tab-banners') carregarBannersGitHub();
+            if (tabId === 'tab-vip') carregarChavesSupabase();
+            if (tabId === 'tab-update') carregarConfiguracaoUpdate();
         }
+
+        /* --- LÓGICA DE CARDS DE NOVIDADE --- */
 
         function atualizarPreviewCard() {
             document.getElementById('prevTag').innerText = document.getElementById('novidadeTag').value;
@@ -373,7 +604,6 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    imagemUrlTemp = e.target.result;
                     document.getElementById('previewCard').style.backgroundImage = `url('${e.target.result}')`;
                 }
                 reader.readAsDataURL(input.files[0]);
@@ -382,17 +612,21 @@
 
         async function carregarNovidadesGitHub() {
             const body = document.getElementById('listaNovidadesBody');
-            body.innerHTML = '<tr><td colspan="4">Carregando cards do GitHub...</td></tr>';
 
             try {
-                let token = localStorage.getItem("gh_pat_token");
+                let token = localStorage.getItem("gh_pat_token") || document.getElementById('ghTokenNovidade')?.value.trim();
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/novidades.json?t=${Date.now()}`;
+                
                 const res = await fetch(ghUrl, { headers: getAuthHeader(token) });
                 
-                if (!res.ok) {
+                if (res.status === 404) {
                     globalNovidades = [];
                     renderizarTabelaNovidades([]);
                     return;
+                }
+
+                if (!res.ok) {
+                    throw new Error(`Erro HTTP ${res.status}`);
                 }
 
                 const currentData = await res.json();
@@ -400,7 +634,8 @@
                 globalNovidades = contentText ? JSON.parse(contentText) : [];
                 renderizarTabelaNovidades(globalNovidades);
             } catch (e) {
-                body.innerHTML = '<tr><td colspan="4">Nenhum card cadastrado.</td></tr>';
+                console.warn("Erro ao carregar novidades do GitHub:", e);
+                renderizarTabelaNovidades([]);
             }
         }
 
@@ -409,15 +644,17 @@
             body.innerHTML = '';
 
             if (!novidades || novidades.length === 0) {
-                body.innerHTML = '<tr><td colspan="4">Nenhum card de novidade cadastrado.</td></tr>';
+                body.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-sub);">Nenhum card de novidade cadastrado.</td></tr>';
                 return;
             }
 
             novidades.forEach((nov) => {
                 const tr = document.createElement('tr');
+                const imgThumb = nov.imagemBg || nov.imagemUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800';
+                
                 tr.innerHTML = `
-                    <td><img src="${nov.imagemBg || nov.imagemUrl}" width="60" height="35" style="border-radius:6px; object-fit:cover;"></td>
-                    <td><span class="badge badge-purple">${nov.tag || nov.selo}</span></td>
+                    <td><img src="${imgThumb}" width="60" height="35" style="border-radius:6px; object-fit:cover;"></td>
+                    <td><span class="badge badge-purple">${nov.tag || nov.selo || 'NOVIDADE'}</span></td>
                     <td><b>${nov.titulo}</b><br><small style="color:var(--text-sub);">${nov.subtitulo}</small></td>
                     <td>
                         <div class="action-btns">
@@ -433,12 +670,12 @@
         document.getElementById('novidadeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSalvarNovidade');
-            let token = localStorage.getItem("gh_pat_token");
+            let token = document.getElementById('ghTokenNovidade').value.trim() || localStorage.getItem("gh_pat_token");
 
             if (!token) {
                 token = prompt("Digite seu Token do GitHub (PAT):");
                 if (!token) return;
-                localStorage.setItem("gh_pat_token", token);
+                salvarTokenLocal(token);
             }
 
             btn.disabled = true;
@@ -496,7 +733,7 @@
                     body: JSON.stringify(bodyPayload)
                 });
 
-                if (!ghRes.ok) throw new Error("Erro ao salvar card no GitHub.");
+                if (!ghRes.ok) throw new Error("Erro ao salvar card no GitHub. Verifique o Token.");
 
                 alert("Card de Novidade publicado no app PenSound com sucesso!");
                 carregarNovidadesGitHub();
@@ -513,10 +750,10 @@
             if (!nov) return;
 
             document.getElementById('editNovidadeId').value = nov.id;
-            document.getElementById('editNovidadeTag').value = nov.tag || nov.selo;
-            document.getElementById('editNovidadeTitulo').value = nov.titulo;
-            document.getElementById('editNovidadeSubtitulo').value = nov.subtitulo;
-            document.getElementById('editNovidadeBtnText').value = nov.btnText || nov.btnTexto;
+            document.getElementById('editNovidadeTag').value = nov.tag || nov.selo || '';
+            document.getElementById('editNovidadeTitulo').value = nov.titulo || '';
+            document.getElementById('editNovidadeSubtitulo').value = nov.subtitulo || '';
+            document.getElementById('editNovidadeBtnText').value = nov.btnText || nov.btnTexto || '';
             document.getElementById('editNovidadePackId').value = nov.packId || "";
 
             document.getElementById('modalEditNovidade').style.display = 'flex';
@@ -528,7 +765,7 @@
 
         async function salvarEdicaoNovidade() {
             const id = document.getElementById('editNovidadeId').value;
-            const token = localStorage.getItem("gh_pat_token");
+            const token = localStorage.getItem("gh_pat_token") || document.getElementById('ghTokenNovidade').value.trim();
 
             const index = globalNovidades.findIndex(n => String(n.id) === String(id));
             if (index === -1) return;
@@ -568,7 +805,7 @@
 
         async function excluirNovidade(id) {
             if (!confirm("Deseja realmente excluir este card de novidade?")) return;
-            const token = localStorage.getItem("gh_pat_token");
+            const token = localStorage.getItem("gh_pat_token") || document.getElementById('ghTokenNovidade').value.trim();
 
             try {
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/novidades.json`;
