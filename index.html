@@ -220,6 +220,9 @@
                                 <option value="REPERTORIO">REPERTÓRIO</option>
                                 <option value="OUTROS">OUTROS</option>
                             </select>
+
+                            <label style="color: var(--accent-gold);">💾 Tamanho do Pacote (MB/GB):</label>
+                            <input type="text" class="input-tamanho" placeholder="Ex: 350 MB ou 1.2 GB" value="ZIP">
                             
                             <label>Capa do Pack (Imagem):</label>
                             <input type="file" class="input-capa" accept="image/*" required>
@@ -283,12 +286,13 @@
                                 <th>Capa</th>
                                 <th>Nome</th>
                                 <th>Categoria</th>
+                                <th>Tamanho</th>
                                 <th>Preview</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="listaPacotesBody">
-                            <tr><td colspan="5">Carregando pacotes do GitHub...</td></tr>
+                            <tr><td colspan="6">Carregando pacotes do GitHub...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -473,7 +477,7 @@
 
     </div>
 
-    <!-- MODAL DE EDIÇÃO DE PACOTE (COM OPÇÃO DE UPLOAD DE NOVA CAPA) -->
+    <!-- MODAL DE EDIÇÃO DE PACOTE (COM OPÇÃO DE UPLOAD DE NOVA CAPA E TAMANHO) -->
     <div id="modalEditPacote" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
@@ -493,6 +497,9 @@
                 <option value="REPERTORIO">REPERTÓRIO</option>
                 <option value="OUTROS">OUTROS</option>
             </select>
+
+            <label style="color: var(--accent-gold);">💾 Tamanho do Pacote (ex: 250 MB ou 1.2 GB):</label>
+            <input type="text" id="editPackTamanho" placeholder="Ex: 350 MB ou 1.2 GB">
 
             <label style="color: var(--accent-gold);">📸 Trocar Imagem da Capa (Opcional):</label>
             <input type="file" id="editPackCapaFile" accept="image/*">
@@ -1283,7 +1290,7 @@
 
         async function carregarPacotesGitHub() {
             const body = document.getElementById('listaPacotesBody');
-            body.innerHTML = '<tr><td colspan="5">Buscando do GitHub...</td></tr>';
+            body.innerHTML = '<tr><td colspan="6">Buscando do GitHub...</td></tr>';
 
             try {
                 let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
@@ -1300,7 +1307,7 @@
 
                 renderizarTabelaPacotes(globalPacotes);
             } catch (e) {
-                body.innerHTML = '<tr><td colspan="5">Erro ao carregar pacotes. Verifique o repositório.</td></tr>';
+                body.innerHTML = '<tr><td colspan="6">Erro ao carregar pacotes. Verifique o repositório.</td></tr>';
             }
         }
 
@@ -1309,7 +1316,7 @@
             body.innerHTML = '';
 
             if (pacotes.length === 0) {
-                body.innerHTML = '<tr><td colspan="5">Nenhum pacote publicado.</td></tr>';
+                body.innerHTML = '<tr><td colspan="6">Nenhum pacote publicado.</td></tr>';
                 return;
             }
 
@@ -1320,10 +1327,13 @@
                     ? `<span class="badge badge-success">🎧 COM ÁUDIO</span>` 
                     : `<span class="badge badge-warning">SEM ÁUDIO</span>`;
 
+                const tamanhoExibicao = pack.tamanho || pack.size || pack.sizeFormatted || "ZIP";
+
                 tr.innerHTML = `
                     <td><img src="${pack.capa || pack.cover_url}" width="45" height="45" style="border-radius:6px; object-fit:cover;"></td>
                     <td><b>${pack.nome || pack.title}</b></td>
                     <td><span class="badge badge-success">${(pack.categoria || pack.type || pack.category || 'PAGODAO').toUpperCase()}</span></td>
+                    <td><span class="badge badge-purple">${tamanhoExibicao}</span></td>
                     <td>${temAudio}</td>
                     <td>
                         <div class="action-btns">
@@ -1352,6 +1362,7 @@
             document.getElementById('editPackId').value = targetId;
             document.getElementById('editPackNome').value = pack.nome || pack.title;
             document.getElementById('editPackCategoria').value = pack.categoria || pack.type || pack.category || "PAGODAO";
+            document.getElementById('editPackTamanho').value = pack.tamanho || pack.size || pack.sizeFormatted || "ZIP";
             document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
             document.getElementById('editPackPreviewUrl').value = pack.previewUrl || pack.preview_url || "";
             document.getElementById('editPackAudioFile').value = "";
@@ -1388,6 +1399,7 @@
             try {
                 const novoNome = document.getElementById('editPackNome').value.trim();
                 const novaCategoria = document.getElementById('editPackCategoria').value;
+                const novoTamanho = document.getElementById('editPackTamanho').value.trim() || "ZIP";
                 const novoDownload = document.getElementById('editPackDownload').value.trim();
                 const inputAudioUrl = document.getElementById('editPackPreviewUrl').value.trim();
                 const inputAudioFile = document.getElementById('editPackAudioFile');
@@ -1449,6 +1461,9 @@
                 globalPacotes[index].categoria = novaCategoria;
                 globalPacotes[index].type = novaCategoria;
                 globalPacotes[index].category = novaCategoria;
+                globalPacotes[index].tamanho = novoTamanho;
+                globalPacotes[index].size = novoTamanho;
+                globalPacotes[index].sizeFormatted = novoTamanho;
                 globalPacotes[index].download = novoDownload;
                 globalPacotes[index].zip_url = novoDownload;
                 globalPacotes[index].capa = capaUrlFinal;
@@ -1625,6 +1640,8 @@
                     <option value="REPERTORIO">REPERTÓRIO</option>
                     <option value="OUTROS">OUTROS</option>
                 </select>
+                <label style="color: var(--accent-gold);">💾 Tamanho do Pacote (MB/GB):</label>
+                <input type="text" class="input-tamanho" placeholder="Ex: 350 MB ou 1.2 GB" value="ZIP">
                 <label>Capa do Pack (Imagem):</label>
                 <input type="file" class="input-capa" accept="image/*" required>
                 <label>Link Direto do ZIP:</label>
@@ -1745,6 +1762,7 @@
                     const instanceId = i + 1;
                     const nome = card.querySelector('.input-nome').value.trim();
                     const categoria = card.querySelector('.input-categoria').value;
+                    const tamanho = card.querySelector('.input-tamanho').value.trim() || "ZIP";
                     const file = card.querySelector('.input-capa').files[0];
                     const download = card.querySelector('.input-download').value.trim();
                     
@@ -1803,12 +1821,13 @@
                             id: packId,
                             nome: nome, title: nome,
                             categoria: categoria, type: categoria, category: categoria,
+                            tamanho: tamanho, size: tamanho, sizeFormatted: tamanho,
                             capa: resImg.secure_url, cover_url: resImg.secure_url,
                             download: download, zip_url: download,
                             previewUrl: previewUrlFinal, preview_url: previewUrlFinal
                         };
 
-                        content.push(novoPack);
+                        content.unshift(novoPack);
                         ultimosPacotes.push(novoPack);
                         pacotesAdicionados++;
 
