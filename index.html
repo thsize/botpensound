@@ -244,6 +244,15 @@
 
                     <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
 
+                    <!-- GERENCIAMENTO DA MENSAGEM DO CARD E NOTIFICAÇÃO PUSH -->
+                    <div style="background-color: var(--card-inner); padding: 16px; border-radius: 8px; margin-top: 20px; border: 1px solid var(--accent-blue);">
+                        <label style="color: var(--accent-blue); margin-top: 0;">💬 Título da Novidade / Notificação Push:</label>
+                        <input type="text" id="inputTituloNovidade" value="🔥 Novo Repertório Liberado!" placeholder="Ex: 🔥 NOVO REPERTÓRIO DISPONÍVEL!">
+
+                        <label style="color: var(--text-sub);">📝 Descrição Personalizada (Opcional - Deixe em branco para automático):</label>
+                        <input type="text" id="inputDescricaoNovidade" placeholder="Ex: Confira o novo repertório atualizado no PenSound!">
+                    </div>
+
                     <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON):</label>
                     <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
 
@@ -297,7 +306,7 @@
                         <div id="customBannerView" style="width:100%; height:100%; display:flex; align-items:center;">
                             <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF;">🔥 NOVIDADES</div>
                             <div class="info-area">
-                                <p id="prevTitulo" class="info-title" style="color: #FFFFFF;">NOVOS PACOTES</p>
+                                <p id="prevTitulo" class="info-title" style="color: #FFFFFF;">NOVO REPERTÓRIO</p>
                                 <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8;">Confira os últimos lançamentos!</p>
                                 <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF;">CONFERIR AGORA ⚡</div>
                             </div>
@@ -313,7 +322,7 @@
                         <input type="text" id="bannerBadge" value="🔥 NOVIDADES" oninput="atualizarPreview()">
 
                         <label>Título Principal:</label>
-                        <input type="text" id="bannerTitulo" value="NOVOS PACOTES" oninput="atualizarPreview()">
+                        <input type="text" id="bannerTitulo" value="NOVO REPERTÓRIO" oninput="atualizarPreview()">
 
                         <label>Subtítulo / Descrição:</label>
                         <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!" oninput="atualizarPreview()">
@@ -1120,7 +1129,6 @@
             btn.disabled = true;
             btn.innerText = "Gerando...";
 
-            // Define o prefixo do código de acordo com o plano
             const prefixo = tipo === 'sorteio' ? 'SORTEIO' : 'PENSOUND';
 
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -1609,8 +1617,11 @@
             return data.access_token;
         }
 
-        async function dispararNotificacaoV1(tokenAccessToken, packNome, packCategoria) {
+        async function dispararNotificacaoV1(tokenAccessToken, packNome, packCategoria, tituloCustom, textoCustom) {
             const fcmUrl = `https://fcm.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/messages:send`;
+            const tituloFinal = tituloCustom || "🔥 Novo Repertório Liberado!";
+            const corpoFinal = textoCustom || `O repertório "${packNome}" [${packCategoria}] já está disponível no PenSound!`;
+
             await fetch(fcmUrl, {
                 method: "POST",
                 headers: {
@@ -1621,8 +1632,8 @@
                     message: {
                         topic: "todos",
                         notification: {
-                            title: "🔥 Novo Pack Liberado!",
-                            body: `O pacote "${packNome}" [${packCategoria}] já está disponível no PenSound!`
+                            title: tituloFinal,
+                            body: corpoFinal
                         },
                         android: {
                             priority: "HIGH",
@@ -1648,6 +1659,9 @@
 
                 const privateKey = document.getElementById('firebaseKeyInput').value.trim();
                 const cards = document.querySelectorAll('.pack-item');
+
+                const tituloNovidade = document.getElementById('inputTituloNovidade')?.value.trim() || "🔥 Novo Repertório Liberado!";
+                const descNovidade = document.getElementById('inputDescricaoNovidade')?.value.trim();
 
                 btn.innerText = "Lendo repositório...";
                 const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
@@ -1759,7 +1773,8 @@
                 try {
                     const accessToken = await getFirebaseAccessToken(privateKey);
                     for (const pack of ultimosPacotes) {
-                        await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria);
+                        const textoMensagem = descNovidade || `O repertório "${pack.nome}" [${pack.categoria}] já está disponível no PenSound!`;
+                        await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria, tituloNovidade, textoMensagem);
                     }
                 } catch (errFcm) {
                     console.warn("Falha no disparo FCM:", errFcm);
