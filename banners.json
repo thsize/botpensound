@@ -1,18 +1,1 @@
-[
-  {
-    "id": "1789471686869",
-    "layoutType": "CUSTOM",
-    "badge": "ATENÇÃO!!",
-    "titulo": "VERSÃO BETA E PODE CONTER BUGS👍🏼",
-    "subtitulo": "PENSOUND",
-    "btnText": "Mensagem",
-    "bgColor": "#3e0c85",
-    "borderColor": "#ffff00",
-    "accentColor": "#f2f200",
-    "titleColor": "#ffffff",
-    "imagemUrl": "",
-    "clicavel": false,
-    "tipoDestino": "PACK",
-    "destinoId": ""
-  }
-]
+[]
