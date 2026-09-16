@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PenSound Admin - Gestão Completa</title>
 
-    <!-- Lib para assinar JWT para notificação FCM -->
+    <!-- Lib JWT para FCM -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
     
-    <!-- Wavesurfer.js e Plugin Regions para Editor Visual de Áudio -->
+    <!-- Wavesurfer.js e Plugin Regions -->
     <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
     <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.min.js"></script>
 
@@ -83,7 +83,6 @@
         .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 20px; }
         .card-vip h3 { color: var(--accent-gold); }
         .card-pack h3 { color: var(--accent-purple); }
-        .card-banner h3 { color: var(--accent-blue); }
         .card-novidade h3 { color: var(--accent-purple); }
         .card-update h3 { color: var(--accent-red); }
 
@@ -118,21 +117,12 @@
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
 
-        .chave-resultado {
-            font-size: 18px; font-weight: bold; color: var(--accent-green);
-            text-align: center; margin-top: 14px; padding: 12px;
-            background-color: var(--card-inner); border-radius: 8px;
-            border: 1px solid var(--accent-green); user-select: all; word-break: break-all;
-        }
-
         .pack-item {
             background-color: var(--card-inner); padding: 16px;
             border-radius: 8px; margin-bottom: 16px; border: 1px solid #45475A;
         }
 
-        .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
-
-        /* MOCKUP CARD DE NOVIDADE ESTILO PENSOUND */
+        /* MOCKUP CARD DE NOVIDADE PENSOUND */
         .pensound-card-preview {
             width: 100%; height: 210px; border-radius: 16px;
             position: relative; overflow: hidden;
@@ -191,8 +181,6 @@
         th { background-color: #11111B; color: var(--accent-blue); }
 
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .badge-success { background-color: var(--accent-green); color: #11111B; }
-        .badge-warning { background-color: var(--accent-gold); color: #11111B; }
         .badge-purple { background-color: var(--accent-purple); color: #11111B; }
         .action-btns { display: flex; gap: 8px; }
 
@@ -206,7 +194,6 @@
             width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
         }
 
-        /* EDITOR VISUAL WAVESURFER */
         .audio-editor-box {
             background-color: #11111B; border: 1px solid var(--accent-purple);
             border-radius: 8px; padding: 12px; margin-top: 10px; display: none;
@@ -225,7 +212,6 @@
             <li class="active" onclick="switchTab('tab-novidades', event)">📢 Cards de Novidades</li>
             <li onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
             <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
-            <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
             <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
             <li onclick="switchTab('tab-update', event)">🚀 Atualização do App</li>
         </ul>
@@ -234,12 +220,12 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="main-content">
 
-        <!-- ABA 1: CARDS DE NOVIDADE / REPERTÓRIO (DESTAQUE) -->
+        <!-- ABA 1: CARDS DE NOVIDADE / BANNERS DO APP -->
         <div id="tab-novidades" class="tab-content active">
             <div class="card card-novidade">
                 <h3>🔥 Criar Card de Novidade / Repertório Destaque</h3>
 
-                <span style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 10px;">PRÉ-VISUALIZAÇÃO EM TEMPO REAL NO ESTILO PENSOUND:</span>
+                <span style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 10px;">PRÉ-VISUALIZAÇÃO DO CARD DO PENSOUND:</span>
                 
                 <div class="pensound-card-preview" id="previewCard" style="background-image: url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800');">
                     <div class="pensound-card-overlay"></div>
@@ -280,7 +266,7 @@
             </div>
 
             <div class="card card-novidade">
-                <h3>📋 Cards Publicados no Carrossel</h3>
+                <h3>📋 Banners / Cards Ativos em banners.json</h3>
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -292,7 +278,7 @@
                             </tr>
                         </thead>
                         <tbody id="listaNovidadesBody">
-                            <tr><td colspan="4">Carregando cards...</td></tr>
+                            <tr><td colspan="4">Carregando do GitHub...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -389,117 +375,38 @@
             </div>
         </div>
 
-        <!-- ABA 4: GERENCIAR BANNERS -->
-        <div id="tab-banners" class="tab-content">
-            <div class="card card-banner">
-                <h3>🎨 Editor de Banner</h3>
-
-                <label>Tipo de Banner:</label>
-                <select id="bannerLayoutType">
-                    <option value="CUSTOM">Customizado (Textos + Cores)</option>
-                    <option value="FULL_IMAGE">Imagem Cheia (Preenche o Card Todo)</option>
-                </select>
-                
-                <form id="bannerForm">
-                    <label>Texto da Tag/Selo:</label>
-                    <input type="text" id="bannerBadge" value="🔥 NOVIDADES">
-
-                    <label>Título Principal:</label>
-                    <input type="text" id="bannerTitulo" value="NOVOS PACOTES">
-
-                    <label>Subtítulo / Descrição:</label>
-                    <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!">
-
-                    <label>Texto do Botão de Ação:</label>
-                    <input type="text" id="bannerBtnText" value="CONFERIR AGORA ⚡">
-
-                    <label style="margin-top: 14px; color: var(--accent-gold);">Token do GitHub (PAT):</label>
-                    <input type="password" id="bannerGhToken" placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
-
-                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
-                </form>
-            </div>
-
-            <div class="card card-banner">
-                <h3>🖼️ Banners Publicados</h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Imagem/Prévia</th>
-                                <th>Tipo</th>
-                                <th>Título/Info</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaBannersBody">
-                            <tr><td colspan="4">Carregando banners...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ABA 5: GERENCIAR CHAVES VIP -->
+        <!-- ABA 4: GERENCIAR CHAVES VIP -->
         <div id="tab-vip" class="tab-content">
             <div class="card card-vip">
                 <h3>👑 Gerar Nova Chave VIP</h3>
+                <label>ID do Aparelho / Nome do Cliente:</label>
+                <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João">
 
-                <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
-                <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
-
-                <label for="vipTipoPlano">Selecione o Plano / Validade:</label>
+                <label for="vipTipoPlano">Plano / Validade:</label>
                 <select id="vipTipoPlano">
-                    <option value="sorteio">🎁 Chave Sorteio (1 Dia / 24h) - Grátis</option>
-                    <option value="semanal">Semanal (7 Dias) - R$ 4,90</option>
-                    <option value="quinzenal">Quinzenal (15 Dias) - R$ 6,90</option>
-                    <option value="mensal">Mensal (30 Dias) - R$ 12,90</option>
-                    <option value="vitalicio">Vitalício (Para Sempre) - R$ 29,90</option>
+                    <option value="sorteio">🎁 Sorteio (1 Dia)</option>
+                    <option value="semanal">Semanal (7 Dias)</option>
+                    <option value="quinzenal">Quinzenal (15 Dias)</option>
+                    <option value="mensal">Mensal (30 Dias)</option>
+                    <option value="vitalicio">Vitalício</option>
                 </select>
                 
                 <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
-
-                <div id="boxResultadoVip" style="display: none;">
-                    <div class="chave-resultado" id="txtChaveGerada">---</div>
-                </div>
-            </div>
-
-            <div class="card card-vip">
-                <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
-                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP ou Device ID..." onkeyup="filtrarChavesVip()">
-                
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Chave</th>
-                                <th>Tipo / Plano</th>
-                                <th>Status / Dispositivo</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaChavesBody">
-                            <tr><td colspan="4">Carregando chaves do Supabase...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <div id="boxResultadoVip" style="display: none;"><div class="chave-resultado" id="txtChaveGerada">---</div></div>
             </div>
         </div>
 
-        <!-- ABA 6: GERENCIAR ATUALIZAÇÃO DO APP -->
+        <!-- ABA 5: ATUALIZAÇÃO DO APP -->
         <div id="tab-update" class="tab-content">
             <div class="card card-update">
-                <h3>🚀 Controle de Atualização Obrigatória (Supabase)</h3>
+                <h3>🚀 Controle de Atualização Obrigatória</h3>
                 <form id="updateForm">
-                    <label>Versão Mínima Exigida (versionCode no Android):</label>
-                    <input type="number" id="updateVersaoMinima" min="1" placeholder="Ex: 2" required>
-
-                    <label>Link Direto para Download do Novo APK:</label>
-                    <input type="url" id="updateUrlApk" placeholder="https://seusite.com/pensound-v2.apk" required>
-
-                    <label>Mensagem de Aviso Exibida na Tela do Usuário:</label>
-                    <textarea id="updateMensagem" rows="3" placeholder="Uma nova versão do PenSound está disponível com melhorias!" required></textarea>
-
+                    <label>Versão Mínima Exigida:</label>
+                    <input type="number" id="updateVersaoMinima" min="1" required>
+                    <label>Link Direto para APK:</label>
+                    <input type="url" id="updateUrlApk" required>
+                    <label>Mensagem de Aviso:</label>
+                    <textarea id="updateMensagem" rows="3" required></textarea>
                     <button type="submit" id="btnSalvarUpdate" class="btn-update">FORÇAR ATUALIZAÇÃO NO SUPABASE</button>
                 </form>
             </div>
@@ -536,9 +443,6 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://yxrqkhbjytbxwwswbvel.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4cnFraGJqeXRieHd3c3didmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjkzMTksImV4cCI6MjEwMzg0NTMxOX0.zjgkZKrT3dfsRsygMA7QKC33HTrw4I-Y21CE4k-qcyU";
-
         const CLOUD_NAME = "y5u5zkp7";
         const UPLOAD_PRESET = "ftpuvxis";
         const REPO = "thsize/botpensound";
@@ -564,7 +468,6 @@
             localStorage.setItem("gh_pat_token", token);
             if (document.getElementById('ghTokenNovidade')) document.getElementById('ghTokenNovidade').value = token;
             if (document.getElementById('ghToken')) document.getElementById('ghToken').value = token;
-            if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = token;
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -572,7 +475,6 @@
             if (tokenSalvo) {
                 if (document.getElementById('ghTokenNovidade')) document.getElementById('ghTokenNovidade').value = tokenSalvo;
                 if (document.getElementById('ghToken')) document.getElementById('ghToken').value = tokenSalvo;
-                if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = tokenSalvo;
             }
             carregarNovidadesGitHub();
         });
@@ -585,13 +487,7 @@
             if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
             if (tabId === 'tab-novidades') carregarNovidadesGitHub();
-            if (tabId === 'tab-pacotes') carregarPacotesGitHub();
-            if (tabId === 'tab-banners') carregarBannersGitHub();
-            if (tabId === 'tab-vip') carregarChavesSupabase();
-            if (tabId === 'tab-update') carregarConfiguracaoUpdate();
         }
-
-        /* --- LÓGICA DE CARDS DE NOVIDADE --- */
 
         function atualizarPreviewCard() {
             document.getElementById('prevTag').innerText = document.getElementById('novidadeTag').value;
@@ -610,12 +506,13 @@
             }
         }
 
+        /* LER BANNERS/NOVIDADES DIRETAMENTE DE BANNERS.JSON */
         async function carregarNovidadesGitHub() {
             const body = document.getElementById('listaNovidadesBody');
 
             try {
                 let token = localStorage.getItem("gh_pat_token") || document.getElementById('ghTokenNovidade')?.value.trim();
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/novidades.json?t=${Date.now()}`;
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json?t=${Date.now()}`;
                 
                 const res = await fetch(ghUrl, { headers: getAuthHeader(token) });
                 
@@ -625,16 +522,14 @@
                     return;
                 }
 
-                if (!res.ok) {
-                    throw new Error(`Erro HTTP ${res.status}`);
-                }
+                if (!res.ok) throw new Error(`Erro HTTP ${res.status}`);
 
                 const currentData = await res.json();
                 const contentText = base64ToUtf8(currentData.content).trim();
                 globalNovidades = contentText ? JSON.parse(contentText) : [];
                 renderizarTabelaNovidades(globalNovidades);
             } catch (e) {
-                console.warn("Erro ao carregar novidades do GitHub:", e);
+                console.warn("Erro ao carregar do GitHub:", e);
                 renderizarTabelaNovidades([]);
             }
         }
@@ -644,18 +539,18 @@
             body.innerHTML = '';
 
             if (!novidades || novidades.length === 0) {
-                body.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-sub);">Nenhum card de novidade cadastrado.</td></tr>';
+                body.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-sub);">Nenhum card cadastrado em banners.json.</td></tr>';
                 return;
             }
 
             novidades.forEach((nov) => {
                 const tr = document.createElement('tr');
-                const imgThumb = nov.imagemBg || nov.imagemUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800';
+                const imgThumb = nov.imagemBg || nov.imagemUrl || nov.imagem || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800';
                 
                 tr.innerHTML = `
                     <td><img src="${imgThumb}" width="60" height="35" style="border-radius:6px; object-fit:cover;"></td>
-                    <td><span class="badge badge-purple">${nov.tag || nov.selo || 'NOVIDADE'}</span></td>
-                    <td><b>${nov.titulo}</b><br><small style="color:var(--text-sub);">${nov.subtitulo}</small></td>
+                    <td><span class="badge badge-purple">${nov.tag || nov.badge || nov.selo || '🔥 NOVIDADE'}</span></td>
+                    <td><b>${nov.titulo || nov.title || 'Sem Título'}</b><br><small style="color:var(--text-sub);">${nov.subtitulo || nov.subtitle || ''}</small></td>
                     <td>
                         <div class="action-btns">
                             <button class="btn-edit" onclick="abrirEdicaoNovidade('${nov.id}')">Editar</button>
@@ -700,7 +595,7 @@
                 }
 
                 btn.innerText = "Atualizando GitHub...";
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/novidades.json`;
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
                 let currentSha = "";
                 let listaAtuais = [];
 
@@ -714,11 +609,14 @@
                 const novaNovidade = {
                     id: Date.now().toString(),
                     tag: document.getElementById('novidadeTag').value.trim(),
+                    badge: document.getElementById('novidadeTag').value.trim(),
                     titulo: document.getElementById('novidadeTitulo').value.trim(),
                     subtitulo: document.getElementById('novidadeSubtitulo').value.trim(),
                     btnText: document.getElementById('novidadeBtnText').value.trim(),
                     imagemBg: finalImgUrl,
-                    packId: document.getElementById('novidadePackId').value.trim()
+                    imagemUrl: finalImgUrl,
+                    packId: document.getElementById('novidadePackId').value.trim(),
+                    clicavel: true
                 };
 
                 listaAtuais.unshift(novaNovidade);
@@ -750,9 +648,9 @@
             if (!nov) return;
 
             document.getElementById('editNovidadeId').value = nov.id;
-            document.getElementById('editNovidadeTag').value = nov.tag || nov.selo || '';
-            document.getElementById('editNovidadeTitulo').value = nov.titulo || '';
-            document.getElementById('editNovidadeSubtitulo').value = nov.subtitulo || '';
+            document.getElementById('editNovidadeTag').value = nov.tag || nov.badge || nov.selo || '';
+            document.getElementById('editNovidadeTitulo').value = nov.titulo || nov.title || '';
+            document.getElementById('editNovidadeSubtitulo').value = nov.subtitulo || nov.subtitle || '';
             document.getElementById('editNovidadeBtnText').value = nov.btnText || nov.btnTexto || '';
             document.getElementById('editNovidadePackId').value = nov.packId || "";
 
@@ -770,14 +668,21 @@
             const index = globalNovidades.findIndex(n => String(n.id) === String(id));
             if (index === -1) return;
 
-            globalNovidades[index].tag = document.getElementById('editNovidadeTag').value.trim();
-            globalNovidades[index].titulo = document.getElementById('editNovidadeTitulo').value.trim();
-            globalNovidades[index].subtitulo = document.getElementById('editNovidadeSubtitulo').value.trim();
+            const novoTag = document.getElementById('editNovidadeTag').value.trim();
+            const novoTitulo = document.getElementById('editNovidadeTitulo').value.trim();
+            const novoSubtitulo = document.getElementById('editNovidadeSubtitulo').value.trim();
+
+            globalNovidades[index].tag = novoTag;
+            globalNovidades[index].badge = novoTag;
+            globalNovidades[index].titulo = novoTitulo;
+            globalNovidades[index].title = novoTitulo;
+            globalNovidades[index].subtitulo = novoSubtitulo;
+            globalNovidades[index].subtitle = novoSubtitulo;
             globalNovidades[index].btnText = document.getElementById('editNovidadeBtnText').value.trim();
             globalNovidades[index].packId = document.getElementById('editNovidadePackId').value.trim();
 
             try {
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/novidades.json`;
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
                 const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
                 const currentData = await getRes.json();
 
@@ -804,11 +709,11 @@
         }
 
         async function excluirNovidade(id) {
-            if (!confirm("Deseja realmente excluir este card de novidade?")) return;
+            if (!confirm("Deseja realmente excluir este card?")) return;
             const token = localStorage.getItem("gh_pat_token") || document.getElementById('ghTokenNovidade').value.trim();
 
             try {
-                const ghUrl = `https://api.github.com/repos/${REPO}/contents/novidades.json`;
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
                 const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
                 const currentData = await getRes.json();
 
