@@ -1303,7 +1303,10 @@
                 globalShaGitHub = currentData.sha;
 
                 const contentText = base64ToUtf8(currentData.content).trim();
-                globalPacotes = contentText ? JSON.parse(contentText) : [];
+                let pacotesLidos = contentText ? JSON.parse(contentText) : [];
+
+                // Garante que o painel sempre liste os pacotes do id mais novo ao mais antigo
+                globalPacotes = pacotesLidos.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
 
                 renderizarTabelaPacotes(globalPacotes);
             } catch (e) {
@@ -1757,6 +1760,9 @@
                 let ultimosPacotes = [];
                 let novosBanners = [];
 
+                // Array auxiliar para os lotes
+                let loteNovosPacotes = [];
+
                 for (let i = 0; i < cards.length; i++) {
                     const card = cards[i];
                     const instanceId = i + 1;
@@ -1827,7 +1833,7 @@
                             previewUrl: previewUrlFinal, preview_url: previewUrlFinal
                         };
 
-                        content.unshift(novoPack);
+                        loteNovosPacotes.push(novoPack);
                         ultimosPacotes.push(novoPack);
                         pacotesAdicionados++;
 
@@ -1862,6 +1868,11 @@
                             destinoId: packId
                         });
                     }
+                }
+
+                // Insere os novos pacotes sempre no TOPO da lista mantendo a ordem correta
+                for (let j = loteNovosPacotes.length - 1; j >= 0; j--) {
+                    content.unshift(loteNovosPacotes[j]);
                 }
 
                 btn.innerText = "Atualizando pacotes.json no GitHub...";
