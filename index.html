@@ -1783,7 +1783,7 @@
                         else if (catUpper === "PAGODAO") tagTexto = "⚡ NOVO PAGODÃO";
                         else if (catUpper === "ARROCHA") tagTexto = "⚡ NOVO ARROCHA";
 
-                        // MONTA O CARD CUSTOMIZADO PARA O BANNERS.JSON
+                        // MONTA O CARD CUSTOMIZADO COM FOTO DA CAPA NO FUNDO PARA O BANNERS.JSON
                         novosBanners.push({
                             id: packId,
                             layoutType: "CUSTOM",
@@ -1792,7 +1792,7 @@
                             nome: nome,
                             title: nome,
                             titulo: nome,
-                            subtitulo: nome,
+                            subtitulo: "Disponível para download!",
                             categoria: categoria,
                             type: categoria,
                             btnText: "BAIXAR PACOTE 🎧",
@@ -1800,9 +1800,10 @@
                             borderColor: "#9D00FF",
                             accentColor: "#9D00FF",
                             titleColor: "#FFFFFF",
-                            imagemUrl: "",
+                            imagemUrl: resImg.secure_url, // URL da foto enviada para a capa
                             capa: resImg.secure_url,
                             cover_url: resImg.secure_url,
+                            imagemBg: resImg.secure_url,
                             clicavel: true,
                             tipoDestino: "PACK",
                             destinoId: packId
