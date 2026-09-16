@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PenSound Admin - Gestão Completa</title>
 
-    <!-- Lib para assinar JWT para notificação FCM -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
-    
-    <!-- Wavesurfer.js e Plugin Regions para Editor Visual de Áudio -->
     <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
     <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.min.js"></script>
 
@@ -39,7 +36,6 @@
             flex-direction: row;
         }
 
-        /* BARRA LATERAL */
         .sidebar {
             width: 260px; background-color: var(--sidebar-bg);
             padding: 20px 0; display: flex; flex-direction: column;
@@ -67,7 +63,6 @@
             border-left: 4px solid var(--accent-blue);
         }
 
-        /* CONTEÚDO PRINCIPAL */
         .main-content {
             margin-left: 260px; flex: 1; padding: 30px; max-width: 950px;
             width: 100%;
@@ -136,7 +131,6 @@
 
         .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
 
-        /* TABELAS */
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
         table {
             width: 100%; border-collapse: collapse; background-color: var(--card-inner);
@@ -155,7 +149,6 @@
         .badge-danger { background-color: var(--accent-red); color: #11111B; }
         .action-btns { display: flex; gap: 8px; }
 
-        /* MODAL */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000;
@@ -165,7 +158,6 @@
             width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
         }
 
-        /* EDITOR VISUAL WAVESURFER */
         .audio-editor-box {
             background-color: #11111B; border: 1px solid var(--accent-purple);
             border-radius: 8px; padding: 12px; margin-top: 10px; display: none;
@@ -174,7 +166,6 @@
         .audio-editor-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .audio-editor-controls div { flex: 1; min-width: 120px; }
 
-        /* OTIMIZACÃO PARA ANDROID / DISPOSITIVOS MÓVEIS */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar {
@@ -195,7 +186,6 @@
 </head>
 <body>
 
-    <!-- BARRA LATERAL -->
     <div class="sidebar">
         <div class="sidebar-brand"><h2>⚡ PenSound Admin</h2></div>
         <ul class="sidebar-menu">
@@ -207,10 +197,8 @@
         </ul>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <div class="main-content">
 
-        <!-- ABA 1: PUBLICAR PACOTES -->
         <div id="tab-publicar" class="tab-content active">
             <div class="card card-pack">
                 <h3>📦 Envio de Pacotes em Lote</h3>
@@ -239,7 +227,6 @@
                             <label>Link Direto do ZIP (MediaFire Página/Google Drive):</label>
                             <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
 
-                            <!-- EDITOR DE PREVIEW DE ÁUDIO -->
                             <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload + Editor Visual):</label>
                             <input type="file" class="input-audio-preview" accept="audio/*" onchange="carregarEditorAudio(this, 1)">
 
@@ -265,7 +252,6 @@
 
                     <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
 
-                    <!-- GERENCIAMENTO DA MENSAGEM DO CARD E NOTIFICAÇÃO PUSH -->
                     <div style="background-color: var(--card-inner); padding: 16px; border-radius: 8px; margin-top: 20px; border: 1px solid var(--accent-blue);">
                         <label style="color: var(--accent-blue); margin-top: 0;">💬 Título da Novidade / Notificação Push:</label>
                         <input type="text" id="inputTituloNovidade" value="🔥 Novo Repertório Liberado!" placeholder="Ex: 🔥 NOVO REPERTÓRIO DISPONÍVEL!">
@@ -285,7 +271,6 @@
             </div>
         </div>
 
-        <!-- ABA 2: GERENCIAR PACOTES -->
         <div id="tab-pacotes" class="tab-content">
             <div class="card card-pack">
                 <h3>🎵 Lista de Pacotes Cadastrados</h3>
@@ -310,7 +295,6 @@
             </div>
         </div>
 
-        <!-- ABA 3: GERENCIAR BANNERS -->
         <div id="tab-banners" class="tab-content">
             <div class="card card-banner">
                 <h3>🎨 Editor de Banner</h3>
@@ -420,7 +404,6 @@
             </div>
         </div>
 
-        <!-- ABA 4: GERENCIAR CHAVES VIP -->
         <div id="tab-vip" class="tab-content">
             <div class="card card-vip">
                 <h3>👑 Gerar Nova Chave VIP</h3>
@@ -466,7 +449,6 @@
             </div>
         </div>
 
-        <!-- ABA 5: GERENCIAR ATUALIZAÇÃO DO APP -->
         <div id="tab-update" class="tab-content">
             <div class="card card-update">
                 <h3>🚀 Controle de Atualização Obrigatória (Supabase)</h3>
@@ -491,7 +473,7 @@
 
     </div>
 
-    <!-- MODAL DE EDIÇÃO DE PACOTE -->
+    <!-- MODAL DE EDIÇÃO DE PACOTE (COM OPÇÃO DE UPLOAD DE NOVA CAPA) -->
     <div id="modalEditPacote" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
@@ -511,11 +493,15 @@
                 <option value="REPERTORIO">REPERTÓRIO</option>
                 <option value="OUTROS">OUTROS</option>
             </select>
-            
+
+            <!-- CAMPO ADICIONADO PARA TROCAR A FOTO -->
+            <label style="color: var(--accent-gold);">📸 Trocar Imagem da Capa (Opcional):</label>
+            <input type="file" id="editPackCapaFile" accept="image/*">
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: var(--text-sub);">Selecione uma imagem apenas se quiser substituir a foto de capa do card e do banner carrossel.</p>
+
             <label>Link Direto do ZIP:</label>
             <input type="url" id="editPackDownload">
 
-            <!-- EDITOR DE PREVIEW DE ÁUDIO NO MODAL -->
             <label style="color: var(--accent-green);">🎵 Novo Preview de Áudio (Upload + Editor Visual):</label>
             <input type="file" id="editPackAudioFile" accept="audio/*" onchange="carregarEditorAudio(this, 'edit')">
 
@@ -559,7 +545,6 @@
         let globalBanners = [];
         let globalChavesVip = [];
 
-        // Armazena as instâncias do Wavesurfer e Regions por ID
         const wavesurfers = {};
         const wsRegions = {};
 
@@ -611,8 +596,6 @@
             if (tabId === 'tab-vip') carregarChavesSupabase();
             if (tabId === 'tab-update') carregarConfiguracaoUpdate();
         }
-
-        /* --- LÓGICA DE GERENCIAMENTO DE ATUALIZAÇÃO (SUPABASE) --- */
 
         async function carregarConfiguracaoUpdate() {
             try {
@@ -676,8 +659,6 @@
                 btn.innerText = "FORÇAR ATUALIZAÇÃO NO SUPABASE";
             }
         });
-
-        /* --- EDITOR VISUAL E CORTE CUSTOMIZADO DE ÁUDIO COM WAVESURFER --- */
 
         function carregarEditorAudio(input, instanceId) {
             if (!input.files || !input.files[0]) return;
@@ -815,8 +796,6 @@
             }
             return new Blob([out], { type: 'audio/wav' });
         }
-
-        // --- LÓGICA DO EDITOR DE BANNERS ---
 
         function alternarTipoLayout() {
             const layout = document.getElementById('bannerLayoutType').value;
@@ -1139,8 +1118,6 @@
             }
         }
 
-        // --- GERENCIAMENTO DE CHAVES VIP & SORTEIO (SUPABASE) ---
-
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
             const deviceIdInput = document.getElementById('vipDeviceIdInput').value.trim();
@@ -1305,8 +1282,6 @@
             }
         }
 
-        // --- GERENCIAMENTO DE PACOTES (GITHUB) ---
-
         async function carregarPacotesGitHub() {
             const body = document.getElementById('listaPacotesBody');
             body.innerHTML = '<tr><td colspan="5">Buscando do GitHub...</td></tr>';
@@ -1381,6 +1356,7 @@
             document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
             document.getElementById('editPackPreviewUrl').value = pack.previewUrl || pack.preview_url || "";
             document.getElementById('editPackAudioFile').value = "";
+            document.getElementById('editPackCapaFile').value = "";
             document.getElementById('editor-box-edit').style.display = 'none';
 
             document.getElementById('modalEditPacote').style.display = 'flex';
@@ -1390,6 +1366,7 @@
             document.getElementById('modalEditPacote').style.display = 'none';
         }
 
+        // SALVAR EDIÇÃO COM RENOVAÇÃO DE CAPA EM PACOTES.JSON E BANNERS.JSON
         async function salvarEdicaoPacote() {
             const btn = document.getElementById('btnSalvarEditPack');
             let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
@@ -1416,6 +1393,27 @@
                 const novoDownload = document.getElementById('editPackDownload').value.trim();
                 const inputAudioUrl = document.getElementById('editPackPreviewUrl').value.trim();
                 const inputAudioFile = document.getElementById('editPackAudioFile');
+                const inputCapaFile = document.getElementById('editPackCapaFile');
+
+                let capaUrlFinal = globalPacotes[index].capa || globalPacotes[index].cover_url || "";
+
+                // UPLOAD DE NOVA IMAGEM SE SELECIONADA
+                if (inputCapaFile && inputCapaFile.files && inputCapaFile.files[0]) {
+                    btn.innerText = "Enviando nova imagem...";
+                    const formData = new FormData();
+                    formData.append('file', inputCapaFile.files[0]);
+                    formData.append('upload_preset', UPLOAD_PRESET);
+
+                    const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                        method: 'POST', body: formData
+                    }).then(r => r.json());
+
+                    if (resImg.secure_url) {
+                        capaUrlFinal = resImg.secure_url;
+                    } else {
+                        throw new Error("Falha ao enviar a nova imagem para o Cloudinary.");
+                    }
+                }
 
                 let previewUrlFinal = globalPacotes[index].previewUrl || globalPacotes[index].preview_url || "";
 
@@ -1449,6 +1447,7 @@
                     previewUrlFinal = `https://raw.githubusercontent.com/${REPO}/main/${pathGitHub}`;
                 }
 
+                // ATUALIZA PACOTE
                 globalPacotes[index].nome = novoNome;
                 globalPacotes[index].title = novoNome;
                 globalPacotes[index].categoria = novaCategoria;
@@ -1456,8 +1455,51 @@
                 globalPacotes[index].category = novaCategoria;
                 globalPacotes[index].download = novoDownload;
                 globalPacotes[index].zip_url = novoDownload;
+                globalPacotes[index].capa = capaUrlFinal;
+                globalPacotes[index].cover_url = capaUrlFinal;
                 globalPacotes[index].previewUrl = previewUrlFinal;
                 globalPacotes[index].preview_url = previewUrlFinal;
+
+                // ATUALIZA TAMBÉM O BANNER NO BANNERS.JSON SE A FOTO FOI TROCADA OU O BANNER EXISTIR
+                try {
+                    btn.innerText = "Atualizando banners.json...";
+                    const bannersUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                    const resB = await fetch(`${bannersUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                    if (resB.ok) {
+                        const bData = await resB.json();
+                        const bText = base64ToUtf8(bData.content).trim();
+                        let bList = bText ? JSON.parse(bText) : [];
+
+                        let bChanged = false;
+                        bList.forEach(b => {
+                            if (String(b.id || b.destinoId).trim() === String(targetId).trim()) {
+                                b.imagemUrl = capaUrlFinal;
+                                b.capa = capaUrlFinal;
+                                b.cover_url = capaUrlFinal;
+                                b.imagemBg = capaUrlFinal;
+                                b.nome = novoNome;
+                                b.title = novoNome;
+                                b.titulo = novoNome;
+                                bChanged = true;
+                            }
+                        });
+
+                        if (bChanged) {
+                            const updatedBContent = utf8ToBase64(JSON.stringify(bList, null, 2));
+                            await fetch(bannersUrl, {
+                                method: 'PUT',
+                                headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    message: `Update capa banner ${novoNome}`,
+                                    content: updatedBContent,
+                                    sha: bData.sha
+                                })
+                            });
+                        }
+                    }
+                } catch (errB) {
+                    console.warn("Aviso: Não foi possível sincronizar banners.json:", errB);
+                }
 
                 btn.innerText = "Atualizando GitHub...";
                 await atualizarArquivoGitHub(token, `Editado pacote ${novoNome}`);
@@ -1564,8 +1606,6 @@
                 alert("Erro de comunicação com o GitHub: " + e.message);
             }
         }
-
-        // --- PUBLICAR NOVOS PACOTES EM LOTE ---
 
         let packCount = 1;
         document.getElementById('btnAddPack').addEventListener('click', () => {
@@ -1776,14 +1816,12 @@
                         ultimosPacotes.push(novoPack);
                         pacotesAdicionados++;
 
-                        // DEFINE TAG DINÂMICA
                         const catUpper = categoria.toUpperCase();
                         let tagTexto = "⚡ NOVO PACOTE";
                         if (catUpper === "REPERTORIO") tagTexto = "🎵 NOVO REPERTÓRIO";
                         else if (catUpper === "PAGODAO") tagTexto = "⚡ NOVO PAGODÃO";
                         else if (catUpper === "ARROCHA") tagTexto = "⚡ NOVO ARROCHA";
 
-                        // MONTA O CARD CUSTOMIZADO COM FOTO DA CAPA NO FUNDO PARA O BANNERS.JSON
                         novosBanners.push({
                             id: packId,
                             layoutType: "CUSTOM",
@@ -1800,7 +1838,7 @@
                             borderColor: "#9D00FF",
                             accentColor: "#9D00FF",
                             titleColor: "#FFFFFF",
-                            imagemUrl: resImg.secure_url, // URL da foto enviada para a capa
+                            imagemUrl: resImg.secure_url,
                             capa: resImg.secure_url,
                             cover_url: resImg.secure_url,
                             imagemBg: resImg.secure_url,
@@ -1828,7 +1866,6 @@
                     throw new Error(errPut.message || "Erro ao salvar alterações no GitHub. Verifique as permissões do PAT.");
                 }
 
-                // TENTA ATUALIZAR O BANNERS.JSON COM OS NOVOS PACOTES
                 if (novosBanners.length > 0) {
                     try {
                         btn.innerText = "Sincronizando carrossel (banners.json)...";
@@ -1845,7 +1882,6 @@
                             listaBannersAtual = bannerText ? JSON.parse(bannerText) : [];
                         }
 
-                        // Adiciona os novos no início da lista
                         novosBanners.forEach(nb => listaBannersAtual.unshift(nb));
 
                         const updatedBannersContent = utf8ToBase64(JSON.stringify(listaBannersAtual, null, 2));
