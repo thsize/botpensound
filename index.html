@@ -477,7 +477,7 @@
 
     </div>
 
-    <!-- MODAL DE EDIÇÃO DE PACOTE (COM OPÇÃO DE UPLOAD DE NOVA CAPA E TAMANHO) -->
+    <!-- MODAL DE EDIÇÃO DE PACOTE -->
     <div id="modalEditPacote" class="modal">
         <div class="modal-content">
             <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
@@ -1124,6 +1124,7 @@
             }
         }
 
+        // --- GERAÇÃO DE CHAVES VIP COM DATA DE EXPIRAÇÃO AUTOMÁTICA EM ISO ---
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
             const deviceIdInput = document.getElementById('vipDeviceIdInput').value.trim();
@@ -1144,6 +1145,32 @@
             }
             const novaChave = `${prefixo}-${p1}-${p2}`;
 
+            // Cálculo da Data de Expiração Automática
+            const agora = new Date();
+            let dataExpira = new Date(agora);
+
+            switch (tipo.toLowerCase()) {
+                case 'sorteio':
+                    dataExpira.setHours(agora.getHours() + 24); // Exatamente 24 horas
+                    break;
+                case 'semanal':
+                    dataExpira.setDate(agora.getDate() + 7);
+                    break;
+                case 'quinzenal':
+                    dataExpira.setDate(agora.getDate() + 15);
+                    break;
+                case 'mensal':
+                    dataExpira.setDate(agora.getDate() + 30);
+                    break;
+                case 'vitalicio':
+                    dataExpira = null;
+                    break;
+                default:
+                    dataExpira.setDate(agora.getDate() + 7);
+            }
+
+            const expiraEmIso = dataExpira ? dataExpira.toISOString() : null;
+
             try {
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip`, {
                     method: 'POST',
@@ -1157,7 +1184,8 @@
                         chave: novaChave,
                         tipo: tipo,
                         utilizada: deviceIdInput ? true : false,
-                        device_id: deviceIdInput
+                        device_id: deviceIdInput,
+                        expira_em: expiraEmIso // Salva a data calculada no Supabase
                     })
                 });
 
@@ -1305,7 +1333,6 @@
                 const contentText = base64ToUtf8(currentData.content).trim();
                 let pacotesLidos = contentText ? JSON.parse(contentText) : [];
 
-                // Garante que o painel sempre liste os pacotes do id mais novo ao mais antigo
                 globalPacotes = pacotesLidos.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
 
                 renderizarTabelaPacotes(globalPacotes);
@@ -1760,7 +1787,6 @@
                 let ultimosPacotes = [];
                 let novosBanners = [];
 
-                // Array auxiliar para os lotes
                 let loteNovosPacotes = [];
 
                 for (let i = 0; i < cards.length; i++) {
@@ -1870,7 +1896,6 @@
                     }
                 }
 
-                // Insere os novos pacotes sempre no TOPO da lista mantendo a ordem correta
                 for (let j = loteNovosPacotes.length - 1; j >= 0; j--) {
                     content.unshift(loteNovosPacotes[j]);
                 }
