@@ -83,6 +83,7 @@
         .card-pack h3 { color: var(--accent-purple); }
         .card-banner h3 { color: var(--accent-blue); }
         .card-update h3 { color: var(--accent-red); }
+        .card-links h3 { color: var(--accent-green); }
 
         label {
             display: block; font-size: 13px; font-weight: 600;
@@ -113,6 +114,7 @@
         .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
         .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-update { background-color: var(--accent-red); color: #11111B; font-size: 15px; margin-top: 20px; }
+        .btn-links { background-color: var(--accent-green); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
@@ -194,11 +196,13 @@
             <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
             <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
             <li onclick="switchTab('tab-update', event)">🚀 Atualização do App</li>
+            <li onclick="switchTab('tab-links', event)">🌐 Links do Site</li>
         </ul>
     </div>
 
     <div class="main-content">
 
+        <!-- TAB: PUBLICAR PACOTES -->
         <div id="tab-publicar" class="tab-content active">
             <div class="card card-pack">
                 <h3>📦 Envio de Pacotes em Lote</h3>
@@ -274,6 +278,7 @@
             </div>
         </div>
 
+        <!-- TAB: GERENCIAR PACOTES -->
         <div id="tab-pacotes" class="tab-content">
             <div class="card card-pack">
                 <h3>🎵 Lista de Pacotes Cadastrados</h3>
@@ -299,6 +304,7 @@
             </div>
         </div>
 
+        <!-- TAB: BANNERS -->
         <div id="tab-banners" class="tab-content">
             <div class="card card-banner">
                 <h3>🎨 Editor de Banner</h3>
@@ -408,6 +414,7 @@
             </div>
         </div>
 
+        <!-- TAB: CHAVES VIP -->
         <div id="tab-vip" class="tab-content">
             <div class="card card-vip">
                 <h3>👑 Gerar Nova Chave VIP</h3>
@@ -453,6 +460,7 @@
             </div>
         </div>
 
+        <!-- TAB: ATUALIZAÇÃO -->
         <div id="tab-update" class="tab-content">
             <div class="card card-update">
                 <h3>🚀 Controle de Atualização Obrigatória (Supabase)</h3>
@@ -471,6 +479,26 @@
                     <textarea id="updateMensagem" rows="3" placeholder="Uma nova versão do PenSound está disponível com melhorias!" required></textarea>
 
                     <button type="submit" id="btnSalvarUpdate" class="btn-update">FORÇAR ATUALIZAÇÃO NO SUPABASE</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: LINKS DO SITE (NOVA OPÇÃO) -->
+        <div id="tab-links" class="tab-content">
+            <div class="card card-links">
+                <h3>🌐 Gestão de Links do Site (Supabase)</h3>
+                <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">
+                    Altere os links da tua Landing Page em tempo real. O valor é atualizado diretamente na tabela <code style="color:var(--accent-green)">site_links</code>.
+                </p>
+
+                <form id="linksForm">
+                    <label style="color: var(--accent-green);">💾 Link do APK para Download na Landing Page (download_apk):</label>
+                    <input type="url" id="linkApkSite" placeholder="https://www.dropbox.com/scl/fi/..." required>
+
+                    <label style="color: var(--accent-blue); margin-top: 14px;">💬 Link do Grupo do WhatsApp (grupo_whatsapp):</label>
+                    <input type="url" id="linkWhatsappSite" placeholder="https://chat.whatsapp.com/...">
+
+                    <button type="submit" id="btnSalvarLinks" class="btn-links">SALVAR LINKS NO SUPABASE</button>
                 </form>
             </div>
         </div>
@@ -601,8 +629,91 @@
             if (tabId === 'tab-banners') carregarBannersGitHub();
             if (tabId === 'tab-vip') carregarChavesSupabase();
             if (tabId === 'tab-update') carregarConfiguracaoUpdate();
+            if (tabId === 'tab-links') carregarLinksSite();
         }
 
+        // ==========================================
+        // LÓGICA DE LINKS DO SITE (SUPABASE)
+        // ==========================================
+        async function carregarLinksSite() {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/site_links?select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        data.forEach(item => {
+                            if (item.nome === 'download_apk') {
+                                document.getElementById('linkApkSite').value = item.url || '';
+                            } else if (item.nome === 'grupo_whatsapp') {
+                                document.getElementById('linkWhatsappSite').value = item.url || '';
+                            }
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Erro ao carregar site_links:", err);
+            }
+        }
+
+        document.getElementById('linksForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarLinks');
+            btn.disabled = true;
+            btn.innerText = "Salvando no Supabase...";
+
+            const urlApk = document.getElementById('linkApkSite').value.trim();
+            const urlWhatsapp = document.getElementById('linkWhatsappSite').value.trim();
+
+            try {
+                // Atualiza o Link do APK
+                const resApk = await fetch(`${SUPABASE_URL}/rest/v1/site_links?nome=eq.download_apk`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ url: urlApk })
+                });
+
+                // Atualiza o Link do WhatsApp se preenchido
+                if (urlWhatsapp) {
+                    await fetch(`${SUPABASE_URL}/rest/v1/site_links?nome=eq.grupo_whatsapp`, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({ url: urlWhatsapp })
+                    });
+                }
+
+                if (resApk.ok) {
+                    alert("Links do site atualizados com sucesso!");
+                } else {
+                    const err = await resApk.json();
+                    throw new Error(err.message || "Erro ao salvar na tabela site_links.");
+                }
+            } catch (err) {
+                alert("Erro ao salvar links: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "SALVAR LINKS NO SUPABASE";
+            }
+        });
+
+        // ==========================================
+        // DEMAIS FUNÇÕES EXISTENTES
+        // ==========================================
         async function carregarConfiguracaoUpdate() {
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/app_config?select=*`, {
@@ -1124,7 +1235,6 @@
             }
         }
 
-        // --- GERAÇÃO DE CHAVES VIP COM DATA DE EXPIRAÇÃO AUTOMÁTICA EM ISO ---
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
             const deviceIdInput = document.getElementById('vipDeviceIdInput').value.trim();
@@ -1145,13 +1255,12 @@
             }
             const novaChave = `${prefixo}-${p1}-${p2}`;
 
-            // Cálculo da Data de Expiração Automática
             const agora = new Date();
             let dataExpira = new Date(agora);
 
             switch (tipo.toLowerCase()) {
                 case 'sorteio':
-                    dataExpira.setHours(agora.getHours() + 24); // Exatamente 24 horas
+                    dataExpira.setHours(agora.getHours() + 24);
                     break;
                 case 'semanal':
                     dataExpira.setDate(agora.getDate() + 7);
@@ -1185,7 +1294,7 @@
                         tipo: tipo,
                         utilizada: deviceIdInput ? true : false,
                         device_id: deviceIdInput,
-                        expira_em: expiraEmIso // Salva a data calculada no Supabase
+                        expira_em: expiraEmIso
                     })
                 });
 
