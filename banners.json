@@ -1,25 +1,5 @@
 [
   {
-    "id": "1789959278866",
-    "layoutType": "CUSTOM",
-    "badge": "AVISO!!",
-    "tag": "AVISO!!",
-    "titulo": "viu algum bug? conte nos",
-    "title": "viu algum bug? conte nos",
-    "subtitulo": "",
-    "btnText": "aviso",
-    "bgColor": "#22123b",
-    "borderColor": "#9d00ff",
-    "accentColor": "#9d00ff",
-    "titleColor": "#ffffff",
-    "imagemUrl": "",
-    "capa": "",
-    "imagemBg": "",
-    "clicavel": false,
-    "tipoDestino": "PACK",
-    "destinoId": ""
-  },
-  {
     "id": "1789947996996",
     "layoutType": "CUSTOM",
     "tag": "⚡ NOVO ARROCHA",
