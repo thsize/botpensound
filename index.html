@@ -520,8 +520,38 @@
                     <label>Link de Destino / Download:</label>
                     <input type="url" id="cardSiteLink" placeholder="https://..." required>
 
-                    <label>Ícone (Classe FontAwesome):</label>
-                    <input type="text" id="cardSiteIcone" placeholder="Ex: fa-mobile-screen-button ou fa-compact-disc" value="fa-mobile-screen-button" required>
+                    <label>Ícone do Card:</label>
+                    <select id="cardSiteIcone">
+                        <optgroup label="📱 Aplicativos e Dispositivos">
+                            <option value="fa-mobile-screen-button">📱 Celular / App Mobile (fa-mobile-screen-button)</option>
+                            <option value="fa-desktop">🖥️ Computador / PC (fa-desktop)</option>
+                            <option value="fa-gamepad">🎮 Controle / Jogos (fa-gamepad)</option>
+                        </optgroup>
+
+                        <optgroup label="🎵 Música e Áudio">
+                            <option value="fa-compact-disc">💿 Disco / CD / Pack (fa-compact-disc)</option>
+                            <option value="fa-music">🎵 Nota Musical (fa-music)</option>
+                            <option value="fa-headphones">🎧 Fone de Ouvido (fa-headphones)</option>
+                            <option value="fa-sliders">🎚️ Mesa de Som / Equalizador (fa-sliders)</option>
+                            <option value="fa-drum">🥁 Bateria / Percussão (fa-drum)</option>
+                            <option value="fa-guitar">🎸 Guitarra / Violão (fa-guitar)</option>
+                            <option value="fa-radio">📻 Rádio / Som (fa-radio)</option>
+                        </optgroup>
+
+                        <optgroup label="🚀 Downloads e Arquivos">
+                            <option value="fa-download">📥 Download / Baixar (fa-download)</option>
+                            <option value="fa-folder-closed">📁 Pasta de Arquivos (fa-folder-closed)</option>
+                            <option value="fa-box">📦 Pacote / Kit (fa-box)</option>
+                            <option value="fa-file-zipper">🤐 Arquivo ZIP / RAR (fa-file-zipper)</option>
+                        </optgroup>
+
+                        <optgroup label="🌐 Mídia e Redes">
+                            <option value="fa-bolt">⚡ Raio / Novidade (fa-bolt)</option>
+                            <option value="fa-star">⭐ Estrela / Destaque (fa-star)</option>
+                            <option value="fa-fire">🔥 Fogo / Em Alta (fa-fire)</option>
+                            <option value="fa-link">🔗 Link / Web (fa-link)</option>
+                        </optgroup>
+                    </select>
 
                     <label>Estilo de Cor:</label>
                     <select id="cardSiteCor">
