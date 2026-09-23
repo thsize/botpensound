@@ -9,6 +9,9 @@
     <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
     <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.min.js"></script>
 
+    <!-- FontAwesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     <style>
         :root {
             --bg-dark: #11111B;
@@ -196,7 +199,7 @@
             <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
             <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
             <li onclick="switchTab('tab-update', event)">🚀 Atualização do App</li>
-            <li onclick="switchTab('tab-links', event)">🌐 Links do Site</li>
+            <li onclick="switchTab('tab-links', event)">🌐 Links e Cards do Site</li>
         </ul>
     </div>
 
@@ -483,23 +486,73 @@
             </div>
         </div>
 
-        <!-- TAB: LINKS DO SITE (NOVA OPÇÃO) -->
+        <!-- TAB: LINKS E CARDS DO SITE -->
         <div id="tab-links" class="tab-content">
             <div class="card card-links">
-                <h3>🌐 Gestão de Links do Site (Supabase)</h3>
+                <h3>🌐 Gestão de Links da Landing Page (Supabase)</h3>
                 <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">
-                    Altere os links da tua Landing Page em tempo real. O valor é atualizado diretamente na tabela <code style="color:var(--accent-green)">site_links</code>.
+                    Altere os links gerais e gerencie os cards do site em tempo real.
                 </p>
 
                 <form id="linksForm">
                     <label style="color: var(--accent-green);">💾 Link do APK para Download na Landing Page (download_apk):</label>
                     <input type="url" id="linkApkSite" placeholder="https://www.dropbox.com/scl/fi/..." required>
 
-                    <label style="color: var(--accent-blue); margin-top: 14px;">💬 Link do Grupo do WhatsApp (grupo_whatsapp):</label>
-                    <input type="url" id="linkWhatsappSite" placeholder="https://chat.whatsapp.com/...">
+                    <label style="color: var(--accent-blue); margin-top: 14px;">💬 Link do WhatsApp / Contato (grupo_whatsapp):</label>
+                    <input type="url" id="linkWhatsappSite" placeholder="https://wa.me/5500000000000">
 
                     <button type="submit" id="btnSalvarLinks" class="btn-links">SALVAR LINKS NO SUPABASE</button>
                 </form>
+            </div>
+
+            <!-- GERENCIADOR DE CARDS DO SITE -->
+            <div class="card card-pack">
+                <h3>🎴 Criar / Editar Cards da Landing Page</h3>
+                <form id="cardSiteForm">
+                    <input type="hidden" id="cardSiteId">
+                    
+                    <label>Título do Card:</label>
+                    <input type="text" id="cardSiteTitulo" placeholder="Ex: Mídia Play" required>
+
+                    <label>Descrição Curta:</label>
+                    <input type="text" id="cardSiteDescricao" placeholder="Ex: Aplicativo para música, pacotes e downloads." required>
+
+                    <label>Link de Destino / Download:</label>
+                    <input type="url" id="cardSiteLink" placeholder="https://..." required>
+
+                    <label>Ícone (Classe FontAwesome):</label>
+                    <input type="text" id="cardSiteIcone" placeholder="Ex: fa-mobile-screen-button ou fa-compact-disc" value="fa-mobile-screen-button" required>
+
+                    <label>Estilo de Cor:</label>
+                    <select id="cardSiteCor">
+                        <option value="card-purple">Roxo</option>
+                        <option value="card-blue">Azul</option>
+                        <option value="card-green">Verde</option>
+                        <option value="card-orange">Laranja</option>
+                    </select>
+
+                    <button type="submit" id="btnSalvarCardSite" class="btn-submit" style="background-color: var(--accent-blue);">SALVAR CARD NO SUPABASE</button>
+                </form>
+            </div>
+
+            <div class="card card-pack">
+                <h3>📋 Cards Ativos no Site</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ícone</th>
+                                <th>Título</th>
+                                <th>Descrição</th>
+                                <th>Link</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaCardsSiteBody">
+                            <tr><td colspan="5">Carregando cards do Supabase...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -629,7 +682,10 @@
             if (tabId === 'tab-banners') carregarBannersGitHub();
             if (tabId === 'tab-vip') carregarChavesSupabase();
             if (tabId === 'tab-update') carregarConfiguracaoUpdate();
-            if (tabId === 'tab-links') carregarLinksSite();
+            if (tabId === 'tab-links') {
+                carregarLinksSite();
+                carregarCardsSite();
+            }
         }
 
         // ==========================================
@@ -671,7 +727,6 @@
             const urlWhatsapp = document.getElementById('linkWhatsappSite').value.trim();
 
             try {
-                // Atualiza o Link do APK
                 const resApk = await fetch(`${SUPABASE_URL}/rest/v1/site_links?nome=eq.download_apk`, {
                     method: 'PATCH',
                     headers: {
@@ -683,7 +738,6 @@
                     body: JSON.stringify({ url: urlApk })
                 });
 
-                // Atualiza o Link do WhatsApp se preenchido
                 if (urlWhatsapp) {
                     await fetch(`${SUPABASE_URL}/rest/v1/site_links?nome=eq.grupo_whatsapp`, {
                         method: 'PATCH',
@@ -710,6 +764,135 @@
                 btn.innerText = "SALVAR LINKS NO SUPABASE";
             }
         });
+
+        // ==========================================
+        // LÓGICA DE CARDS DA LANDING PAGE (SUPABASE)
+        // ==========================================
+        async function carregarCardsSite() {
+            const body = document.getElementById('listaCardsSiteBody');
+            if (!body) return;
+            body.innerHTML = '<tr><td colspan="5">Carregando cards...</td></tr>';
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/site_cards?select=*&order=id.asc`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (res.ok) {
+                    const cards = await res.json();
+                    body.innerHTML = '';
+
+                    if (cards.length === 0) {
+                        body.innerHTML = '<tr><td colspan="5">Nenhum card cadastrado.</td></tr>';
+                        return;
+                    }
+
+                    cards.forEach(card => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><i class="fa-solid ${card.icone}" style="font-size:18px; color: var(--accent-blue);"></i></td>
+                            <td><b>${card.titulo}</b></td>
+                            <td>${card.descricao}</td>
+                            <td><a href="${card.link}" target="_blank" style="color:var(--accent-blue); font-size:12px; word-break: break-all;">${card.link}</a></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-edit" onclick='editarCardSite(${JSON.stringify(card)})'>Editar</button>
+                                    <button class="btn-danger" onclick="excluirCardSite('${card.id}')">Excluir</button>
+                                </div>
+                            </td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                }
+            } catch (err) {
+                body.innerHTML = `<tr><td colspan="5" style="color:var(--accent-red)">Erro ao carregar cards: ${err.message}</td></tr>`;
+            }
+        }
+
+        document.getElementById('cardSiteForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarCardSite');
+            btn.disabled = true;
+            btn.innerText = "Salvando...";
+
+            const id = document.getElementById('cardSiteId').value;
+            const titulo = document.getElementById('cardSiteTitulo').value.trim();
+            const descricao = document.getElementById('cardSiteDescricao').value.trim();
+            const link = document.getElementById('cardSiteLink').value.trim();
+            const icone = document.getElementById('cardSiteIcone').value.trim();
+            const cor = document.getElementById('cardSiteCor').value;
+
+            const payload = { titulo, descricao, link, icone, cor };
+
+            try {
+                let method = 'POST';
+                let url = `${SUPABASE_URL}/rest/v1/site_cards`;
+
+                if (id) {
+                    method = 'PATCH';
+                    url = `${SUPABASE_URL}/rest/v1/site_cards?id=eq.${id}`;
+                }
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("Card salvo com sucesso!");
+                    document.getElementById('cardSiteForm').reset();
+                    document.getElementById('cardSiteId').value = '';
+                    carregarCardsSite();
+                } else {
+                    const err = await res.json();
+                    throw new Error(err.message || "Erro ao salvar no Supabase.");
+                }
+            } catch (err) {
+                alert("Erro: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "SALVAR CARD NO SUPABASE";
+            }
+        });
+
+        function editarCardSite(card) {
+            document.getElementById('cardSiteId').value = card.id;
+            document.getElementById('cardSiteTitulo').value = card.titulo;
+            document.getElementById('cardSiteDescricao').value = card.descricao;
+            document.getElementById('cardSiteLink').value = card.link;
+            document.getElementById('cardSiteIcone').value = card.icone;
+            document.getElementById('cardSiteCor').value = card.cor;
+        }
+
+        async function excluirCardSite(id) {
+            if (!confirm("Deseja realmente excluir este card da landing page?")) return;
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/site_cards?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (res.ok) {
+                    alert("Card excluído com sucesso!");
+                    carregarCardsSite();
+                }
+            } catch (err) {
+                alert("Erro ao excluir card: " + err.message);
+            }
+        }
 
         // ==========================================
         // DEMAIS FUNÇÕES EXISTENTES
