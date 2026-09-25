@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenSound Admin - Gestão Simplificada</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.min.js"></script>
+
+    <!-- FontAwesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        :root {
+            --bg-dark: #11111B;
+            --sidebar-bg: #1E1E2E;
+            --card-bg: #313244;
+            --card-inner: #181825;
+            --text-main: #CDD6F4;
+            --text-sub: #A6ADC8;
+            --accent-blue: #89B4FA;
+            --accent-green: #A6E3A1;
+            --accent-gold: #F9E2AF;
+            --accent-purple: #CBA6F7;
+            --accent-red: #F38BA8;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex; 
+            min-height: 100vh;
+            flex-direction: row;
+        }
+
+        .sidebar {
+            width: 260px; background-color: var(--sidebar-bg);
+            padding: 20px 0; display: flex; flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            position: fixed; height: 100vh; z-index: 100;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-brand h2 { margin: 0; font-size: 20px; color: #FFFFFF; }
+
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu li {
+            padding: 14px 20px; color: var(--text-sub);
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease; display: flex; align-items: center; gap: 10px;
+        }
+
+        .sidebar-menu li:hover, .sidebar-menu li.active {
+            background-color: var(--card-bg); color: var(--accent-blue);
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .main-content {
+            margin-left: 260px; flex: 1; padding: 30px; max-width: 950px;
+            width: 100%;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card {
+            background-color: var(--card-bg); border-radius: 12px;
+            padding: 24px; margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 20px; }
+        .card-pack h3 { color: var(--accent-purple); }
+        .card-banner h3 { color: var(--accent-blue); }
+
+        label {
+            display: block; font-size: 13px; font-weight: 600;
+            color: var(--text-sub); margin-bottom: 6px; margin-top: 12px;
+        }
+
+        input[type="text"], input[type="password"], input[type="url"], input[type="number"], textarea, select, input[type="color"] {
+            width: 100%; padding: 12px 14px; background-color: var(--card-inner);
+            color: #FFFFFF; border: 1px solid #45475A; border-radius: 8px; font-size: 14px;
+        }
+
+        input[type="color"] { height: 44px; padding: 4px; cursor: pointer; }
+
+        input[type="file"] {
+            width: 100%; padding: 10px; background-color: var(--card-inner);
+            border: 1px dashed #45475A; border-radius: 8px; color: var(--text-sub);
+        }
+
+        button {
+            width: 100%; padding: 12px 14px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 12px;
+            transition: opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
+        .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
+        .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
+        .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
+
+        .pack-item {
+            background-color: var(--card-inner); padding: 16px;
+            border-radius: 8px; margin-bottom: 16px; border: 1px solid #45475A;
+        }
+
+        .pack-item h4 { margin: 0 0 12px 0; color: var(--accent-blue); }
+
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
+        table {
+            width: 100%; border-collapse: collapse; background-color: var(--card-inner);
+            border-radius: 8px; overflow: hidden; min-width: 500px;
+        }
+        th, td {
+            padding: 12px 14px; text-align: left;
+            border-bottom: 1px solid #313244; font-size: 14px;
+        }
+        th { background-color: #11111B; color: var(--accent-blue); }
+
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .badge-success { background-color: var(--accent-green); color: #11111B; }
+        .badge-warning { background-color: var(--accent-gold); color: #11111B; }
+        .badge-purple { background-color: var(--accent-purple); color: #11111B; }
+        .action-btns { display: flex; gap: 8px; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background-color: var(--card-bg); padding: 24px; border-radius: 12px;
+            width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+        }
+
+        .audio-editor-box {
+            background-color: #11111B; border: 1px solid var(--accent-purple);
+            border-radius: 8px; padding: 12px; margin-top: 10px; display: none;
+        }
+        .waveform-container { width: 100%; height: 80px; margin-bottom: 10px; }
+        .audio-editor-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .audio-editor-controls div { flex: 1; min-width: 120px; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%; height: auto; position: relative; padding: 10px 0;
+                border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            .sidebar-brand { padding: 0 15px 10px 15px; margin-bottom: 10px; text-align: center; }
+            .sidebar-menu { display: flex; overflow-x: auto; white-space: nowrap; padding: 0 10px; }
+            .sidebar-menu li { padding: 10px 14px; font-size: 13px; border-left: none; border-bottom: 3px solid transparent; }
+            .sidebar-menu li:hover, .sidebar-menu li.active { border-left: none; border-bottom: 3px solid var(--accent-blue); }
+            
+            .main-content { margin-left: 0; padding: 15px; width: 100%; }
+            .card { padding: 16px; }
+            .audio-editor-controls { flex-direction: column; align-items: stretch; }
+            .action-btns { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-brand"><h2>⚡ PenSound Admin</h2></div>
+        <ul class="sidebar-menu">
+            <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
+            <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
+            <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+
+        <!-- TAB: PUBLICAR PACOTES -->
+        <div id="tab-publicar" class="tab-content active">
+            <div class="card card-pack">
+                <h3>📦 Envio de Pacotes em Lote</h3>
+                <form id="packForm">
+                    <div id="cardsContainer">
+                        <div class="pack-item" id="pack-item-1">
+                            <h4>Pacote 1</h4>
+                            <label>Nome do Pacote:</label>
+                            <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
+                            
+                            <label>Categoria:</label>
+                            <select class="input-categoria">
+                                <option value="PAGODAO">PAGODÃO</option>
+                                <option value="ARROCHA">ARROCHA</option>
+                                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
+                                <option value="SAMBA">SAMBA</option>
+                                <option value="FORRO">FORRÓ</option>
+                                <option value="FUNK">FUNK</option>
+                                <option value="REPERTORIO">REPERTÓRIO</option>
+                                <option value="OUTROS">OUTROS</option>
+                            </select>
+
+                            <label style="color: var(--accent-gold);">💾 Tamanho do Pacote (MB/GB):</label>
+                            <input type="text" class="input-tamanho" placeholder="Ex: 350 MB ou 1.2 GB" value="ZIP">
+                            
+                            <label>Capa do Pack (Imagem):</label>
+                            <input type="file" class="input-capa" accept="image/*" required>
+                            
+                            <label>Link Direto do ZIP (MediaFire Página/Google Drive):</label>
+                            <input type="url" class="input-download" placeholder="https://www.mediafire.com/file/..." required>
+
+                            <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload + Editor Visual):</label>
+                            <input type="file" class="input-audio-preview" accept="audio/*" onchange="carregarEditorAudio(this, 1)">
+
+                            <div class="audio-editor-box" id="editor-box-1">
+                                <div id="waveform-1" class="waveform-container"></div>
+                                <div class="audio-editor-controls">
+                                    <button type="button" class="btn-edit btn-small" id="btn-play-1" onclick="togglePlayAudio(1)">▶️ Ouvir Trecho</button>
+                                    <div>
+                                        <label style="margin:0; font-size:11px;">Início (seg):</label>
+                                        <input type="number" id="start-time-1" value="0" min="0" step="0.5" onchange="atualizarRegiaoManual(1)">
+                                    </div>
+                                    <div>
+                                        <label style="margin:0; font-size:11px;">Fim (seg):</label>
+                                        <input type="number" id="end-time-1" value="40" min="1" step="0.5" onchange="atualizarRegiaoManual(1)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
+                            <input type="url" class="input-audio-url" placeholder="https://res.cloudinary.com/.../audio.mp3">
+                        </div>
+                    </div>
+
+                    <button type="button" id="btnAddPack" class="btn-add">+ Adicionar Mais Um Pacote</button>
+
+                    <div style="background-color: var(--card-inner); padding: 16px; border-radius: 8px; margin-top: 20px; border: 1px solid var(--accent-blue);">
+                        <label style="color: var(--accent-blue); margin-top: 0;">💬 Título da Novidade / Notificação Push:</label>
+                        <input type="text" id="inputTituloNovidade" value="🔥 Novo Repertório Liberado!" placeholder="Ex: 🔥 NOVO REPERTÓRIO DISPONÍVEL!">
+
+                        <label style="color: var(--text-sub);">📝 Descrição Personalizada (Opcional - Deixe em branco para automático):</label>
+                        <input type="text" id="inputDescricaoNovidade" placeholder="Ex: Confira o novo repertório atualizado no PenSound!">
+                    </div>
+
+                    <label style="margin-top: 20px;">Private Key do Firebase (Cole do arquivo JSON):</label>
+                    <textarea id="firebaseKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----\n..." required></textarea>
+
+                    <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
+                    <input type="password" id="ghToken" required placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
+
+                    <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR E NOTIFICAR APP</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: GERENCIAR PACOTES -->
+        <div id="tab-pacotes" class="tab-content">
+            <div class="card card-pack">
+                <h3>🎵 Lista de Pacotes Cadastrados</h3>
+                <input type="text" id="searchPacote" placeholder="🔎 Pesquisar pacote por nome ou categoria..." onkeyup="filtrarPacotes()">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Capa</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Tamanho</th>
+                                <th>Preview</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaPacotesBody">
+                            <tr><td colspan="6">Carregando pacotes do GitHub...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: BANNERS -->
+        <div id="tab-banners" class="tab-content">
+            <div class="card card-banner">
+                <h3>🎨 Editor de Banner</h3>
+
+                <label>Tipo de Banner:</label>
+                <select id="bannerLayoutType" onchange="alternarTipoLayout()">
+                    <option value="CUSTOM">Customizado (Textos + Cores)</option>
+                    <option value="FULL_IMAGE">Imagem Cheia (Preenche o Card Todo)</option>
+                </select>
+                
+                <div class="banner-preview-box" style="margin-top: 16px;">
+                    <span style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold;">PRÉ-VISUALIZAÇÃO AO VIVO NO APP</span>
+                    <div id="bannerMockup" class="banner-mockup" style="background-color: #22123B; border-color: #9D00FF; min-height: 100px; border-radius: 8px; padding: 12px; display:flex; align-items:center;">
+                        <div id="customBannerView" style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
+                            <div id="prevBadge" class="badge-tag" style="background-color: #9D00FF; color:#fff; width:fit-content; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">🔥 NOVIDADES</div>
+                            <div class="info-area" style="margin-top:6px;">
+                                <p id="prevTitulo" class="info-title" style="color: #FFFFFF; font-weight:bold; margin:0 0 4px 0;">NOVO REPERTÓRIO</p>
+                                <p id="prevSubtitulo" class="info-sub" style="color: #A6ADC8; margin:0 0 8px 0; font-size:12px;">Confira os últimos lançamentos!</p>
+                                <div id="prevBtnAction" class="btn-action" style="background-color: #9D00FF; color:#fff; padding:6px 12px; border-radius:6px; display:inline-block; font-size:12px; font-weight:bold;">CONFERIR AGORA ⚡</div>
+                            </div>
+                        </div>
+
+                        <img id="prevFullImg" src="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:6px;">
+                    </div>
+                </div>
+
+                <form id="bannerForm">
+                    <div id="sectionCustomFields">
+                        <label>Texto da Tag/Selo:</label>
+                        <input type="text" id="bannerBadge" value="🔥 NOVIDADES" oninput="atualizarPreview()">
+
+                        <label>Título Principal:</label>
+                        <input type="text" id="bannerTitulo" value="NOVO REPERTÓRIO" oninput="atualizarPreview()">
+
+                        <label>Subtítulo / Descrição:</label>
+                        <input type="text" id="bannerSubtitulo" value="Confira os últimos lançamentos!" oninput="atualizarPreview()">
+
+                        <label>Texto do Botão de Ação:</label>
+                        <input type="text" id="bannerBtnText" value="CONFERIR AGORA ⚡" placeholder="Ex: CONFERIR AGORA ⚡, OUVIR AGORA 🎧" oninput="atualizarPreview()">
+
+                        <div class="editor-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                            <div>
+                                <label>Cor de Fundo:</label>
+                                <input type="color" id="colorBgCard" value="#22123B" onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label>Cor da Borda:</label>
+                                <input type="color" id="colorBorderCard" value="#9D00FF" onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label>Cor Destaques:</label>
+                                <input type="color" id="colorAccent" value="#9D00FF" onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label>Cor do Título:</label>
+                                <input type="color" id="colorTextTitle" value="#FFFFFF" onchange="atualizarPreview()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sectionFileField" style="display: none;">
+                        <label id="lblBannerFile">Imagem do Banner Cheio (PNG/JPG):</label>
+                        <input type="file" id="bannerCapa" accept="image/png, image/jpeg" onchange="previewImage(this)">
+                    </div>
+
+                    <label style="margin-top:14px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="bannerClicavel" onchange="toggleBannerDestino()" style="width:auto;">
+                        <span>Tornar Banner Clicável?</span>
+                    </label>
+
+                    <div id="boxBannerDestino" style="display: none; background-color: var(--card-inner); padding: 14px; border-radius: 8px; margin-top: 10px; border: 1px solid #45475A;">
+                        <label style="margin-top:0;">Tipo de Ação ao Clicar:</label>
+                        <select id="bannerTipoDestino">
+                            <option value="PACK">Abrir Pacote Específico do App</option>
+                            <option value="LINK">Abrir Link Externo no Navegador</option>
+                        </select>
+
+                        <label>ID do Pacote ou Link Completo (https://):</label>
+                        <input type="text" id="bannerDestinoValue" placeholder="Ex: ID_DO_PACK ou https://link.com">
+                    </div>
+
+                    <label style="margin-top: 14px; color: var(--accent-gold);">Token do GitHub (PAT):</label>
+                    <input type="password" id="bannerGhToken" placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
+
+                    <button type="submit" id="btnSubmitBanner" class="btn-submit" style="background-color: var(--accent-blue);">PUBLICAR BANNER</button>
+                </form>
+            </div>
+
+            <div class="card card-banner">
+                <h3>🖼️ Banners Publicados</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Imagem/Prévia</th>
+                                <th>Tipo</th>
+                                <th>Título/Info</th>
+                                <th>Clicável?</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaBannersBody">
+                            <tr><td colspan="5">Carregando banners...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DE PACOTE -->
+    <div id="modalEditPacote" class="modal">
+        <div class="modal-content">
+            <h3 style="color: var(--accent-blue); margin-top:0;">Editar Pacote</h3>
+            <input type="hidden" id="editPackId">
+            
+            <label>Nome do Pacote:</label>
+            <input type="text" id="editPackNome">
+            
+            <label>Categoria:</label>
+            <select id="editPackCategoria">
+                <option value="PAGODAO">PAGODÃO</option>
+                <option value="ARROCHA">ARROCHA</option>
+                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
+                <option value="SAMBA">SAMBA</option>
+                <option value="FORRO">FORRÓ</option>
+                <option value="FUNK">FUNK</option>
+                <option value="REPERTORIO">REPERTÓRIO</option>
+                <option value="OUTROS">OUTROS</option>
+            </select>
+
+            <label style="color: var(--accent-gold);">💾 Tamanho do Pacote (ex: 250 MB ou 1.2 GB):</label>
+            <input type="text" id="editPackTamanho" placeholder="Ex: 350 MB ou 1.2 GB">
+
+            <label style="color: var(--accent-gold);">📸 Trocar Imagem da Capa (Opcional):</label>
+            <input type="file" id="editPackCapaFile" accept="image/*">
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: var(--text-sub);">Selecione uma imagem apenas se quiser substituir a foto de capa do card e do banner carrossel.</p>
+
+            <label>Link Direto do ZIP:</label>
+            <input type="url" id="editPackDownload">
+
+            <label style="color: var(--accent-green);">🎵 Novo Preview de Áudio (Upload + Editor Visual):</label>
+            <input type="file" id="editPackAudioFile" accept="audio/*" onchange="carregarEditorAudio(this, 'edit')">
+
+            <div class="audio-editor-box" id="editor-box-edit">
+                <div id="waveform-edit" class="waveform-container"></div>
+                <div class="audio-editor-controls">
+                    <button type="button" class="btn-edit btn-small" id="btn-play-edit" onclick="togglePlayAudio('edit')">▶️ Ouvir Trecho</button>
+                    <div>
+                        <label style="margin:0; font-size:11px;">Início (seg):</label>
+                        <input type="number" id="start-time-edit" value="0" min="0" step="0.5" onchange="atualizarRegiaoManual('edit')">
+                    </div>
+                    <div>
+                        <label style="margin:0; font-size:11px;">Fim (seg):</label>
+                        <input type="number" id="end-time-edit" value="40" min="1" step="0.5" onchange="atualizarRegiaoManual('edit')">
+                    </div>
+                </div>
+            </div>
+
+            <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Preview (MP3/WAV):</label>
+            <input type="url" id="editPackPreviewUrl" placeholder="https://raw.githubusercontent.com/.../audio.mp3">
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" id="btnSalvarEditPack" class="btn-submit" onclick="salvarEdicaoPacote()" style="margin:0;">Salvar Alterações</button>
+                <button type="button" class="btn-danger" onclick="fecharModalEdit()" style="margin:0;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CLOUD_NAME = "y5u5zkp7";
+        const UPLOAD_PRESET = "ftpuvxis";
+        const REPO = "thsize/botpensound";
+        const FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@painel-sky.iam.gserviceaccount.com";
+        const FIREBASE_PROJECT_ID = "painel-sky";
+
+        let globalPacotes = [];
+        let globalShaGitHub = "";
+        let globalBanners = [];
+
+        const wavesurfers = {};
+        const wsRegions = {};
+
+        function utf8ToBase64(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+                return String.fromCharCode('0x' + p1);
+            }));
+        }
+
+        function base64ToUtf8(str) {
+            return decodeURIComponent(atob(str.replace(/\s/g, '')).split('').map((c) => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        }
+
+        function getAuthHeader(token) {
+            if (!token) return {};
+            const cleanToken = token.trim();
+            if (cleanToken.startsWith('github_pat_')) {
+                return { 'Authorization': `Bearer ${cleanToken}` };
+            }
+            return { 'Authorization': `token ${cleanToken}` };
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const tokenSalvo = localStorage.getItem("gh_pat_token");
+            if (tokenSalvo) {
+                if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = tokenSalvo;
+                if (document.getElementById('ghToken')) document.getElementById('ghToken').value = tokenSalvo;
+            }
+        });
+
+        function salvarTokenLocal(val) {
+            const trimmed = val.trim();
+            localStorage.setItem("gh_pat_token", trimmed);
+            if (document.getElementById('ghToken')) document.getElementById('ghToken').value = trimmed;
+            if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = trimmed;
+        }
+
+        function switchTab(tabId, evt) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+
+            if (tabId === 'tab-pacotes') carregarPacotesGitHub();
+            if (tabId === 'tab-banners') carregarBannersGitHub();
+        }
+
+        function carregarEditorAudio(input, instanceId) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const editorBox = document.getElementById(`editor-box-${instanceId}`);
+            editorBox.style.display = 'block';
+
+            if (wavesurfers[instanceId]) {
+                wavesurfers[instanceId].destroy();
+            }
+
+            const ws = WaveSurfer.create({
+                container: `#waveform-${instanceId}`,
+                waveColor: '#45475A',
+                progressColor: '#89B4FA',
+                cursorColor: '#CBA6F7',
+                barWidth: 2,
+                height: 80
+            });
+
+            const wsRegionPlugin = ws.registerPlugin(WaveSurfer.Regions.create());
+
+            wavesurfers[instanceId] = ws;
+            wsRegions[instanceId] = wsRegionPlugin;
+
+            const fileUrl = URL.createObjectURL(file);
+            ws.load(fileUrl);
+
+            ws.on('ready', () => {
+                const duration = ws.getDuration();
+                const defaultEnd = Math.min(duration, 40);
+
+                document.getElementById(`start-time-${instanceId}`).value = 0;
+                document.getElementById(`end-time-${instanceId}`).value = defaultEnd.toFixed(1);
+
+                const activeRegion = wsRegionPlugin.addRegion({
+                    start: 0,
+                    end: defaultEnd,
+                    color: 'rgba(166, 227, 161, 0.3)',
+                    drag: true,
+                    resize: true
+                });
+
+                activeRegion.on('update-end', () => {
+                    document.getElementById(`start-time-${instanceId}`).value = activeRegion.start.toFixed(1);
+                    document.getElementById(`end-time-${instanceId}`).value = activeRegion.end.toFixed(1);
+                });
+            });
+        }
+
+        function togglePlayAudio(instanceId) {
+            const ws = wavesurfers[instanceId];
+            const regPlugin = wsRegions[instanceId];
+            const btn = document.getElementById(`btn-play-${instanceId}`);
+
+            if (!ws) return;
+
+            if (ws.isPlaying()) {
+                ws.pause();
+                btn.innerText = "▶️ Ouvir Trecho";
+            } else {
+                const regions = regPlugin.getRegions();
+                if (regions.length > 0) {
+                    regions[0].play();
+                } else {
+                    ws.play();
+                }
+                btn.innerText = "⏸️ Pausar";
+            }
+        }
+
+        function atualizarRegiaoManual(instanceId) {
+            const ws = wavesurfers[instanceId];
+            const regPlugin = wsRegions[instanceId];
+            if (!ws || !regPlugin) return;
+
+            let start = parseFloat(document.getElementById(`start-time-${instanceId}`).value) || 0;
+            let end = parseFloat(document.getElementById(`end-time-${instanceId}`).value) || 40;
+
+            const regions = regPlugin.getRegions();
+            if (regions.length > 0) {
+                regions[0].setOptions({ start: start, end: end });
+            }
+        }
+
+        async function recortarAudioCustomizado(file, startTime, endTime) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const arrayBuffer = await file.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+            const startFrame = Math.floor(startTime * audioBuffer.sampleRate);
+            const endFrame = Math.floor(Math.min(endTime, audioBuffer.duration) * audioBuffer.sampleRate);
+            const totalFrames = Math.max(1, endFrame - startFrame);
+
+            const offlineContext = new OfflineAudioContext(
+                audioBuffer.numberOfChannels,
+                totalFrames,
+                audioBuffer.sampleRate
+            );
+
+            const source = offlineContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(offlineContext.destination);
+            source.start(0, startTime, endTime - startTime);
+
+            const renderedBuffer = await offlineContext.startRendering();
+            return audioBufferToWavBlob(renderedBuffer);
+        }
+
+        function audioBufferToWavBlob(buffer) {
+            let numOfChan = buffer.numberOfChannels,
+                length = buffer.length * numOfChan * 2 + 44,
+                out = new DataView(new ArrayBuffer(length)),
+                channels = [], i, sample, offset = 0, pos = 0;
+
+            function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
+            function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
+
+            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+            setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * numOfChan);
+            setUint16(numOfChan * 2); setUint16(16);
+            setUint32(0x61746164); setUint32(length - pos - 4);
+
+            for (i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+
+            while (offset < buffer.length) {
+                for (i = 0; i < numOfChan; i++) {
+                    sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    out.setInt16(pos, sample, true); pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([out], { type: 'audio/wav' });
+        }
+
+        function alternarTipoLayout() {
+            const layout = document.getElementById('bannerLayoutType').value;
+            const sectionCustom = document.getElementById('sectionCustomFields');
+            const sectionFile = document.getElementById('sectionFileField');
+            const customView = document.getElementById('customBannerView');
+            const fullImg = document.getElementById('prevFullImg');
+
+            if (layout === 'FULL_IMAGE') {
+                sectionCustom.style.display = 'none';
+                sectionFile.style.display = 'block';
+                customView.style.display = 'none';
+                fullImg.style.display = 'block';
+            } else {
+                sectionCustom.style.display = 'block';
+                sectionFile.style.display = 'none';
+                customView.style.display = 'flex';
+                fullImg.style.display = 'none';
+            }
+            atualizarPreview();
+        }
+
+        function atualizarPreview() {
+            const layout = document.getElementById('bannerLayoutType').value;
+            const mockup = document.getElementById('bannerMockup');
+
+            if (layout === 'CUSTOM') {
+                const badgeText = document.getElementById('bannerBadge').value;
+                const tituloText = document.getElementById('bannerTitulo').value;
+                const subText = document.getElementById('bannerSubtitulo').value;
+                const btnText = document.getElementById('bannerBtnText').value;
+                const bgColor = document.getElementById('colorBgCard').value;
+                const borderColor = document.getElementById('colorBorderCard').value;
+                const accentColor = document.getElementById('colorAccent').value;
+                const titleColor = document.getElementById('colorTextTitle').value;
+
+                const badgeEl = document.getElementById('prevBadge');
+                badgeEl.innerText = badgeText;
+                badgeEl.style.backgroundColor = accentColor;
+
+                const titleEl = document.getElementById('prevTitulo');
+                titleEl.innerText = tituloText;
+                titleEl.style.color = titleColor;
+
+                document.getElementById('prevSubtitulo').innerText = subText;
+                
+                const btnActionEl = document.getElementById('prevBtnAction');
+                btnActionEl.innerText = btnText || "CONFERIR AGORA ⚡";
+                btnActionEl.style.backgroundColor = accentColor;
+
+                mockup.style.backgroundColor = bgColor;
+                mockup.style.borderColor = borderColor;
+            }
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('prevFullImg').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function toggleBannerDestino() {
+            const isChecked = document.getElementById('bannerClicavel').checked;
+            document.getElementById('boxBannerDestino').style.display = isChecked ? 'block' : 'none';
+        }
+
+        async function carregarBannersGitHub() {
+            const body = document.getElementById('listaBannersBody');
+            body.innerHTML = '<tr><td colspan="5">Buscando banners do GitHub...</td></tr>';
+
+            try {
+                let token = document.getElementById('bannerGhToken')?.value.trim() || 
+                            document.getElementById('ghToken')?.value.trim() || 
+                            localStorage.getItem("gh_pat_token");
+
+                const headers = getAuthHeader(token);
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json?t=${Date.now()}`;
+                
+                const res = await fetch(ghUrl, { headers });
+                if (!res.ok) {
+                    globalBanners = [];
+                    renderizarTabelaBanners([]);
+                    return;
+                }
+                const currentData = await res.json();
+                const contentText = base64ToUtf8(currentData.content).trim();
+                globalBanners = contentText ? JSON.parse(contentText) : [];
+                renderizarTabelaBanners(globalBanners);
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="5">Nenhum banner encontrado ou erro de conexão.</td></tr>';
+            }
+        }
+
+        function renderizarTabelaBanners(banners) {
+            const body = document.getElementById('listaBannersBody');
+            body.innerHTML = '';
+
+            if (!banners || banners.length === 0) {
+                body.innerHTML = '<tr><td colspan="5">Nenhum banner cadastrado.</td></tr>';
+                return;
+            }
+
+            banners.forEach((banner) => {
+                const tr = document.createElement('tr');
+                const clicavelBadge = banner.clicavel 
+                    ? `<span class="badge badge-success">SIM</span>` 
+                    : `<span class="badge badge-warning">NÃO</span>`;
+                
+                const tipoBadge = banner.layoutType === 'FULL_IMAGE'
+                    ? `<span class="badge badge-warning">IMAGEM CHEIA</span>`
+                    : `<span class="badge badge-success">CUSTOM</span>`;
+
+                const thumbImg = (banner.layoutType === 'FULL_IMAGE' || banner.imagemUrl || banner.capa)
+                    ? `<img src="${banner.imagemUrl || banner.capa}" width="60" height="35" style="border-radius:6px; object-fit:cover;">`
+                    : `<div style="width:60px; height:35px; background:${banner.bgColor || '#333'}; border:1px solid ${banner.borderColor || '#555'}; border-radius:6px;"></div>`;
+
+                tr.innerHTML = `
+                    <td>${thumbImg}</td>
+                    <td>${tipoBadge}</td>
+                    <td><b>${banner.titulo || banner.title || banner.nome || 'Banner Customizado'}</b></td>
+                    <td>${clicavelBadge}</td>
+                    <td>
+                        <button class="btn-danger" onclick="excluirBanner('${banner.id}')">Excluir</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        document.getElementById('bannerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitBanner');
+            
+            let token = document.getElementById('bannerGhToken')?.value.trim() || 
+                        document.getElementById('ghToken')?.value.trim() || 
+                        localStorage.getItem("gh_pat_token");
+
+            if (!token) {
+                token = prompt("Informe seu Token Personalizado do GitHub (PAT):");
+                if (!token) {
+                    alert("A publicação foi cancelada pois o Token não foi informado.");
+                    return;
+                }
+                salvarTokenLocal(token);
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Iniciando publicação...";
+
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                let currentSha = "";
+                let bannersAtuais = [];
+                
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, {
+                    headers: getAuthHeader(token)
+                });
+
+                if (getRes.ok) {
+                    const dataJson = await getRes.json();
+                    currentSha = dataJson.sha;
+                    try {
+                        const contentText = base64ToUtf8(dataJson.content).trim();
+                        bannersAtuais = contentText ? JSON.parse(contentText) : [];
+                    } catch (errContent) {
+                        bannersAtuais = [];
+                    }
+                } else if (getRes.status === 401) {
+                    localStorage.removeItem("gh_pat_token");
+                    throw new Error("Token recusado pelo GitHub (401 Unauthorized). Digite o token correto novamente.");
+                }
+
+                const layoutType = document.getElementById('bannerLayoutType').value;
+                let imageUrl = "";
+
+                if (layoutType === 'FULL_IMAGE') {
+                    const fileInput = document.getElementById('bannerCapa');
+                    if (fileInput.files && fileInput.files[0]) {
+                        btn.innerText = "Enviando imagem...";
+                        const formData = new FormData();
+                        formData.append('file', fileInput.files[0]);
+                        formData.append('upload_preset', UPLOAD_PRESET);
+
+                        const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                            method: 'POST', body: formData
+                        }).then(r => r.json());
+                        
+                        if (!resImg.secure_url) throw new Error("Falha no envio da imagem para o servidor de mídias.");
+                        imageUrl = resImg.secure_url;
+                    } else {
+                        throw new Error("Por favor, selecione uma imagem para a opção Banner Cheio.");
+                    }
+                }
+
+                const novoBanner = {
+                    id: Date.now().toString(),
+                    layoutType: layoutType,
+                    badge: layoutType === 'CUSTOM' ? document.getElementById('bannerBadge').value.trim() : "",
+                    tag: layoutType === 'CUSTOM' ? document.getElementById('bannerBadge').value.trim() : "",
+                    titulo: layoutType === 'CUSTOM' ? document.getElementById('bannerTitulo').value.trim() : "Banner Cheio",
+                    title: layoutType === 'CUSTOM' ? document.getElementById('bannerTitulo').value.trim() : "Banner Cheio",
+                    subtitulo: layoutType === 'CUSTOM' ? document.getElementById('bannerSubtitulo').value.trim() : "",
+                    btnText: layoutType === 'CUSTOM' ? (document.getElementById('bannerBtnText').value.trim() || "CONFERIR AGORA ⚡") : "CONFERIR AGORA ⚡",
+                    bgColor: layoutType === 'CUSTOM' ? document.getElementById('colorBgCard').value : "#000000",
+                    borderColor: layoutType === 'CUSTOM' ? document.getElementById('colorBorderCard').value : "#9D00FF",
+                    accentColor: layoutType === 'CUSTOM' ? document.getElementById('colorAccent').value : "#9D00FF",
+                    titleColor: layoutType === 'CUSTOM' ? document.getElementById('colorTextTitle').value : "#FFFFFF",
+                    imagemUrl: imageUrl,
+                    capa: imageUrl,
+                    imagemBg: imageUrl,
+                    clicavel: document.getElementById('bannerClicavel').checked,
+                    tipoDestino: document.getElementById('bannerTipoDestino').value,
+                    destinoId: document.getElementById('bannerDestinoValue').value.trim()
+                };
+
+                bannersAtuais.unshift(novoBanner);
+
+                btn.innerText = "Gravando dados no GitHub...";
+                const updatedContent = utf8ToBase64(JSON.stringify(bannersAtuais, null, 2));
+
+                const bodyPayload = {
+                    message: `Adicionado banner ${novoBanner.titulo}`,
+                    content: updatedContent
+                };
+                if (currentSha) bodyPayload.sha = currentSha;
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { 
+                        ...getAuthHeader(token), 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(bodyPayload)
+                });
+
+                if (!ghRes.ok) {
+                    const errorData = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(`Erro de resposta do GitHub (${ghRes.status}): ` + (errorData.message || "Erro desconhecido. Verifique as permissões do PAT."));
+                }
+
+                alert("Banner publicado com sucesso!");
+                carregarBannersGitHub();
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "PUBLICAR BANNER";
+            }
+        });
+
+        async function excluirBanner(bannerId) {
+            let token = document.getElementById('bannerGhToken')?.value.trim() || 
+                        document.getElementById('ghToken')?.value.trim() || 
+                        localStorage.getItem("gh_pat_token");
+
+            if (!token) {
+                token = prompt("Digite seu Token do GitHub (PAT) para excluir:");
+                if (!token) return;
+                salvarTokenLocal(token);
+            }
+
+            if (!confirm(`Deseja realmente excluir este banner?`)) return;
+
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, {
+                    headers: getAuthHeader(token)
+                });
+
+                if (!getRes.ok) {
+                    const errorGet = await getRes.json();
+                    if (getRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errorGet.message || "Não foi possível carregar o banners.json do GitHub.");
+                }
+
+                const currentData = await getRes.json();
+                const latestSha = currentData.sha;
+
+                const contentText = base64ToUtf8(currentData.content).trim();
+                let banners = contentText ? JSON.parse(contentText) : [];
+
+                const idAlvo = String(bannerId).trim();
+                const novosBanners = banners.filter(b => String(b.id).trim() !== idAlvo);
+
+                if (banners.length === novosBanners.length) {
+                    throw new Error("O banner não foi localizado no arquivo do GitHub para ser removido.");
+                }
+
+                const updatedContent = utf8ToBase64(JSON.stringify(novosBanners, null, 2));
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { 
+                        ...getAuthHeader(token), 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({
+                        message: `Removido banner ID: ${bannerId}`,
+                        content: updatedContent,
+                        sha: latestSha
+                    })
+                });
+
+                if (ghRes.ok) {
+                    alert("Banner excluído com sucesso!");
+                    carregarBannersGitHub();
+                } else {
+                    const errRes = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errRes.message || "Erro de permissão no GitHub.");
+                }
+            } catch (err) {
+                alert("Erro ao excluir banner: " + err.message);
+            }
+        }
+
+        async function carregarPacotesGitHub() {
+            const body = document.getElementById('listaPacotesBody');
+            body.innerHTML = '<tr><td colspan="6">Buscando do GitHub...</td></tr>';
+
+            try {
+                let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json?t=${Date.now()}`;
+                const res = await fetch(ghUrl, { headers: getAuthHeader(token) });
+                
+                if (!res.ok) throw new Error("Não foi possível acessar pacotes.json");
+
+                const currentData = await res.json();
+                globalShaGitHub = currentData.sha;
+
+                const contentText = base64ToUtf8(currentData.content).trim();
+                let pacotesLidos = contentText ? JSON.parse(contentText) : [];
+
+                globalPacotes = pacotesLidos.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+
+                renderizarTabelaPacotes(globalPacotes);
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="6">Erro ao carregar pacotes. Verifique o repositório.</td></tr>';
+            }
+        }
+
+        function renderizarTabelaPacotes(pacotes) {
+            const body = document.getElementById('listaPacotesBody');
+            body.innerHTML = '';
+
+            if (pacotes.length === 0) {
+                body.innerHTML = '<tr><td colspan="6">Nenhum pacote publicado.</td></tr>';
+                return;
+            }
+
+            pacotes.forEach((pack) => {
+                const tr = document.createElement('tr');
+                const packId = pack.id || pack.nome || pack.title;
+                const temAudio = (pack.previewUrl || pack.preview_url) 
+                    ? `<span class="badge badge-success">🎧 COM ÁUDIO</span>` 
+                    : `<span class="badge badge-warning">SEM ÁUDIO</span>`;
+
+                const tamanhoExibicao = pack.tamanho || pack.size || pack.sizeFormatted || "ZIP";
+
+                tr.innerHTML = `
+                    <td><img src="${pack.capa || pack.cover_url}" width="45" height="45" style="border-radius:6px; object-fit:cover;"></td>
+                    <td><b>${pack.nome || pack.title}</b></td>
+                    <td><span class="badge badge-success">${(pack.categoria || pack.type || pack.category || 'PAGODAO').toUpperCase()}</span></td>
+                    <td><span class="badge badge-purple">${tamanhoExibicao}</span></td>
+                    <td>${temAudio}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-edit" onclick="abrirEdicaoPacote('${packId}')">Editar</button>
+                            <button class="btn-danger" onclick="excluirPacote('${packId}')">Excluir</button>
+                        </div>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function filtrarPacotes() {
+            const termo = document.getElementById('searchPacote').value.toLowerCase();
+            const filtrados = globalPacotes.filter(p => 
+                ((p.nome || p.title) && (p.nome || p.title).toLowerCase().includes(termo)) || 
+                ((p.categoria || p.type || p.category) && (p.categoria || p.type || p.category).toLowerCase().includes(termo))
+            );
+            renderizarTabelaPacotes(filtrados);
+        }
+
+        function abrirEdicaoPacote(targetId) {
+            const pack = globalPacotes.find(p => String(p.id || p.nome || p.title).trim() === String(targetId).trim());
+            if (!pack) return;
+
+            document.getElementById('editPackId').value = targetId;
+            document.getElementById('editPackNome').value = pack.nome || pack.title;
+            document.getElementById('editPackCategoria').value = pack.categoria || pack.type || pack.category || "PAGODAO";
+            document.getElementById('editPackTamanho').value = pack.tamanho || pack.size || pack.sizeFormatted || "ZIP";
+            document.getElementById('editPackDownload').value = pack.download || pack.zip_url;
+            document.getElementById('editPackPreviewUrl').value = pack.previewUrl || pack.preview_url || "";
+            document.getElementById('editPackAudioFile').value = "";
+            document.getElementById('editPackCapaFile').value = "";
+            document.getElementById('editor-box-edit').style.display = 'none';
+
+            document.getElementById('modalEditPacote').style.display = 'flex';
+        }
+
+        function fecharModalEdit() {
+            document.getElementById('modalEditPacote').style.display = 'none';
+        }
+
+        async function salvarEdicaoPacote() {
+            const btn = document.getElementById('btnSalvarEditPack');
+            let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
+            if (!token) {
+                token = prompt("Digite seu Token do GitHub (PAT) para salvar:");
+                if (!token) return;
+                salvarTokenLocal(token);
+            }
+
+            const targetId = document.getElementById('editPackId').value;
+            const index = globalPacotes.findIndex(p => String(p.id || p.nome || p.title).trim() === String(targetId).trim());
+
+            if (index === -1) {
+                alert("Erro ao localizar o pacote para salvar.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Processando...";
+
+            try {
+                const novoNome = document.getElementById('editPackNome').value.trim();
+                const novaCategoria = document.getElementById('editPackCategoria').value;
+                const novoTamanho = document.getElementById('editPackTamanho').value.trim() || "ZIP";
+                const novoDownload = document.getElementById('editPackDownload').value.trim();
+                const inputAudioUrl = document.getElementById('editPackPreviewUrl').value.trim();
+                const inputAudioFile = document.getElementById('editPackAudioFile');
+                const inputCapaFile = document.getElementById('editPackCapaFile');
+
+                let capaUrlFinal = globalPacotes[index].capa || globalPacotes[index].cover_url || "";
+
+                if (inputCapaFile && inputCapaFile.files && inputCapaFile.files[0]) {
+                    btn.innerText = "Enviando nova imagem...";
+                    const formData = new FormData();
+                    formData.append('file', inputCapaFile.files[0]);
+                    formData.append('upload_preset', UPLOAD_PRESET);
+
+                    const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                        method: 'POST', body: formData
+                    }).then(r => r.json());
+
+                    if (resImg.secure_url) {
+                        capaUrlFinal = resImg.secure_url;
+                    } else {
+                        throw new Error("Falha ao enviar a nova imagem para o Cloudinary.");
+                    }
+                }
+
+                let previewUrlFinal = globalPacotes[index].previewUrl || globalPacotes[index].preview_url || "";
+
+                if (inputAudioUrl !== "") {
+                    previewUrlFinal = inputAudioUrl;
+                } else if (inputAudioFile && inputAudioFile.files && inputAudioFile.files[0]) {
+                    btn.innerText = "Cortando áudio selecionado...";
+                    const startTime = parseFloat(document.getElementById('start-time-edit').value) || 0;
+                    const endTime = parseFloat(document.getElementById('end-time-edit').value) || 40;
+
+                    const audioCortadoBlob = await recortarAudioCustomizado(inputAudioFile.files[0], startTime, endTime);
+
+                    btn.innerText = "Enviando áudio para o GitHub...";
+                    const fileName = `preview_${Date.now()}.wav`;
+                    const pathGitHub = `previews/${fileName}`;
+
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioCortadoBlob);
+                    await new Promise(resolve => reader.onloadend = resolve);
+                    const base64Audio = reader.result.split(',')[1];
+
+                    await fetch(`https://api.github.com/repos/${REPO}/contents/${pathGitHub}`, {
+                        method: 'PUT',
+                        headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: `Update preview ${fileName}`,
+                            content: base64Audio
+                        })
+                    });
+
+                    previewUrlFinal = `https://raw.githubusercontent.com/${REPO}/main/${pathGitHub}`;
+                }
+
+                globalPacotes[index].nome = novoNome;
+                globalPacotes[index].title = novoNome;
+                globalPacotes[index].categoria = novaCategoria;
+                globalPacotes[index].type = novaCategoria;
+                globalPacotes[index].category = novaCategoria;
+                globalPacotes[index].tamanho = novoTamanho;
+                globalPacotes[index].size = novoTamanho;
+                globalPacotes[index].sizeFormatted = novoTamanho;
+                globalPacotes[index].download = novoDownload;
+                globalPacotes[index].zip_url = novoDownload;
+                globalPacotes[index].capa = capaUrlFinal;
+                globalPacotes[index].cover_url = capaUrlFinal;
+                globalPacotes[index].previewUrl = previewUrlFinal;
+                globalPacotes[index].preview_url = previewUrlFinal;
+
+                try {
+                    btn.innerText = "Atualizando banners.json...";
+                    const bannersUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                    const resB = await fetch(`${bannersUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                    if (resB.ok) {
+                        const bData = await resB.json();
+                        const bText = base64ToUtf8(bData.content).trim();
+                        let bList = bText ? JSON.parse(bText) : [];
+
+                        let bChanged = false;
+                        bList.forEach(b => {
+                            if (String(b.id || b.destinoId).trim() === String(targetId).trim()) {
+                                b.imagemUrl = capaUrlFinal;
+                                b.capa = capaUrlFinal;
+                                b.cover_url = capaUrlFinal;
+                                b.imagemBg = capaUrlFinal;
+                                b.nome = novoNome;
+                                b.title = novoNome;
+                                b.titulo = novoNome;
+                                b.btnText = "CONFERIR AGORA ⚡";
+                                bChanged = true;
+                            }
+                        });
+
+                        if (bChanged) {
+                            const updatedBContent = utf8ToBase64(JSON.stringify(bList, null, 2));
+                            await fetch(bannersUrl, {
+                                method: 'PUT',
+                                headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    message: `Update capa banner ${novoNome}`,
+                                    content: updatedBContent,
+                                    sha: bData.sha
+                                })
+                            });
+                        }
+                    }
+                } catch (errB) {
+                    console.warn("Aviso: Não foi possível sincronizar banners.json:", errB);
+                }
+
+                btn.innerText = "Atualizando GitHub...";
+                await atualizarArquivoGitHub(token, `Editado pacote ${novoNome}`);
+                fecharModalEdit();
+                carregarPacotesGitHub();
+            } catch (err) {
+                alert("Erro ao salvar edição: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Salvar Alterações";
+            }
+        }
+
+        async function excluirPacote(targetId) {
+            let token = document.getElementById('ghToken')?.value.trim() || 
+                        document.getElementById('bannerGhToken')?.value.trim() || 
+                        localStorage.getItem("gh_pat_token");
+
+            if (!token) {
+                token = prompt("Digite seu Token do GitHub (PAT) para excluir:");
+                if (!token) return;
+                salvarTokenLocal(token);
+            }
+
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                
+                if (!getRes.ok) throw new Error("Falha ao consultar pacotes no GitHub.");
+                
+                const currentData = await getRes.json();
+                const latestSha = currentData.sha;
+                const contentText = base64ToUtf8(currentData.content).trim();
+                let listaAtual = contentText ? JSON.parse(contentText) : [];
+
+                const idAlvo = String(targetId).trim();
+                const itemAlvo = listaAtual.find(p => String(p.id || p.nome || p.title).trim() === idAlvo);
+                const nomePacote = itemAlvo ? (itemAlvo.nome || itemAlvo.title) : "selecionado";
+
+                if (!confirm(`Deseja realmente excluir o pacote "${nomePacote}"?`)) return;
+
+                const novaLista = listaAtual.filter(p => String(p.id || p.nome || p.title).trim() !== idAlvo);
+
+                if (listaAtual.length === novaLista.length) {
+                    throw new Error("O pacote não foi localizado na lista remota do GitHub.");
+                }
+
+                const updatedContent = utf8ToBase64(JSON.stringify(novaLista, null, 2));
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `Removido pacote ${nomePacote}`,
+                        content: updatedContent,
+                        sha: latestSha
+                    })
+                });
+
+                if (ghRes.ok) {
+                    alert("Pacote excluído com sucesso!");
+                    carregarPacotesGitHub();
+                } else {
+                    const errData = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errData.message || "Erro de permissão no GitHub.");
+                }
+            } catch(e) {
+                alert("Erro ao excluir pacote: " + e.message);
+            }
+        }
+
+        async function atualizarArquivoGitHub(token, commitMessage) {
+            try {
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                
+                const getRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                let latestSha = globalShaGitHub;
+                if (getRes.ok) {
+                    const currentData = await getRes.json();
+                    latestSha = currentData.sha;
+                }
+
+                const updatedContent = utf8ToBase64(JSON.stringify(globalPacotes, null, 2));
+
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: commitMessage,
+                        content: updatedContent,
+                        sha: latestSha
+                    })
+                });
+
+                if (ghRes.ok) {
+                    alert("Operação salva no GitHub com sucesso!");
+                } else {
+                    const errData = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    alert(`Erro ao atualizar GitHub: ${errData.message || 'Verifique seu Token.'}`);
+                }
+            } catch (e) {
+                alert("Erro de comunicação com o GitHub: " + e.message);
+            }
+        }
+
+        let packCount = 1;
+        document.getElementById('btnAddPack').addEventListener('click', () => {
+            packCount++;
+            const container = document.getElementById('cardsContainer');
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'pack-item';
+            cardDiv.id = `pack-item-${packCount}`;
+            cardDiv.innerHTML = `
+                <h4>Pacote ${packCount}</h4>
+                <label>Nome do Pacote:</label>
+                <input type="text" class="input-nome" placeholder="Nome do Pacote ${packCount}" required>
+                <label>Categoria:</label>
+                <select class="input-categoria">
+                    <option value="PAGODAO">PAGODÃO</option>
+                    <option value="ARROCHA">ARROCHA</option>
+                    <option value="ARROCHADEIRA">ARROCHADEIRA</option>
+                    <option value="SAMBA">SAMBA</option>
+                    <option value="FORRO">FORRÓ</option>
+                    <option value="FUNK">FUNK</option>
+                    <option value="REPERTORIO">REPERTÓRIO</option>
+                    <option value="OUTROS">OUTROS</option>
+                </select>
+                <label style="color: var(--accent-gold);">💾 Tamanho do Pacote (MB/GB):</label>
+                <input type="text" class="input-tamanho" placeholder="Ex: 350 MB ou 1.2 GB" value="ZIP">
+                <label>Capa do Pack (Imagem):</label>
+                <input type="file" class="input-capa" accept="image/*" required>
+                <label>Link Direto do ZIP:</label>
+                <input type="url" class="input-download" placeholder="https://..." required>
+                <label style="color: var(--accent-green);">🎵 Preview de Áudio (Upload + Editor Visual):</label>
+                <input type="file" class="input-audio-preview" accept="audio/*" onchange="carregarEditorAudio(this, ${packCount})">
+
+                <div class="audio-editor-box" id="editor-box-${packCount}">
+                    <div id="waveform-${packCount}" class="waveform-container"></div>
+                    <div class="audio-editor-controls">
+                        <button type="button" class="btn-edit btn-small" id="btn-play-${packCount}" onclick="togglePlayAudio(${packCount})">▶️ Ouvir Trecho</button>
+                        <div>
+                            <label style="margin:0; font-size:11px;">Início (seg):</label>
+                            <input type="number" id="start-time-${packCount}" value="0" min="0" step="0.5" onchange="atualizarRegiaoManual(${packCount})">
+                        </div>
+                        <div>
+                            <label style="margin:0; font-size:11px;">Fim (seg):</label>
+                            <input type="number" id="end-time-${packCount}" value="40" min="1" step="0.5" onchange="atualizarRegiaoManual(${packCount})">
+                        </div>
+                    </div>
+                </div>
+
+                <label style="color: var(--accent-blue);">🔗 Ou Cole o Link Direto do Áudio MP3/WAV (Opcional):</label>
+                <input type="url" class="input-audio-url" placeholder="https://res.cloudinary.com/.../audio.mp3">
+            `;
+            container.appendChild(cardDiv);
+        });
+
+        async function getFirebaseAccessToken(privateKey) {
+            const now = Math.floor(Date.now() / 1000);
+            const claim = {
+                iss: FIREBASE_CLIENT_EMAIL,
+                scope: "https://www.googleapis.com/auth/firebase.messaging",
+                aud: "https://oauth2.googleapis.com/token",
+                exp: now + 3600,
+                iat: now
+            };
+
+            const header = { alg: "RS256", typ: "JWT" };
+            const jwtToken = KJUR.jws.JWS.sign("RS256", JSON.stringify(header), JSON.stringify(claim), privateKey);
+
+            const response = await fetch("https://oauth2.googleapis.com/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwtToken}`
+            });
+
+            const data = await response.json();
+            return data.access_token;
+        }
+
+        async function dispararNotificacaoV1(tokenAccessToken, packNome, packCategoria, tituloCustom, textoCustom) {
+            const fcmUrl = `https://fcm.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/messages:send`;
+            const tituloFinal = tituloCustom || "🔥 Novo Repertório Liberado!";
+            const corpoFinal = textoCustom || `O repertório "${packNome}" [${packCategoria}] já está disponível no PenSound!`;
+
+            await fetch(fcmUrl, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${tokenAccessToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: {
+                        topic: "todos",
+                        notification: {
+                            title: tituloFinal,
+                            body: corpoFinal
+                        },
+                        android: {
+                            priority: "HIGH",
+                            notification: { sound: "default", channel_id: "pensound_notifications" }
+                        }
+                    }
+                })
+            });
+        }
+
+        document.getElementById('packForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+
+            try {
+                let token = document.getElementById('ghToken')?.value.trim() || localStorage.getItem("gh_pat_token");
+                if (!token) {
+                    token = prompt("Digite seu Token do GitHub (PAT) para publicar:");
+                    if (!token) return;
+                    salvarTokenLocal(token);
+                }
+
+                const privateKey = document.getElementById('firebaseKeyInput').value.trim();
+                const cards = document.querySelectorAll('.pack-item');
+
+                const tituloNovidade = document.getElementById('inputTituloNovidade')?.value.trim() || "🔥 Novo Repertório Liberado!";
+                const descNovidade = document.getElementById('inputDescricaoNovidade')?.value.trim();
+
+                btn.innerText = "Lendo repositório...";
+                const ghUrl = `https://api.github.com/repos/${REPO}/contents/pacotes.json`;
+                const currentRes = await fetch(`${ghUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                
+                if (!currentRes.ok) {
+                    const errGet = await currentRes.json();
+                    if (currentRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errGet.message || "Erro ao consultar pacotes.json no GitHub.");
+                }
+                const currentData = await currentRes.json();
+
+                const contentText = base64ToUtf8(currentData.content).trim();
+                let content = contentText ? JSON.parse(contentText) : [];
+
+                let pacotesAdicionados = 0;
+                let ultimosPacotes = [];
+                let novosBanners = [];
+
+                let loteNovosPacotes = [];
+
+                for (let i = 0; i < cards.length; i++) {
+                    const card = cards[i];
+                    const instanceId = i + 1;
+                    const nome = card.querySelector('.input-nome').value.trim();
+                    const categoria = card.querySelector('.input-categoria').value;
+                    const tamanho = card.querySelector('.input-tamanho').value.trim() || "ZIP";
+                    const file = card.querySelector('.input-capa').files[0];
+                    const download = card.querySelector('.input-download').value.trim();
+                    
+                    const inputAudioFile = card.querySelector('.input-audio-preview');
+                    const inputAudioUrl = card.querySelector('.input-audio-url').value.trim();
+
+                    if (nome && file && download) {
+                        btn.innerText = `Enviando imagem ${i + 1} de ${cards.length}...`;
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('upload_preset', UPLOAD_PRESET);
+
+                        const resImg = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                            method: 'POST', body: formData
+                        }).then(r => r.json());
+
+                        if (!resImg.secure_url) {
+                            throw new Error(`Falha ao fazer upload da imagem do pacote ${i + 1}.`);
+                        }
+
+                        let previewUrlFinal = "";
+
+                        if (inputAudioUrl !== "") {
+                            previewUrlFinal = inputAudioUrl;
+                        } else if (inputAudioFile && inputAudioFile.files && inputAudioFile.files[0]) {
+                            btn.innerText = `Cortando áudio do pacote ${i + 1}...`;
+                            const startTime = parseFloat(document.getElementById(`start-time-${instanceId}`)?.value) || 0;
+                            const endTime = parseFloat(document.getElementById(`end-time-${instanceId}`)?.value) || 40;
+
+                            const audioCortadoBlob = await recortarAudioCustomizado(inputAudioFile.files[0], startTime, endTime);
+
+                            btn.innerText = `Enviando áudio ${i + 1} para o GitHub...`;
+                            const fileName = `preview_${Date.now()}_${i}.wav`;
+                            const pathGitHub = `previews/${fileName}`;
+
+                            const reader = new FileReader();
+                            reader.readAsDataURL(audioCortadoBlob);
+                            await new Promise(resolve => reader.onloadend = resolve);
+                            const base64Audio = reader.result.split(',')[1];
+
+                            await fetch(`https://api.github.com/repos/${REPO}/contents/${pathGitHub}`, {
+                                method: 'PUT',
+                                headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    message: `Add preview ${fileName}`,
+                                    content: base64Audio
+                                })
+                            });
+
+                            previewUrlFinal = `https://raw.githubusercontent.com/${REPO}/main/${pathGitHub}`;
+                        }
+
+                        const packId = (Date.now() + i).toString();
+
+                        const novoPack = {
+                            id: packId,
+                            nome: nome, title: nome,
+                            categoria: categoria, type: categoria, category: categoria,
+                            tamanho: tamanho, size: tamanho, sizeFormatted: tamanho,
+                            capa: resImg.secure_url, cover_url: resImg.secure_url,
+                            download: download, zip_url: download,
+                            previewUrl: previewUrlFinal, preview_url: previewUrlFinal
+                        };
+
+                        loteNovosPacotes.push(novoPack);
+                        ultimosPacotes.push(novoPack);
+                        pacotesAdicionados++;
+
+                        const catUpper = categoria.toUpperCase();
+                        let tagTexto = "⚡ NOVO PACOTE";
+                        if (catUpper === "REPERTORIO") tagTexto = "🎵 NOVO REPERTÓRIO";
+                        else if (catUpper === "PAGODAO") tagTexto = "⚡ NOVO PAGODÃO";
+                        else if (catUpper === "ARROCHA") tagTexto = "⚡ NOVO ARROCHA";
+
+                        novosBanners.push({
+                            id: packId,
+                            layoutType: "CUSTOM",
+                            tag: tagTexto,
+                            badge: tagTexto,
+                            nome: nome,
+                            title: nome,
+                            titulo: nome,
+                            subtitulo: "Disponível para download!",
+                            categoria: categoria,
+                            type: categoria,
+                            btnText: "CONFERIR AGORA ⚡",
+                            bgColor: "#22123B",
+                            borderColor: "#9D00FF",
+                            accentColor: "#9D00FF",
+                            titleColor: "#FFFFFF",
+                            imagemUrl: resImg.secure_url,
+                            capa: resImg.secure_url,
+                            cover_url: resImg.secure_url,
+                            imagemBg: resImg.secure_url,
+                            clicavel: true,
+                            tipoDestino: "PACK",
+                            destinoId: packId
+                        });
+                    }
+                }
+
+                for (let j = loteNovosPacotes.length - 1; j >= 0; j--) {
+                    content.unshift(loteNovosPacotes[j]);
+                }
+
+                btn.innerText = "Atualizando pacotes.json no GitHub...";
+                const updatedContent = utf8ToBase64(JSON.stringify(content, null, 2));
+                const ghRes = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `Adicionados ${pacotesAdicionados} pacotes`,
+                        content: updatedContent, sha: currentData.sha
+                    })
+                });
+
+                if (!ghRes.ok) {
+                    const errPut = await ghRes.json();
+                    if (ghRes.status === 401) localStorage.removeItem("gh_pat_token");
+                    throw new Error(errPut.message || "Erro ao salvar alterações no GitHub. Verifique as permissões do PAT.");
+                }
+
+                if (novosBanners.length > 0) {
+                    try {
+                        btn.innerText = "Sincronizando carrossel (banners.json)...";
+                        const bannersUrl = `https://api.github.com/repos/${REPO}/contents/banners.json`;
+                        const resBanners = await fetch(`${bannersUrl}?t=${Date.now()}`, { headers: getAuthHeader(token) });
+                        
+                        let listaBannersAtual = [];
+                        let bannersSha = "";
+
+                        if (resBanners.ok) {
+                            const bannersData = await resBanners.json();
+                            bannersSha = bannersData.sha;
+                            const bannerText = base64ToUtf8(bannersData.content).trim();
+                            listaBannersAtual = bannerText ? JSON.parse(bannerText) : [];
+                        }
+
+                        novosBanners.forEach(nb => listaBannersAtual.unshift(nb));
+
+                        const updatedBannersContent = utf8ToBase64(JSON.stringify(listaBannersAtual, null, 2));
+                        const payloadBanners = {
+                            message: `Sincronizados ${novosBanners.length} banners de novidades`,
+                            content: updatedBannersContent
+                        };
+                        if (bannersSha) payloadBanners.sha = bannersSha;
+
+                        await fetch(bannersUrl, {
+                            method: 'PUT',
+                            headers: { ...getAuthHeader(token), 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payloadBanners)
+                        });
+                    } catch (errB) {
+                        console.warn("Aviso: Falha ao atualizar banners.json automaticamente:", errB);
+                    }
+                }
+
+                btn.innerText = "Enviando notificações...";
+                try {
+                    const accessToken = await getFirebaseAccessToken(privateKey);
+                    for (const pack of ultimosPacotes) {
+                        const textoMensagem = descNovidade || `O repertório "${pack.nome}" [${pack.categoria}] já está disponível no PenSound!`;
+                        await dispararNotificacaoV1(accessToken, pack.nome, pack.categoria, tituloNovidade, textoMensagem);
+                    }
+                } catch (errFcm) {
+                    console.warn("Falha no disparo FCM:", errFcm);
+                    alert("Pacote publicado no GitHub, mas houve erro ao disparar a notificação Firebase.");
+                }
+
+                alert(`${pacotesAdicionados} pacote(s) publicado(s) com sucesso!`);
+                location.reload();
+            } catch (err) {
+                alert('Erro ao publicar: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "PUBLICAR E NOTIFICAR APP";
+            }
+        });
+    </script>
+</body>
+</html>
