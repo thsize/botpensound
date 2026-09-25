@@ -1,5 +1,25 @@
 [
   {
+    "id": "1790339647193",
+    "layoutType": "CUSTOM",
+    "badge": "AVISO!!",
+    "tag": "AVISO!!",
+    "titulo": "ALGUNS PACOTES ESTÃO DANDO ERRO. JA VAMOS CORRIGIR",
+    "title": "ALGUNS PACOTES ESTÃO DANDO ERRO. JA VAMOS CORRIGIR",
+    "subtitulo": "ERRO NO SEVIDOR!",
+    "btnText": "PENSOUND",
+    "bgColor": "#22123b",
+    "borderColor": "#9d00ff",
+    "accentColor": "#9d00ff",
+    "titleColor": "#ffffff",
+    "imagemUrl": "",
+    "capa": "",
+    "imagemBg": "",
+    "clicavel": false,
+    "tipoDestino": "PACK",
+    "destinoId": ""
+  },
+  {
     "id": "1790257345955",
     "layoutType": "FULL_IMAGE",
     "badge": "",
