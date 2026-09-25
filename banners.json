@@ -1,5 +1,25 @@
 [
   {
+    "id": "1790339890775",
+    "layoutType": "CUSTOM",
+    "badge": "Sorteio",
+    "tag": "Sorteio",
+    "titulo": "QUEM QUISER GANHAR CÓDIGO DE REMOVE ANÚNCIO CHAMA NO WHATSAPP",
+    "title": "QUEM QUISER GANHAR CÓDIGO DE REMOVE ANÚNCIO CHAMA NO WHATSAPP",
+    "subtitulo": "Clicando em ativa chave e indo em WhatsApp",
+    "btnText": "PENSOUND",
+    "bgColor": "#22123b",
+    "borderColor": "#9d00ff",
+    "accentColor": "#9d00ff",
+    "titleColor": "#ffffff",
+    "imagemUrl": "",
+    "capa": "",
+    "imagemBg": "",
+    "clicavel": false,
+    "tipoDestino": "PACK",
+    "destinoId": ""
+  },
+  {
     "id": "1790339647193",
     "layoutType": "CUSTOM",
     "badge": "AVISO!!",
