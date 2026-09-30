@@ -1,5 +1,24 @@
 [
     {
+        "id": "1790733767294",
+        "nome": "CD_UNHA_PINTADA_2026",
+        "title": "CD_UNHA_PINTADA_2026",
+        "titulo": "CD_UNHA_PINTADA_2026",
+        "categoria": "ARROCHA",
+        "type": "ARROCHA",
+        "category": "ARROCHA",
+        "tamanho": "165.87 MB",
+        "size": "165.87 MB",
+        "sizeFormatted": "165.87 MB",
+        "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1790733367/Tatica_Infalivel_-_Unha_Pintada_%C3%81udio_Oficial_LAN%C3%87AMENTO.webp",
+        "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1790733367/Tatica_Infalivel_-_Unha_Pintada_%C3%81udio_Oficial_LAN%C3%87AMENTO.webp",
+        "download": "https://drive.google.com/uc?export=download&id=1C95iZ1pBcN0Cz5rkvUtN2ireq8IoabC-",
+        "zip_url": "https://drive.google.com/uc?export=download&id=1C95iZ1pBcN0Cz5rkvUtN2ireq8IoabC-",
+        "link_mediafire": "https://drive.google.com/uc?export=download&id=1C95iZ1pBcN0Cz5rkvUtN2ireq8IoabC-",
+        "previewUrl": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_CD_UNHA_PINTADA_2026.mp3",
+        "preview_url": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_CD_UNHA_PINTADA_2026.mp3"
+    },
+    {
         "id": "1790732253816",
         "nome": "CD_DEVINHO_NOVAES_2026",
         "title": "CD_DEVINHO_NOVAES_2026",
