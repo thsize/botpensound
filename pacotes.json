@@ -1,5 +1,24 @@
 [
     {
+        "id": "1790737411728",
+        "nome": "CD_THIAGO_AQUINO_2026",
+        "title": "CD_THIAGO_AQUINO_2026",
+        "titulo": "CD_THIAGO_AQUINO_2026",
+        "categoria": "ARROCHA",
+        "type": "ARROCHA",
+        "category": "ARROCHA",
+        "tamanho": "327.79 MB",
+        "size": "327.79 MB",
+        "sizeFormatted": "327.79 MB",
+        "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1790734088/Novo_eu_-_Thiago_Aquino_-_Repert%C3%B3rio_Atualizado_-_Outubro_2025.webp",
+        "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1790734088/Novo_eu_-_Thiago_Aquino_-_Repert%C3%B3rio_Atualizado_-_Outubro_2025.webp",
+        "download": "https://drive.google.com/uc?export=download&id=1bVSSsqR2scPQ_0Se-8yoCjH7XNohyhs3",
+        "zip_url": "https://drive.google.com/uc?export=download&id=1bVSSsqR2scPQ_0Se-8yoCjH7XNohyhs3",
+        "link_mediafire": "https://drive.google.com/uc?export=download&id=1bVSSsqR2scPQ_0Se-8yoCjH7XNohyhs3",
+        "previewUrl": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_CD_THIAGO_AQUINO_2026.mp3",
+        "preview_url": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_CD_THIAGO_AQUINO_2026.mp3"
+    },
+    {
         "id": "1790733767294",
         "nome": "CD_UNHA_PINTADA_2026",
         "title": "CD_UNHA_PINTADA_2026",
