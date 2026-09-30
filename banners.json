@@ -1,5 +1,30 @@
 [
     {
+        "id": "1790730265913",
+        "layoutType": "CUSTOM",
+        "tag": "⚡ NOVO PAGODAO",
+        "badge": "⚡ NOVO PAGODAO",
+        "nome": "SET_DA_LOJA_SETEMBRO_2026",
+        "title": "SET_DA_LOJA_SETEMBRO_2026",
+        "titulo": "SET_DA_LOJA_SETEMBRO_2026",
+        "subtitulo": "Disponível para download!",
+        "categoria": "PAGODAO",
+        "type": "PAGODAO",
+        "btnText": "CONFERIR AGORA ⚡",
+        "bgColor": "#22123B",
+        "borderColor": "#9D00FF",
+        "accentColor": "#9D00FF",
+        "titleColor": "#FFFFFF",
+        "imagemUrl": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788535009/images.jpg",
+        "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788535009/images.jpg",
+        "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788535009/images.jpg",
+        "imagemBg": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1788535009/images.jpg",
+        "link_mediafire": "https://drive.google.com/uc?export=download&id=1e4RWDfVc7foj3kdZissu-5zgHKjLsa04",
+        "clicavel": true,
+        "tipoDestino": "PACK",
+        "destinoId": "1790730265913"
+    },
+    {
         "titulo": "SET_DA_LOJA_SETEMBRO_2026",
         "link_mediafire": "https://drive.google.com/uc?export=download&id=1e4RWDfVc7foj3kdZissu-5zgHKjLsa04",
         "genero": "Pagodão"
@@ -8,30 +33,6 @@
         "titulo": "SET_DA_LOJA_SETEMBRO_2026",
         "link_mediafire": "https://www.mediafire.com/file/SET_DA_LOJA_SETEMBRO_2026.zip/file",
         "genero": "Pagodão"
-    },
-    {
-        "titulo": "undefined",
-        "link_mediafire": "https://www.mediafire.com/file/SET_DA_LOJA_SETEMBRO_2026.zip/file",
-        "genero": "Pagodão",
-        "imagemUrl": "",
-        "capa": "",
-        "cover_url": "",
-        "imagemBg": "",
-        "nome": "undefined",
-        "title": "undefined",
-        "btnText": "CONFERIR AGORA ⚡"
-    },
-    {
-        "titulo": "undefined",
-        "link_mediafire": "https://www.mediafire.com/file_premium/SET_DA_LOJA_SETEMBRO_2026.zip",
-        "genero": "Pagodão",
-        "imagemUrl": "",
-        "capa": "",
-        "cover_url": "",
-        "imagemBg": "",
-        "nome": "undefined",
-        "title": "undefined",
-        "btnText": "CONFERIR AGORA ⚡"
     },
     {
         "id": "1790720191119",
