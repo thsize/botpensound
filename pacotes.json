@@ -1,5 +1,24 @@
 [
     {
+        "id": "1790737963163",
+        "nome": "CD_HEITOR_COSTA_2026",
+        "title": "CD_HEITOR_COSTA_2026",
+        "titulo": "CD_HEITOR_COSTA_2026",
+        "categoria": "ARROCHA",
+        "type": "ARROCHA",
+        "category": "ARROCHA",
+        "tamanho": "135.8 MB",
+        "size": "135.8 MB",
+        "sizeFormatted": "135.8 MB",
+        "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1790737553/Heitor_Costa_-_Sina_de_Of%C3%A9lia_-_Pra_Ouvir_no_Talo_1.0.webp",
+        "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1790737553/Heitor_Costa_-_Sina_de_Of%C3%A9lia_-_Pra_Ouvir_no_Talo_1.0.webp",
+        "download": "https://drive.google.com/uc?export=download&id=1MgTrrcPR4WmGn5KmN79h3PVdZSs4EMv9",
+        "zip_url": "https://drive.google.com/uc?export=download&id=1MgTrrcPR4WmGn5KmN79h3PVdZSs4EMv9",
+        "link_mediafire": "https://drive.google.com/uc?export=download&id=1MgTrrcPR4WmGn5KmN79h3PVdZSs4EMv9",
+        "previewUrl": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_CD_HEITOR_COSTA_2026.mp3",
+        "preview_url": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_CD_HEITOR_COSTA_2026.mp3"
+    },
+    {
         "id": "1790737411728",
         "nome": "CD_THIAGO_AQUINO_2026",
         "title": "CD_THIAGO_AQUINO_2026",
