@@ -1,5 +1,24 @@
 [
     {
+        "id": "1790770957332",
+        "nome": "MANO_BROWN_2002",
+        "title": "MANO_BROWN_2002",
+        "titulo": "MANO_BROWN_2002",
+        "categoria": "OUTROS",
+        "type": "OUTROS",
+        "category": "OUTROS",
+        "tamanho": "87.16 MB",
+        "size": "87.16 MB",
+        "sizeFormatted": "87.16 MB",
+        "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1790770943/A_Vida_E%CC%81_Desafio.webp",
+        "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1790770943/A_Vida_E%CC%81_Desafio.webp",
+        "download": "https://drive.google.com/uc?export=download&id=1wurZKZM6d6Och8R4fxscR_ZOWyJ5yrn-",
+        "zip_url": "https://drive.google.com/uc?export=download&id=1wurZKZM6d6Och8R4fxscR_ZOWyJ5yrn-",
+        "link_mediafire": "https://drive.google.com/uc?export=download&id=1wurZKZM6d6Och8R4fxscR_ZOWyJ5yrn-",
+        "previewUrl": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_MANO_BROWN_2002.mp3",
+        "preview_url": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_MANO_BROWN_2002.mp3"
+    },
+    {
         "id": "1790770372269",
         "nome": "CD_ARROCHADEIRA_2026",
         "title": "CD_ARROCHADEIRA_2026",
