@@ -1,5 +1,25 @@
 [
   {
+    "id": "1791476381897",
+    "layoutType": "FULL_IMAGE",
+    "badge": "",
+    "tag": "",
+    "titulo": "Banner Cheio",
+    "title": "Banner Cheio",
+    "subtitulo": "",
+    "btnText": "CONFERIR AGORA ⚡",
+    "bgColor": "#000000",
+    "borderColor": "#9D00FF",
+    "accentColor": "#9D00FF",
+    "titleColor": "#FFFFFF",
+    "imagemUrl": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1791476381/1000095505.png",
+    "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1791476381/1000095505.png",
+    "imagemBg": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1791476381/1000095505.png",
+    "clicavel": false,
+    "tipoDestino": "PACK",
+    "destinoId": ""
+  },
+  {
     "id": "1791470144726",
     "layoutType": "CUSTOM",
     "tag": "⚡ NOVO PACOTE",
