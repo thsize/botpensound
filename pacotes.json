@@ -1,5 +1,24 @@
 [
     {
+        "id": "1792372908233",
+        "nome": "BANDA CHICABANA 2026",
+        "title": "BANDA CHICABANA 2026",
+        "titulo": "BANDA CHICABANA 2026",
+        "categoria": "OUTROS",
+        "type": "OUTROS",
+        "category": "OUTROS",
+        "tamanho": "139.53 MB",
+        "size": "139.53 MB",
+        "sizeFormatted": "139.53 MB",
+        "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1792372837/j2oq7NGnHJk_Kiko_Chicabana_e_NatanzinhoLimaOficial_-_Pega_Pega_DVD_Nostalgia.webp",
+        "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1792372837/j2oq7NGnHJk_Kiko_Chicabana_e_NatanzinhoLimaOficial_-_Pega_Pega_DVD_Nostalgia.webp",
+        "download": "https://drive.google.com/uc?export=download&id=176s_bebg9nrxI7ONqLnQMgz0P6QrGfiY",
+        "zip_url": "https://drive.google.com/uc?export=download&id=176s_bebg9nrxI7ONqLnQMgz0P6QrGfiY",
+        "link_mediafire": "https://drive.google.com/uc?export=download&id=176s_bebg9nrxI7ONqLnQMgz0P6QrGfiY",
+        "previewUrl": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_BANDA CHICABANA 2026.mp3",
+        "preview_url": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_BANDA CHICABANA 2026.mp3"
+    },
+    {
         "id": "1792334558700",
         "nome": "MIKAEL SANTOS 2026",
         "title": "MIKAEL SANTOS 2026",
