@@ -1,5 +1,24 @@
 [
     {
+        "id": "1792809650543",
+        "nome": "JOÃO GOMES 2026",
+        "title": "JOÃO GOMES 2026",
+        "titulo": "JOÃO GOMES 2026",
+        "categoria": "ARROCHA",
+        "type": "ARROCHA",
+        "category": "ARROCHA",
+        "tamanho": "43.57 MB",
+        "size": "43.57 MB",
+        "sizeFormatted": "43.57 MB",
+        "capa": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1792809483/Jo%C3%A3o_Gomes_Cantor_-_SONHO_LINDO_-_Jo%C3%A3o_Gomes_e_Raquel_dos_Teclados_Ao_Vivo_no_Sert%C3%A3o.webp",
+        "cover_url": "https://res.cloudinary.com/y5u5zkp7/image/upload/v1792809483/Jo%C3%A3o_Gomes_Cantor_-_SONHO_LINDO_-_Jo%C3%A3o_Gomes_e_Raquel_dos_Teclados_Ao_Vivo_no_Sert%C3%A3o.webp",
+        "download": "https://drive.google.com/uc?export=download&id=1f0_13olMex7StUn3IW0kBlNThP5FrbpC",
+        "zip_url": "https://drive.google.com/uc?export=download&id=1f0_13olMex7StUn3IW0kBlNThP5FrbpC",
+        "link_mediafire": "https://drive.google.com/uc?export=download&id=1f0_13olMex7StUn3IW0kBlNThP5FrbpC",
+        "previewUrl": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_JOÃO GOMES 2026.mp3",
+        "preview_url": "https://raw.githubusercontent.com/thsize/botpensound/main/previews/preview_JOÃO GOMES 2026.mp3"
+    },
+    {
         "id": "1792809231924",
         "nome": "SELECAO ARROCHA 2026",
         "title": "SELECAO ARROCHA 2026",
