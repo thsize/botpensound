@@ -119,6 +119,7 @@
         .btn-update { background-color: var(--accent-red); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-links { background-color: var(--accent-green); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
+        .btn-toggle { background-color: var(--accent-green); color: #11111B; width: auto; padding: 8px 12px; margin: 0; font-weight: bold; }
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
 
@@ -422,6 +423,13 @@
             <div class="card card-vip">
                 <h3>👑 Gerar Nova Chave VIP</h3>
 
+                <label>Selecione a Aplicação Alvo:</label>
+                <select id="vipAppAlvoSelect">
+                    <option value="pensound">🎧 PenSound (Padrão)</option>
+                    <option value="midia_play_mix">🎵 Mídia Play Mix</option>
+                    <option value="app_principal">📱 Aplicativo Principal</option>
+                </select>
+
                 <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
                 <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
 
@@ -443,20 +451,21 @@
 
             <div class="card card-vip">
                 <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
-                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP ou Device ID..." onkeyup="filtrarChavesVip()">
+                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP, App ou Device ID..." onkeyup="filtrarChavesVip()">
                 
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
+                                <th>App</th>
                                 <th>Chave</th>
                                 <th>Tipo / Plano</th>
                                 <th>Status / Dispositivo</th>
-                                <th>Ações</th>
+                                <th style="text-align: right;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="listaChavesBody">
-                            <tr><td colspan="4">Carregando chaves do Supabase...</td></tr>
+                            <tr><td colspan="5">Carregando chaves do Supabase...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -715,6 +724,238 @@
             if (tabId === 'tab-links') {
                 carregarLinksSite();
                 carregarCardsSite();
+            }
+        }
+
+        // ==========================================
+        // LÓGICA DE CHAVES VIP (SUPABASE) - ATUALIZADA
+        // ==========================================
+        document.getElementById('btnGerarVip').addEventListener('click', async () => {
+            const tipo = document.getElementById('vipTipoPlano').value;
+            const deviceIdInput = document.getElementById('vipDeviceIdInput').value.trim();
+            const appAlvo = document.getElementById('vipAppAlvoSelect').value;
+            const btn = document.getElementById('btnGerarVip');
+            const boxResult = document.getElementById('boxResultadoVip');
+            const txtChave = document.getElementById('txtChaveGerada');
+
+            btn.disabled = true;
+            btn.innerText = "Gerando...";
+
+            const prefixo = tipo === 'sorteio' ? 'SORTEIO' : 'VIP';
+
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let p1 = '', p2 = '';
+            for (let i = 0; i < 4; i++) {
+                p1 += chars.charAt(Math.floor(Math.random() * chars.length));
+                p2 += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const novaChave = `${prefixo}-${p1}-${p2}`;
+
+            const agora = new Date();
+            let dataExpira = new Date(agora);
+
+            switch (tipo.toLowerCase()) {
+                case 'sorteio':
+                    dataExpira.setHours(agora.getHours() + 24);
+                    break;
+                case 'semanal':
+                    dataExpira.setDate(agora.getDate() + 7);
+                    break;
+                case 'quinzenal':
+                    dataExpira.setDate(agora.getDate() + 15);
+                    break;
+                case 'mensal':
+                    dataExpira.setDate(agora.getDate() + 30);
+                    break;
+                case 'vitalicio':
+                    dataExpira = null;
+                    break;
+                default:
+                    dataExpira.setDate(agora.getDate() + 7);
+            }
+
+            const expiraEmIso = dataExpira ? dataExpira.toISOString() : null;
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        chave: novaChave,
+                        tipo: tipo,
+                        utilizada: deviceIdInput ? true : false,
+                        device_id: deviceIdInput,
+                        expira_em: expiraEmIso,
+                        ativo: true,
+                        app_alvo: appAlvo
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.message || "Erro ao salvar no Supabase.");
+                }
+
+                txtChave.innerText = novaChave;
+                boxResult.style.display = 'block';
+                document.getElementById('vipDeviceIdInput').value = '';
+                carregarChavesSupabase();
+            } catch (err) {
+                alert("Erro ao gerar chave: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "GERAR E SALVAR CHAVE NO SUPABASE";
+            }
+        });
+
+        async function carregarChavesSupabase() {
+            const body = document.getElementById('listaChavesBody');
+            body.innerHTML = '<tr><td colspan="5">Carregando chaves...</td></tr>';
+
+            try {
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=created_at.desc`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) {
+                    res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*`, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    body.innerHTML = `<tr><td colspan="5" style="color:var(--accent-red)">Erro no Supabase: ${err.message || res.statusText}</td></tr>`;
+                    return;
+                }
+
+                const data = await res.json();
+                globalChavesVip = Array.isArray(data) ? data : [];
+                renderizarTabelaChaves(globalChavesVip);
+            } catch (e) {
+                console.error(e);
+                body.innerHTML = `<tr><td colspan="5" style="color:var(--accent-red)">Erro de Conexão: ${e.message}</td></tr>`;
+            }
+        }
+
+        function renderizarTabelaChaves(chaves) {
+            const body = document.getElementById('listaChavesBody');
+            body.innerHTML = '';
+
+            if (chaves.length === 0) {
+                body.innerHTML = '<tr><td colspan="5">Nenhuma chave VIP encontrada.</td></tr>';
+                return;
+            }
+
+            chaves.forEach(item => {
+                const tr = document.createElement('tr');
+                const estaAtivo = item.ativo !== false; // Se for nulo ou verdadeiro, considera ativo
+                const appNome = item.app_alvo ? item.app_alvo.replace('_', ' ').toUpperCase() : 'PENSOUND';
+
+                const statusHtml = item.utilizada 
+                    ? `<span class="badge badge-warning">Ativado (${item.device_id ? item.device_id : 'Sem ID'})</span>`
+                    : `<span class="badge badge-success">Livre</span>`;
+
+                let tipoBadgeClass = "badge-success";
+                let tipoTexto = item.tipo ? item.tipo.toUpperCase() : 'SEMANAL';
+
+                if (item.tipo === 'sorteio') {
+                    tipoBadgeClass = "badge-purple";
+                    tipoTexto = "🎁 SORTEIO (1 DIA)";
+                } else if (item.tipo === 'vitalicio') {
+                    tipoBadgeClass = "badge-warning";
+                    tipoTexto = "👑 VITALÍCIO";
+                }
+
+                const statusBadge = estaAtivo 
+                    ? `<span style="color: var(--accent-green); font-weight: bold;">● ATIVA</span>`
+                    : `<span style="color: var(--accent-red); font-weight: bold;">○ DESATIVADA</span>`;
+
+                tr.innerHTML = `
+                    <td><b style="color: var(--accent-gold); font-size: 12px;">${appNome}</b></td>
+                    <td><b>${item.chave}</b> <br>${statusBadge}</td>
+                    <td><span class="badge ${tipoBadgeClass}">${tipoTexto}</span></td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <div class="action-btns" style="justify-content: flex-end;">
+                            <button class="${estaAtivo ? 'btn-danger' : 'btn-toggle'}" onclick="alternarStatusChaveVip('${item.chave}', ${!estaAtivo})">
+                                ${estaAtivo ? 'Desativar' : 'Ativar'}
+                            </button>
+                            <button class="btn-danger" onclick="excluirChaveVip('${item.chave}')">Excluir</button>
+                        </div>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        async function alternarStatusChaveVip(chave, novoStatus) {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?chave=eq.${chave}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ativo: novoStatus })
+                });
+
+                if (res.ok) {
+                    carregarChavesSupabase();
+                } else {
+                    alert("Erro ao alterar o status da chave.");
+                }
+            } catch (e) {
+                alert("Falha de conexão ao atualizar status.");
+            }
+        }
+
+        function filtrarChavesVip() {
+            const termo = document.getElementById('searchChave').value.toLowerCase();
+            const filtradas = globalChavesVip.filter(c => 
+                c.chave.toLowerCase().includes(termo) || 
+                (c.app_alvo && c.app_alvo.toLowerCase().includes(termo)) ||
+                (c.device_id && c.device_id.toLowerCase().includes(termo))
+            );
+            renderizarTabelaChaves(filtradas);
+        }
+
+        async function excluirChaveVip(chave) {
+            if (!confirm(`Deseja realmente excluir a chave ${chave}? O usuário VIP associado a ela perderá o acesso no app.`)) return;
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?chave=eq.${chave}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (res.ok) {
+                    alert("Chave VIP excluída com sucesso!");
+                    carregarChavesSupabase();
+                } else {
+                    alert("Erro ao excluir chave no banco.");
+                }
+            } catch (e) {
+                alert("Falha na conexão ao excluir chave.");
             }
         }
 
@@ -1445,196 +1686,6 @@
                 }
             } catch (err) {
                 alert("Erro ao excluir banner: " + err.message);
-            }
-        }
-
-        document.getElementById('btnGerarVip').addEventListener('click', async () => {
-            const tipo = document.getElementById('vipTipoPlano').value;
-            const deviceIdInput = document.getElementById('vipDeviceIdInput').value.trim();
-            const btn = document.getElementById('btnGerarVip');
-            const boxResult = document.getElementById('boxResultadoVip');
-            const txtChave = document.getElementById('txtChaveGerada');
-
-            btn.disabled = true;
-            btn.innerText = "Gerando...";
-
-            const prefixo = tipo === 'sorteio' ? 'SORTEIO' : 'PENSOUND';
-
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let p1 = '', p2 = '';
-            for (let i = 0; i < 4; i++) {
-                p1 += chars.charAt(Math.floor(Math.random() * chars.length));
-                p2 += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            const novaChave = `${prefixo}-${p1}-${p2}`;
-
-            const agora = new Date();
-            let dataExpira = new Date(agora);
-
-            switch (tipo.toLowerCase()) {
-                case 'sorteio':
-                    dataExpira.setHours(agora.getHours() + 24);
-                    break;
-                case 'semanal':
-                    dataExpira.setDate(agora.getDate() + 7);
-                    break;
-                case 'quinzenal':
-                    dataExpira.setDate(agora.getDate() + 15);
-                    break;
-                case 'mensal':
-                    dataExpira.setDate(agora.getDate() + 30);
-                    break;
-                case 'vitalicio':
-                    dataExpira = null;
-                    break;
-                default:
-                    dataExpira.setDate(agora.getDate() + 7);
-            }
-
-            const expiraEmIso = dataExpira ? dataExpira.toISOString() : null;
-
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({
-                        chave: novaChave,
-                        tipo: tipo,
-                        utilizada: deviceIdInput ? true : false,
-                        device_id: deviceIdInput,
-                        expira_em: expiraEmIso
-                    })
-                });
-
-                if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.message || "Erro ao salvar no Supabase.");
-                }
-
-                txtChave.innerText = novaChave;
-                boxResult.style.display = 'block';
-                document.getElementById('vipDeviceIdInput').value = '';
-                carregarChavesSupabase();
-            } catch (err) {
-                alert("Erro ao gerar chave: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "GERAR E SALVAR CHAVE NO SUPABASE";
-            }
-        });
-
-        async function carregarChavesSupabase() {
-            const body = document.getElementById('listaChavesBody');
-            body.innerHTML = '<tr><td colspan="4">Carregando chaves...</td></tr>';
-
-            try {
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=created_at.desc`, {
-                    method: 'GET',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!res.ok) {
-                    res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*`, {
-                        method: 'GET',
-                        headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                }
-
-                if (!res.ok) {
-                    const err = await res.json();
-                    body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-red)">Erro no Supabase: ${err.message || res.statusText}</td></tr>`;
-                    return;
-                }
-
-                const data = await res.json();
-                globalChavesVip = Array.isArray(data) ? data : [];
-                renderizarTabelaChaves(globalChavesVip);
-            } catch (e) {
-                console.error(e);
-                body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-red)">Erro de Conexão: ${e.message}</td></tr>`;
-            }
-        }
-
-        function renderizarTabelaChaves(chaves) {
-            const body = document.getElementById('listaChavesBody');
-            body.innerHTML = '';
-
-            if (chaves.length === 0) {
-                body.innerHTML = '<tr><td colspan="4">Nenhuma chave VIP encontrada.</td></tr>';
-                return;
-            }
-
-            chaves.forEach(item => {
-                const tr = document.createElement('tr');
-                const statusHtml = item.utilizada 
-                    ? `<span class="badge badge-warning">Ativado (${item.device_id ? item.device_id : 'Sem ID'})</span>`
-                    : `<span class="badge badge-success">Livre (Aguardando Ativação)</span>`;
-
-                let tipoBadgeClass = "badge-success";
-                let tipoTexto = item.tipo ? item.tipo.toUpperCase() : 'SEMANAL';
-
-                if (item.tipo === 'sorteio') {
-                    tipoBadgeClass = "badge-purple";
-                    tipoTexto = "🎁 SORTEIO (1 DIA)";
-                } else if (item.tipo === 'vitalicio') {
-                    tipoBadgeClass = "badge-warning";
-                    tipoTexto = "👑 VITALÍCIO";
-                }
-
-                tr.innerHTML = `
-                    <td><b>${item.chave}</b></td>
-                    <td><span class="badge ${tipoBadgeClass}">${tipoTexto}</span></td>
-                    <td>${statusHtml}</td>
-                    <td>
-                        <button class="btn-danger" onclick="excluirChaveVip('${item.chave}')">Excluir</button>
-                    </td>
-                `;
-                body.appendChild(tr);
-            });
-        }
-
-        function filtrarChavesVip() {
-            const termo = document.getElementById('searchChave').value.toLowerCase();
-            const filtradas = globalChavesVip.filter(c => 
-                c.chave.toLowerCase().includes(termo) || 
-                (c.device_id && c.device_id.toLowerCase().includes(termo))
-            );
-            renderizarTabelaChaves(filtradas);
-        }
-
-        async function excluirChaveVip(chave) {
-            if (!confirm(`Deseja realmente excluir a chave ${chave}? O usuário VIP associado a ela perderá o acesso no app.`)) return;
-
-            try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?chave=eq.${chave}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    }
-                });
-
-                if (res.ok) {
-                    alert("Chave VIP excluída com sucesso!");
-                    carregarChavesSupabase();
-                } else {
-                    alert("Erro ao excluir chave no banco.");
-                }
-            } catch (e) {
-                alert("Falha na conexão ao excluir chave.");
             }
         }
 
