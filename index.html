@@ -123,6 +123,17 @@
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
 
+        .btn-filter {
+            background-color: var(--card-inner);
+            color: var(--text-sub);
+            border: 1px solid #45475A;
+        }
+        .btn-filter.active-filter {
+            background-color: var(--accent-blue);
+            color: #11111B;
+            border-color: var(--accent-blue);
+        }
+
         .chave-resultado {
             font-size: 18px; font-weight: bold; color: var(--accent-green);
             text-align: center; margin-top: 14px; padding: 12px;
@@ -451,6 +462,14 @@
 
             <div class="card card-vip">
                 <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
+                
+                <!-- BOTÕES DE FILTRO POR APLICATIVO -->
+                <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                    <button type="button" id="btnFiltroTodos" class="btn-small btn-filter active-filter" onclick="filtrarPorApp('todos')">🌐 Todas</button>
+                    <button type="button" id="btnFiltroPensound" class="btn-small btn-filter" onclick="filtrarPorApp('pensound')">🎧 PenSound</button>
+                    <button type="button" id="btnFiltroMultimidia" class="btn-small btn-filter" onclick="filtrarPorApp('multimidia_pro')">🎵 Multimídia Pro</button>
+                </div>
+
                 <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP, App ou Device ID..." onkeyup="filtrarChavesVip()">
                 
                 <div class="table-responsive">
@@ -670,6 +689,7 @@
         let globalShaGitHub = "";
         let globalBanners = [];
         let globalChavesVip = [];
+        let filtroAppAtual = 'todos';
 
         const wavesurfers = {};
         const wsRegions = {};
@@ -728,7 +748,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE CHAVES VIP (SUPABASE) - ATUALIZADA
+        // LÓGICA DE CHAVES VIP (SUPABASE) - FILTRADAS
         // ==========================================
         document.getElementById('btnGerarVip').addEventListener('click', async () => {
             const tipo = document.getElementById('vipTipoPlano').value;
@@ -846,11 +866,37 @@
 
                 const data = await res.json();
                 globalChavesVip = Array.isArray(data) ? data : [];
-                renderizarTabelaChaves(globalChavesVip);
+                filtrarChavesVip();
             } catch (e) {
                 console.error(e);
                 body.innerHTML = `<tr><td colspan="5" style="color:var(--accent-red)">Erro de Conexão: ${e.message}</td></tr>`;
             }
+        }
+
+        function filtrarPorApp(app) {
+            filtroAppAtual = app;
+            document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active-filter'));
+            
+            if (app === 'todos') document.getElementById('btnFiltroTodos').classList.add('active-filter');
+            if (app === 'pensound') document.getElementById('btnFiltroPensound').classList.add('active-filter');
+            if (app === 'multimidia_pro') document.getElementById('btnFiltroMultimidia').classList.add('active-filter');
+
+            filtrarChavesVip();
+        }
+
+        function filtrarChavesVip() {
+            const termo = document.getElementById('searchChave').value.toLowerCase();
+
+            const filtradas = globalChavesVip.filter(c => {
+                const appAlvoLimpo = c.app_alvo ? c.app_alvo.toLowerCase() : 'pensound';
+                const atendeApp = (filtroAppAtual === 'todos') || (appAlvoLimpo === filtroAppAtual);
+                const atendeTermo = c.chave.toLowerCase().includes(termo) || 
+                                    appAlvoLimpo.includes(termo) ||
+                                    (c.device_id && c.device_id.toLowerCase().includes(termo));
+                return atendeApp && atendeTermo;
+            });
+
+            renderizarTabelaChaves(filtradas);
         }
 
         function renderizarTabelaChaves(chaves) {
@@ -858,13 +904,13 @@
             body.innerHTML = '';
 
             if (chaves.length === 0) {
-                body.innerHTML = '<tr><td colspan="5">Nenhuma chave VIP encontrada.</td></tr>';
+                body.innerHTML = '<tr><td colspan="5">Nenhuma chave VIP encontrada para este filtro.</td></tr>';
                 return;
             }
 
             chaves.forEach(item => {
                 const tr = document.createElement('tr');
-                const estaAtivo = item.ativo !== false; // Se for nulo ou verdadeiro, considera ativo
+                const estaAtivo = item.ativo !== false;
                 const appNome = item.app_alvo ? item.app_alvo.replace('_', ' ').toUpperCase() : 'PENSOUND';
 
                 const statusHtml = item.utilizada 
@@ -924,16 +970,6 @@
             } catch (e) {
                 alert("Falha de conexão ao atualizar status.");
             }
-        }
-
-        function filtrarChavesVip() {
-            const termo = document.getElementById('searchChave').value.toLowerCase();
-            const filtradas = globalChavesVip.filter(c => 
-                c.chave.toLowerCase().includes(termo) || 
-                (c.app_alvo && c.app_alvo.toLowerCase().includes(termo)) ||
-                (c.device_id && c.device_id.toLowerCase().includes(termo))
-            );
-            renderizarTabelaChaves(filtradas);
         }
 
         async function excluirChaveVip(chave) {
