@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PenSound Admin - Gestão Completa</title>
+    <title>PenSound & Multimídia Pro Admin</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.26/jsrsasign-all-min.js"></script>
     <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
@@ -57,7 +57,7 @@
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li {
             padding: 14px 20px; color: var(--text-sub);
-            font-size: 15px; font-weight: 600; cursor: pointer;
+            font-size: 14px; font-weight: 600; cursor: pointer;
             transition: all 0.2s ease; display: flex; align-items: center; gap: 10px;
         }
 
@@ -83,6 +83,7 @@
 
         .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 20px; }
         .card-vip h3 { color: var(--accent-gold); }
+        .card-multimedia h3 { color: var(--accent-purple); }
         .card-pack h3 { color: var(--accent-purple); }
         .card-banner h3 { color: var(--accent-blue); }
         .card-update h3 { color: var(--accent-red); }
@@ -114,6 +115,7 @@
         button:hover { opacity: 0.9; }
 
         .btn-vip { background-color: var(--accent-gold); color: #11111B; }
+        .btn-purple { background-color: var(--accent-purple); color: #11111B; }
         .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
         .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-update { background-color: var(--accent-red); color: #11111B; font-size: 15px; margin-top: 20px; }
@@ -122,17 +124,6 @@
         .btn-toggle { background-color: var(--accent-green); color: #11111B; width: auto; padding: 8px 12px; margin: 0; font-weight: bold; }
         .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
         .btn-small { width: auto; padding: 8px 14px; margin-top: 0; }
-
-        .btn-filter {
-            background-color: var(--card-inner);
-            color: var(--text-sub);
-            border: 1px solid #45475A;
-        }
-        .btn-filter.active-filter {
-            background-color: var(--accent-blue);
-            color: #11111B;
-            border-color: var(--accent-blue);
-        }
 
         .chave-resultado {
             font-size: 18px; font-weight: bold; color: var(--accent-green);
@@ -204,12 +195,13 @@
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-brand"><h2>⚡ PenSound Admin</h2></div>
+        <div class="sidebar-brand"><h2>⚡ Painel Geral Admin</h2></div>
         <ul class="sidebar-menu">
             <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
             <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
             <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
-            <li onclick="switchTab('tab-vip', event)">👑 Gerenciar Chaves VIP</li>
+            <li onclick="switchTab('tab-vip-pensound', event)">🎧 Chaves PenSound</li>
+            <li onclick="switchTab('tab-vip-multimedia', event)">🎵 Chaves Multimídia Pro</li>
             <li onclick="switchTab('tab-update', event)">🚀 Atualização do App</li>
             <li onclick="switchTab('tab-links', event)">🌐 Links e Cards do Site</li>
         </ul>
@@ -429,23 +421,16 @@
             </div>
         </div>
 
-        <!-- TAB: CHAVES VIP -->
-        <div id="tab-vip" class="tab-content">
+        <!-- TAB EXCLUSIVA: CHAVES VIP PENSOUND -->
+        <div id="tab-vip-pensound" class="tab-content">
             <div class="card card-vip">
-                <h3>👑 Gerar Nova Chave VIP</h3>
-
-                <label>Selecione a Aplicação Alvo:</label>
-                <select id="vipAppAlvoSelect">
-                    <option value="pensound">🎧 PenSound (Padrão)</option>
-                    <option value="multimidia_pro">🎵 Multimídia Pro</option>
-                    <option value="app_principal">📱 Aplicativo Principal</option>
-                </select>
+                <h3>🎧 Gerar Chave VIP - PenSound</h3>
 
                 <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
-                <input type="text" id="vipDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
+                <input type="text" id="pensoundDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6 ou João da Silva">
 
-                <label for="vipTipoPlano">Selecione o Plano / Validade:</label>
-                <select id="vipTipoPlano">
+                <label>Selecione o Plano / Validade:</label>
+                <select id="pensoundTipoPlano">
                     <option value="sorteio">🎁 Chave Sorteio (1 Dia / 24h) - Grátis</option>
                     <option value="semanal">Semanal (7 Dias) - R$ 4,90</option>
                     <option value="quinzenal">Quinzenal (15 Dias) - R$ 6,90</option>
@@ -453,38 +438,75 @@
                     <option value="vitalicio">Vitalício (Para Sempre) - R$ 29,90</option>
                 </select>
                 
-                <button type="button" id="btnGerarVip" class="btn-vip">GERAR E SALVAR CHAVE NO SUPABASE</button>
+                <button type="button" onclick="gerarChaveGenerica('pensound')" class="btn-vip">GERAR CHAVE PENSOUND NO SUPABASE</button>
 
-                <div id="boxResultadoVip" style="display: none;">
-                    <div class="chave-resultado" id="txtChaveGerada">---</div>
+                <div id="boxResultadoPensound" style="display: none;">
+                    <div class="chave-resultado" id="txtChaveGeradaPensound">---</div>
                 </div>
             </div>
 
             <div class="card card-vip">
-                <h3>🔑 Chaves VIP Cadastradas no Supabase</h3>
-                
-                <!-- BOTÕES DE FILTRO POR APLICATIVO -->
-                <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
-                    <button type="button" id="btnFiltroTodos" class="btn-small btn-filter active-filter" onclick="filtrarPorApp('todos')">🌐 Todas</button>
-                    <button type="button" id="btnFiltroPensound" class="btn-small btn-filter" onclick="filtrarPorApp('pensound')">🎧 PenSound</button>
-                    <button type="button" id="btnFiltroMultimidia" class="btn-small btn-filter" onclick="filtrarPorApp('multimidia_pro')">🎵 Multimídia Pro</button>
-                </div>
-
-                <input type="text" id="searchChave" placeholder="🔎 Pesquisar chave VIP, App ou Device ID..." onkeyup="filtrarChavesVip()">
+                <h3>🔑 Chaves Cadastradas (PenSound)</h3>
+                <input type="text" id="searchPensound" placeholder="🔎 Pesquisar chave ou Device ID..." onkeyup="renderizarTabelaPensound()">
                 
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>App</th>
                                 <th>Chave</th>
                                 <th>Tipo / Plano</th>
                                 <th>Status / Dispositivo</th>
                                 <th style="text-align: right;">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="listaChavesBody">
-                            <tr><td colspan="5">Carregando chaves do Supabase...</td></tr>
+                        <tbody id="listaPensoundBody">
+                            <tr><td colspan="4">Carregando chaves do PenSound...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB EXCLUSIVA: CHAVES VIP MULTIMÍDIA PRO -->
+        <div id="tab-vip-multimedia" class="tab-content">
+            <div class="card card-multimedia">
+                <h3>🎵 Gerar Chave VIP - Multimídia Pro</h3>
+
+                <label>ID do Aparelho / Nome do Cliente (Cole o ID do WhatsApp):</label>
+                <input type="text" id="multimediaDeviceIdInput" placeholder="Ex: MULTI-9988 ou Pedro">
+
+                <label>Selecione o Plano / Validade:</label>
+                <select id="multimediaTipoPlano">
+                    <option value="sorteio">🎁 Chave Sorteio (1 Dia / 24h) - Grátis</option>
+                    <option value="semanal">Semanal (7 Dias) - R$ 4,90</option>
+                    <option value="quinzenal">Quinzenal (15 Dias) - R$ 6,90</option>
+                    <option value="mensal">Mensal (30 Dias) - R$ 12,90</option>
+                    <option value="vitalicio" selected>👑 Licença Premium (Vitalício) - R$ 25,99</option>
+                </select>
+                
+                <button type="button" onclick="gerarChaveGenerica('multimidia_pro')" class="btn-purple">GERAR CHAVE MULTIMÍDIA PRO NO SUPABASE</button>
+
+                <div id="boxResultadoMultimedia" style="display: none;">
+                    <div class="chave-resultado" id="txtChaveGeradaMultimedia">---</div>
+                </div>
+            </div>
+
+            <div class="card card-multimedia">
+                <h3>🔑 Chaves Cadastradas (Multimídia Pro)</h3>
+                <input type="text" id="searchMultimedia" placeholder="🔎 Pesquisar chave ou Device ID..." onkeyup="renderizarTabelaMultimedia()">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Chave</th>
+                                <th>Tipo / Plano</th>
+                                <th>Status / Dispositivo</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaMultimediaBody">
+                            <tr><td colspan="4">Carregando chaves do Multimídia Pro...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -496,7 +518,7 @@
             <div class="card card-update">
                 <h3>🚀 Controle de Atualização Obrigatória (Supabase)</h3>
                 <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">
-                    Sempre que você subir um novo APK e quiser que **todos os usuários com versões antigas sejam bloqueados** até baixarem a nova versão, atualize o versionCode mínimo e o link abaixo.
+                    Sempre que subir um novo APK e quiser que **todos os usuários com versões antigas sejam bloqueados** até baixarem a nova versão, atualize o versionCode mínimo e o link abaixo.
                 </p>
 
                 <form id="updateForm">
@@ -507,7 +529,7 @@
                     <input type="url" id="updateUrlApk" placeholder="https://seusite.com/pensound-v2.apk" required>
 
                     <label>Mensagem de Aviso Exibida na Tela do Usuário:</label>
-                    <textarea id="updateMensagem" rows="3" placeholder="Uma nova versão do PenSound está disponível com melhorias!" required></textarea>
+                    <textarea id="updateMensagem" rows="3" placeholder="Uma nova versão do app está disponível com melhorias!" required></textarea>
 
                     <button type="submit" id="btnSalvarUpdate" class="btn-update">FORÇAR ATUALIZAÇÃO NO SUPABASE</button>
                 </form>
@@ -689,7 +711,6 @@
         let globalShaGitHub = "";
         let globalBanners = [];
         let globalChavesVip = [];
-        let filtroAppAtual = 'todos';
 
         const wavesurfers = {};
         const wsRegions = {};
@@ -739,7 +760,7 @@
 
             if (tabId === 'tab-pacotes') carregarPacotesGitHub();
             if (tabId === 'tab-banners') carregarBannersGitHub();
-            if (tabId === 'tab-vip') carregarChavesSupabase();
+            if (tabId === 'tab-vip-pensound' || tabId === 'tab-vip-multimedia') carregarChavesSupabase();
             if (tabId === 'tab-update') carregarConfiguracaoUpdate();
             if (tabId === 'tab-links') {
                 carregarLinksSite();
@@ -748,18 +769,17 @@
         }
 
         // ==========================================
-        // LÓGICA DE CHAVES VIP (SUPABASE) - FILTRADAS
+        // LÓGICA DE CHAVES VIP SEPARADAS POR APP
         // ==========================================
-        document.getElementById('btnGerarVip').addEventListener('click', async () => {
-            const tipo = document.getElementById('vipTipoPlano').value;
-            const deviceIdInput = document.getElementById('vipDeviceIdInput').value.trim();
-            const appAlvo = document.getElementById('vipAppAlvoSelect').value;
-            const btn = document.getElementById('btnGerarVip');
-            const boxResult = document.getElementById('boxResultadoVip');
-            const txtChave = document.getElementById('txtChaveGerada');
+        async function gerarChaveGenerica(appAlvo) {
+            const isPensound = appAlvo === 'pensound';
+            const inputId = isPensound ? 'pensoundDeviceIdInput' : 'multimediaDeviceIdInput';
+            const selectTipo = isPensound ? 'pensoundTipoPlano' : 'multimediaTipoPlano';
+            const boxResult = isPensound ? 'boxResultadoPensound' : 'boxResultadoMultimedia';
+            const txtChave = isPensound ? 'txtChaveGeradaPensound' : 'txtChaveGeradaMultimedia';
 
-            btn.disabled = true;
-            btn.innerText = "Gerando...";
+            const tipo = document.getElementById(selectTipo).value;
+            const deviceIdInput = document.getElementById(inputId).value.trim();
 
             const prefixo = tipo === 'sorteio' ? 'SORTEIO' : 'VIP';
 
@@ -821,22 +841,16 @@
                     throw new Error(errData.message || "Erro ao salvar no Supabase.");
                 }
 
-                txtChave.innerText = novaChave;
-                boxResult.style.display = 'block';
-                document.getElementById('vipDeviceIdInput').value = '';
+                document.getElementById(txtChave).innerText = novaChave;
+                document.getElementById(boxResult).style.display = 'block';
+                document.getElementById(inputId).value = '';
                 carregarChavesSupabase();
             } catch (err) {
                 alert("Erro ao gerar chave: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "GERAR E SALVAR CHAVE NO SUPABASE";
             }
-        });
+        }
 
         async function carregarChavesSupabase() {
-            const body = document.getElementById('listaChavesBody');
-            body.innerHTML = '<tr><td colspan="5">Carregando chaves...</td></tr>';
-
             try {
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=created_at.desc`, {
                     method: 'GET',
@@ -847,71 +861,58 @@
                     }
                 });
 
-                if (!res.ok) {
-                    res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*`, {
-                        method: 'GET',
-                        headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
+                if (res.ok) {
+                    const data = await res.json();
+                    globalChavesVip = Array.isArray(data) ? data : [];
+                    renderizarTabelaPensound();
+                    renderizarTabelaMultimedia();
                 }
-
-                if (!res.ok) {
-                    const err = await res.json();
-                    body.innerHTML = `<tr><td colspan="5" style="color:var(--accent-red)">Erro no Supabase: ${err.message || res.statusText}</td></tr>`;
-                    return;
-                }
-
-                const data = await res.json();
-                globalChavesVip = Array.isArray(data) ? data : [];
-                filtrarChavesVip();
             } catch (e) {
-                console.error(e);
-                body.innerHTML = `<tr><td colspan="5" style="color:var(--accent-red)">Erro de Conexão: ${e.message}</td></tr>`;
+                console.error("Erro ao carregar do Supabase:", e);
             }
         }
 
-        function filtrarPorApp(app) {
-            filtroAppAtual = app;
-            document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active-filter'));
-            
-            if (app === 'todos') document.getElementById('btnFiltroTodos').classList.add('active-filter');
-            if (app === 'pensound') document.getElementById('btnFiltroPensound').classList.add('active-filter');
-            if (app === 'multimidia_pro') document.getElementById('btnFiltroMultimidia').classList.add('active-filter');
-
-            filtrarChavesVip();
-        }
-
-        function filtrarChavesVip() {
-            const termo = document.getElementById('searchChave').value.toLowerCase();
+        function renderizarTabelaPensound() {
+            const body = document.getElementById('listaPensoundBody');
+            if (!body) return;
+            const termo = document.getElementById('searchPensound').value.toLowerCase();
 
             const filtradas = globalChavesVip.filter(c => {
-                const appAlvoLimpo = c.app_alvo ? c.app_alvo.toLowerCase() : 'pensound';
-                const atendeApp = (filtroAppAtual === 'todos') || (appAlvoLimpo === filtroAppAtual);
-                const atendeTermo = c.chave.toLowerCase().includes(termo) || 
-                                    appAlvoLimpo.includes(termo) ||
-                                    (c.device_id && c.device_id.toLowerCase().includes(termo));
-                return atendeApp && atendeTermo;
+                const appAlvo = (c.app_alvo || 'pensound').toLowerCase();
+                const ePensound = appAlvo === 'pensound';
+                const atendeTermo = c.chave.toLowerCase().includes(termo) || (c.device_id && c.device_id.toLowerCase().includes(termo));
+                return ePensound && atendeTermo;
             });
 
-            renderizarTabelaChaves(filtradas);
+            montarLinhasTabela(body, filtradas);
         }
 
-        function renderizarTabelaChaves(chaves) {
-            const body = document.getElementById('listaChavesBody');
-            body.innerHTML = '';
+        function renderizarTabelaMultimedia() {
+            const body = document.getElementById('listaMultimediaBody');
+            if (!body) return;
+            const termo = document.getElementById('searchMultimedia').value.toLowerCase();
+
+            const filtradas = globalChavesVip.filter(c => {
+                const appAlvo = (c.app_alvo || '').toLowerCase();
+                const eMultimedia = appAlvo === 'multimidia_pro';
+                const atendeTermo = c.chave.toLowerCase().includes(termo) || (c.device_id && c.device_id.toLowerCase().includes(termo));
+                return eMultimedia && atendeTermo;
+            });
+
+            montarLinhasTabela(body, filtradas);
+        }
+
+        function montarLinhasTabela(bodyElement, chaves) {
+            bodyElement.innerHTML = '';
 
             if (chaves.length === 0) {
-                body.innerHTML = '<tr><td colspan="5">Nenhuma chave VIP encontrada para este filtro.</td></tr>';
+                bodyElement.innerHTML = '<tr><td colspan="4">Nenhuma chave VIP cadastrada.</td></tr>';
                 return;
             }
 
             chaves.forEach(item => {
                 const tr = document.createElement('tr');
                 const estaAtivo = item.ativo !== false;
-                const appNome = item.app_alvo ? item.app_alvo.replace('_', ' ').toUpperCase() : 'PENSOUND';
 
                 const statusHtml = item.utilizada 
                     ? `<span class="badge badge-warning">Ativado (${item.device_id ? item.device_id : 'Sem ID'})</span>`
@@ -933,7 +934,6 @@
                     : `<span style="color: var(--accent-red); font-weight: bold;">○ DESATIVADA</span>`;
 
                 tr.innerHTML = `
-                    <td><b style="color: var(--accent-gold); font-size: 12px;">${appNome}</b></td>
                     <td><b>${item.chave}</b> <br>${statusBadge}</td>
                     <td><span class="badge ${tipoBadgeClass}">${tipoTexto}</span></td>
                     <td>${statusHtml}</td>
@@ -946,7 +946,7 @@
                         </div>
                     </td>
                 `;
-                body.appendChild(tr);
+                bodyElement.appendChild(tr);
             });
         }
 
@@ -973,7 +973,7 @@
         }
 
         async function excluirChaveVip(chave) {
-            if (!confirm(`Deseja realmente excluir a chave ${chave}? O usuário VIP associado a ela perderá o acesso no app.`)) return;
+            if (!confirm(`Deseja realmente excluir a chave ${chave}? O usuário VIP associado a ela perderá o acesso.`)) return;
 
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?chave=eq.${chave}`, {
