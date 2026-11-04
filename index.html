@@ -281,7 +281,7 @@
             </div>
         </div>
 
-        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO MULTIMÍDIA PRO -->
+        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO MULTIMÍDIA PRO (ID 2) -->
         <div id="tab-update-multimedia" class="tab-content">
             <div class="card card-update">
                 <h3>🎵 Controle de Atualização - Multimídia Pro</h3>
@@ -304,7 +304,7 @@
             </div>
         </div>
 
-        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO PENSOUND -->
+        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO PENSOUND (ID 1) -->
         <div id="tab-update-pensound" class="tab-content">
             <div class="card card-update">
                 <h3>🎧 Controle de Atualização - PenSound</h3>
@@ -347,17 +347,19 @@
             document.getElementById(tabId).classList.add('active');
             if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
-            if (tabId === 'tab-update-multimedia') carregarUpdateApp('multimidia_pro');
-            if (tabId === 'tab-update-pensound') carregarUpdateApp('pensound');
+            if (tabId === 'tab-update-multimedia') carregarUpdateApp(2);
+            if (tabId === 'tab-update-pensound') carregarUpdateApp(1);
         }
 
         // ==========================================
-        // LÓGICA DE ATUALIZAÇÃO SEPARADA POR APP
+        // LÓGICA DE ATUALIZAÇÃO SEPARADA POR ID
+        // ID 1 = PenSound
+        // ID 2 = Multimídia Pro
         // ==========================================
 
-        async function carregarUpdateApp(appNome) {
+        async function carregarUpdateApp(appId) {
             try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/app_config?app_nome=eq.${appNome}&select=*`, {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/app_config?id=eq.${appId}&select=*`, {
                     headers: {
                         'apikey': SUPABASE_ANON_KEY,
                         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
@@ -368,7 +370,7 @@
                     const data = await res.json();
                     if (data && data.length > 0) {
                         const config = data[0];
-                        if (appNome === 'multimidia_pro') {
+                        if (appId === 2) {
                             document.getElementById('updateVersaoMinimaMulti').value = config.versao_minima || 1;
                             document.getElementById('updateUrlApkMulti').value = config.url_atualizacao || '';
                             document.getElementById('updateMensagemMulti').value = config.mensagem_atualizacao || '';
@@ -384,7 +386,7 @@
             }
         }
 
-        // SALVAR ATUALIZAÇÃO DO MULTIMÍDIA PRO
+        // SALVAR ATUALIZAÇÃO DO MULTIMÍDIA PRO (ID 2)
         document.getElementById('updateFormMultimedia')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSalvarUpdateMulti');
@@ -395,10 +397,10 @@
             const urlApk = document.getElementById('updateUrlApkMulti').value.trim();
             const mensagem = document.getElementById('updateMensagemMulti').value.trim();
 
-            await salvarConfiguracaoNoSupabase('multimidia_pro', versaoMinima, urlApk, mensagem, btn);
+            await salvarConfiguracaoNoSupabase(2, "Multimídia Pro", versaoMinima, urlApk, mensagem, btn);
         });
 
-        // SALVAR ATUALIZAÇÃO DO PENSOUND
+        // SALVAR ATUALIZAÇÃO DO PENSOUND (ID 1)
         document.getElementById('updateFormPensound')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSalvarUpdatePen');
@@ -409,13 +411,12 @@
             const urlApk = document.getElementById('updateUrlApkPen').value.trim();
             const mensagem = document.getElementById('updateMensagemPen').value.trim();
 
-            await salvarConfiguracaoNoSupabase('pensound', versaoMinima, urlApk, mensagem, btn);
+            await salvarConfiguracaoNoSupabase(1, "PenSound", versaoMinima, urlApk, mensagem, btn);
         });
 
-        async function salvarConfiguracaoNoSupabase(appNome, versaoMinima, urlApk, mensagem, btnElement) {
+        async function salvarConfiguracaoNoSupabase(idApp, nomeExibicao, versaoMinima, urlApk, mensagem, btnElement) {
             try {
-                // Tenta fazer o PATCH especificando o app_nome
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/app_config?app_nome=eq.${appNome}`, {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/app_config?id=eq.${idApp}`, {
                     method: 'PATCH',
                     headers: {
                         'apikey': SUPABASE_ANON_KEY,
@@ -431,7 +432,7 @@
                 });
 
                 if (response.ok) {
-                    alert(`✅ Atualização do app (${appNome.toUpperCase()}) configurada com sucesso!`);
+                    alert(`✅ Atualização do (${nomeExibicao}) salva com sucesso!`);
                 } else {
                     const err = await response.json();
                     throw new Error(err.message || "Erro ao salvar no Supabase.");
