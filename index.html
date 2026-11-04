@@ -82,26 +82,16 @@
         }
 
         .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 20px; }
-        .card-vip h3 { color: var(--accent-gold); }
-        .card-multimedia h3 { color: var(--accent-purple); }
-        .card-pack h3 { color: var(--accent-purple); }
-        .card-banner h3 { color: var(--accent-blue); }
         .card-update h3 { color: var(--accent-red); }
-        .card-links h3 { color: var(--accent-green); }
 
         label {
             display: block; font-size: 13px; font-weight: 600;
             color: var(--text-sub); margin-bottom: 6px; margin-top: 12px;
         }
 
-        input[type="text"], input[type="password"], input[type="url"], input[type="number"], textarea, select, input[type="color"] {
+        input[type="text"], input[type="password"], input[type="url"], input[type="number"], textarea {
             width: 100%; padding: 12px 14px; background-color: var(--card-inner);
             color: #FFFFFF; border: 1px solid #45475A; border-radius: 8px; font-size: 14px;
-        }
-
-        input[type="file"] {
-            width: 100%; padding: 10px; background-color: var(--card-inner);
-            border: 1px dashed #45475A; border-radius: 8px; color: var(--text-sub);
         }
 
         button {
@@ -111,46 +101,7 @@
         }
 
         button:hover { opacity: 0.9; }
-
-        .btn-vip { background-color: var(--accent-gold); color: #11111B; }
-        .btn-purple { background-color: var(--accent-purple); color: #11111B; }
-        .btn-add { background-color: var(--card-inner); color: var(--accent-green); border: 1px solid var(--accent-green); }
-        .btn-submit { background-color: var(--accent-purple); color: #11111B; font-size: 15px; margin-top: 20px; }
         .btn-update { background-color: var(--accent-red); color: #11111B; font-size: 15px; margin-top: 20px; }
-        .btn-links { background-color: var(--accent-green); color: #11111B; font-size: 15px; margin-top: 20px; }
-        .btn-danger { background-color: var(--accent-red); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
-        .btn-toggle { background-color: var(--accent-green); color: #11111B; width: auto; padding: 8px 12px; margin: 0; font-weight: bold; }
-        .btn-edit { background-color: var(--accent-blue); color: #11111B; width: auto; padding: 8px 12px; margin: 0; }
-
-        .chave-resultado {
-            font-size: 18px; font-weight: bold; color: var(--accent-green);
-            text-align: center; margin-top: 14px; padding: 12px;
-            background-color: var(--card-inner); border-radius: 8px;
-            border: 1px solid var(--accent-green); user-select: all; word-break: break-all;
-        }
-
-        .pack-item {
-            background-color: var(--card-inner); padding: 16px;
-            border-radius: 8px; margin-bottom: 16px; border: 1px solid #45475A;
-        }
-
-        .table-responsive { width: 100%; overflow-x: auto; margin-top: 14px; }
-        table {
-            width: 100%; border-collapse: collapse; background-color: var(--card-inner);
-            border-radius: 8px; overflow: hidden; min-width: 500px;
-        }
-        th, td {
-            padding: 12px 14px; text-align: left;
-            border-bottom: 1px solid #313244; font-size: 14px;
-        }
-        th { background-color: #11111B; color: var(--accent-blue); }
-
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .badge-success { background-color: var(--accent-green); color: #11111B; }
-        .badge-warning { background-color: var(--accent-gold); color: #11111B; }
-        .badge-purple { background-color: var(--accent-purple); color: #11111B; }
-        .badge-danger { background-color: var(--accent-red); color: #11111B; }
-        .action-btns { display: flex; gap: 8px; }
 
         @media (max-width: 768px) {
             body { flex-direction: column; }
@@ -162,7 +113,6 @@
             .sidebar-menu { display: flex; overflow-x: auto; white-space: nowrap; padding: 0 10px; }
             .sidebar-menu li { padding: 10px 14px; font-size: 12px; border-left: none; border-bottom: 3px solid transparent; }
             .sidebar-menu li:hover, .sidebar-menu li.active { border-left: none; border-bottom: 3px solid var(--accent-blue); }
-            
             .main-content { margin-left: 0; padding: 15px; width: 100%; }
             .card { padding: 16px; }
         }
@@ -173,164 +123,56 @@
     <div class="sidebar">
         <div class="sidebar-brand"><h2>⚡ Painel Admin Geral</h2></div>
         <ul class="sidebar-menu">
-            <li class="active" onclick="switchTab('tab-publicar', event)">📦 Publicar Pacotes</li>
-            <li onclick="switchTab('tab-pacotes', event)">🎵 Gerenciar Pacotes</li>
-            <li onclick="switchTab('tab-banners', event)">🖼️ Gerenciar Banners</li>
-            <li onclick="switchTab('tab-vip-pensound', event)">🎧 Chaves PenSound</li>
-            <li onclick="switchTab('tab-vip-multimedia', event)">🎵 Chaves Multimídia Pro</li>
-            <li onclick="switchTab('tab-update-multimedia', event)">🚀 Atualização Multimídia Pro</li>
+            <li class="active" onclick="switchTab('tab-update-multimedia', event)">🚀 Atualização Multimídia Pro</li>
             <li onclick="switchTab('tab-update-pensound', event)">📲 Atualização PenSound</li>
-            <li onclick="switchTab('tab-links', event)">🌐 Links e Cards do Site</li>
         </ul>
     </div>
 
     <div class="main-content">
 
-        <!-- TAB: PUBLICAR PACOTES -->
-        <div id="tab-publicar" class="tab-content active">
-            <div class="card card-pack">
-                <h3>📦 Envio de Pacotes em Lote (PenSound)</h3>
-                <form id="packForm">
-                    <div id="cardsContainer">
-                        <div class="pack-item" id="pack-item-1">
-                            <h4>Pacote 1</h4>
-                            <label>Nome do Pacote:</label>
-                            <input type="text" class="input-nome" placeholder="Ex: MUDANÇA DE REPERTÓRIO" required>
-                            
-                            <label>Categoria:</label>
-                            <select class="input-categoria">
-                                <option value="PAGODAO">PAGODÃO</option>
-                                <option value="ARROCHA">ARROCHA</option>
-                                <option value="ARROCHADEIRA">ARROCHADEIRA</option>
-                                <option value="SAMBA">SAMBA</option>
-                                <option value="FORRO">FORRÓ</option>
-                                <option value="FUNK">FUNK</option>
-                                <option value="REPERTORIO">REPERTÓRIO</option>
-                                <option value="OUTROS">OUTROS</option>
-                            </select>
-
-                            <label style="color: var(--accent-gold);">💾 Tamanho do Pacote:</label>
-                            <input type="text" class="input-tamanho" placeholder="Ex: 350 MB" value="ZIP">
-                            
-                            <label>Capa do Pack (Imagem):</label>
-                            <input type="file" class="input-capa" accept="image/*" required>
-                            
-                            <label>Link Direto do ZIP:</label>
-                            <input type="url" class="input-download" placeholder="https://..." required>
-                        </div>
-                    </div>
-
-                    <label style="margin-top: 10px;">Token do GitHub (PAT):</label>
-                    <input type="password" id="ghToken" required placeholder="ghp_xxxx..." oninput="salvarTokenLocal(this.value)">
-
-                    <button type="submit" id="btnSubmit" class="btn-submit">PUBLICAR PACOTES</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- TAB: GERENCIAR PACOTES -->
-        <div id="tab-pacotes" class="tab-content">
-            <div class="card card-pack">
-                <h3>🎵 Lista de Pacotes Cadastrados</h3>
-                <input type="text" id="searchPacote" placeholder="🔎 Pesquisar pacote..." onkeyup="filtrarPacotes()">
-                
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Capa</th>
-                                <th>Nome</th>
-                                <th>Categoria</th>
-                                <th>Tamanho</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaPacotesBody">
-                            <tr><td colspan="5">Carregando pacotes do GitHub...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB: BANNERS -->
-        <div id="tab-banners" class="tab-content">
-            <div class="card card-banner">
-                <h3>🖼️ Gerenciar Banners</h3>
-                <p style="color: var(--text-sub);">Consulte e publique banners para o aplicativo.</p>
-            </div>
-        </div>
-
-        <!-- TAB EXCLUSIVA: CHAVES VIP PENSOUND -->
-        <div id="tab-vip-pensound" class="tab-content">
-            <div class="card card-vip">
-                <h3>🎧 Gerar Chave VIP - PenSound</h3>
-                <label>ID do Aparelho / Cliente:</label>
-                <input type="text" id="pensoundDeviceIdInput" placeholder="Ex: a1b2c3d4e5f6">
-                <button type="button" onclick="gerarChaveGenerica('pensound')" class="btn-vip">GERAR CHAVE PENSOUND</button>
-            </div>
-        </div>
-
-        <!-- TAB EXCLUSIVA: CHAVES VIP MULTIMÍDIA PRO -->
-        <div id="tab-vip-multimedia" class="tab-content">
-            <div class="card card-multimedia">
-                <h3>🎵 Gerar Chave VIP - Multimídia Pro</h3>
-                <label>ID do Aparelho / Cliente:</label>
-                <input type="text" id="multimediaDeviceIdInput" placeholder="Ex: MULTI-9988">
-                <button type="button" onclick="gerarChaveGenerica('multimidia_pro')" class="btn-purple">GERAR CHAVE MULTIMÍDIA PRO</button>
-            </div>
-        </div>
-
-        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO MULTIMÍDIA PRO (ID 2) -->
-        <div id="tab-update-multimedia" class="tab-content">
+        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO MULTIMÍDIA PRO (Tabela: multimidia_config) -->
+        <div id="tab-update-multimedia" class="tab-content active">
             <div class="card card-update">
                 <h3>🎵 Controle de Atualização - Multimídia Pro</h3>
                 <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">
-                    Configurações de versão exigida especificamente para o aplicativo **Multimídia Pro**.
+                    Altere a versão, insira seu link direto do APK e edite a mensagem do <b>Multimídia Pro</b>.
                 </p>
 
                 <form id="updateFormMultimedia">
                     <label>Versão Mínima Exigida (versionCode do Android):</label>
-                    <input type="number" id="updateVersaoMinimaMulti" min="1" placeholder="Ex: 2" required>
+                    <input type="number" id="updateVersaoMinimaMulti" min="1" placeholder="Ex: 1" required>
 
-                    <label>Link Direto para Download do APK (Multimídia Pro):</label>
-                    <input type="url" id="updateUrlApkMulti" placeholder="https://seusite.com/multimidia-pro-v2.apk" required>
+                    <label>Link Direto para Download do APK (Cole seu link aqui):</label>
+                    <input type="url" id="updateUrlApkMulti" placeholder="Cole aqui o link do APK do Multimídia Pro..." required>
 
                     <label>Mensagem de Aviso para o Usuário:</label>
-                    <textarea id="updateMensagemMulti" rows="3" placeholder="Uma nova versão do Multimídia Pro está disponível com novos recursos!" required></textarea>
+                    <textarea id="updateMensagemMulti" rows="3" placeholder="Digite a mensagem de atualização..." required></textarea>
 
                     <button type="submit" id="btnSalvarUpdateMulti" class="btn-update">SALVAR ATUALIZAÇÃO DO MULTIMÍDIA PRO</button>
                 </form>
             </div>
         </div>
 
-        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO PENSOUND (ID 1) -->
+        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO PENSOUND (Tabela: app_config) -->
         <div id="tab-update-pensound" class="tab-content">
             <div class="card card-update">
                 <h3>🎧 Controle de Atualização - PenSound</h3>
                 <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">
-                    Configurações de versão exigida especificamente para o aplicativo **PenSound**.
+                    Altere a versão, insira seu link direto do APK e edite a mensagem do <b>PenSound</b>.
                 </p>
 
                 <form id="updateFormPensound">
                     <label>Versão Mínima Exigida (versionCode do Android):</label>
-                    <input type="number" id="updateVersaoMinimaPen" min="1" placeholder="Ex: 2" required>
+                    <input type="number" id="updateVersaoMinimaPen" min="1" placeholder="Ex: 1" required>
 
-                    <label>Link Direto para Download do APK (PenSound):</label>
-                    <input type="url" id="updateUrlApkPen" placeholder="https://seusite.com/pensound-v2.apk" required>
+                    <label>Link Direto para Download do APK (Cole seu link aqui):</label>
+                    <input type="url" id="updateUrlApkPen" placeholder="Cole aqui o link do APK do PenSound..." required>
 
                     <label>Mensagem de Aviso para o Usuário:</label>
-                    <textarea id="updateMensagemPen" rows="3" placeholder="Nova atualização do PenSound disponível!" required></textarea>
+                    <textarea id="updateMensagemPen" rows="3" placeholder="Digite a mensagem de atualização..." required></textarea>
 
                     <button type="submit" id="btnSalvarUpdatePen" class="btn-update" style="background-color: var(--accent-gold);">SALVAR ATUALIZAÇÃO DO PENSOUND</button>
                 </form>
-            </div>
-        </div>
-
-        <!-- TAB: LINKS DO SITE -->
-        <div id="tab-links" class="tab-content">
-            <div class="card card-links">
-                <h3>🌐 Links da Landing Page</h3>
             </div>
         </div>
 
@@ -340,6 +182,10 @@
         const SUPABASE_URL = "https://yxrqkhbjytbxwwswbvel.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4cnFraGJqeXRieHd3c3didmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjkzMTksImV4cCI6MjEwMzg0NTMxOX0.zjgkZKrT3dfsRsygMA7QKC33HTrw4I-Y21CE4k-qcyU";
 
+        document.addEventListener("DOMContentLoaded", () => {
+            carregarUpdateMultimidia();
+        });
+
         function switchTab(tabId, evt) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
@@ -347,103 +193,97 @@
             document.getElementById(tabId).classList.add('active');
             if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
-            if (tabId === 'tab-update-multimedia') carregarUpdateApp(2);
-            if (tabId === 'tab-update-pensound') carregarUpdateApp(1);
+            if (tabId === 'tab-update-multimedia') carregarUpdateMultimidia();
+            if (tabId === 'tab-update-pensound') carregarUpdatePensound();
         }
 
         // ==========================================
-        // LÓGICA DE ATUALIZAÇÃO SEPARADA POR ID
-        // ID 1 = PenSound
-        // ID 2 = Multimídia Pro
+        // MULTIMÍDIA PRO (Tabela: multimidia_config)
         // ==========================================
-
-        async function carregarUpdateApp(appId) {
+        async function carregarUpdateMultimidia() {
             try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/app_config?id=eq.${appId}&select=*`, {
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    }
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/multimidia_config?id=eq.1&select=*`, {
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
                 });
-
                 if (res.ok) {
                     const data = await res.json();
                     if (data && data.length > 0) {
-                        const config = data[0];
-                        if (appId === 2) {
-                            document.getElementById('updateVersaoMinimaMulti').value = config.versao_minima || 1;
-                            document.getElementById('updateUrlApkMulti').value = config.url_atualizacao || '';
-                            document.getElementById('updateMensagemMulti').value = config.mensagem_atualizacao || '';
-                        } else {
-                            document.getElementById('updateVersaoMinimaPen').value = config.versao_minima || 1;
-                            document.getElementById('updateUrlApkPen').value = config.url_atualizacao || '';
-                            document.getElementById('updateMensagemPen').value = config.mensagem_atualizacao || '';
-                        }
+                        document.getElementById('updateVersaoMinimaMulti').value = data[0].versao_minima || 1;
+                        document.getElementById('updateUrlApkMulti').value = data[0].url_atualizacao || '';
+                        document.getElementById('updateMensagemMulti').value = data[0].mensagem_atualizacao || '';
                     }
                 }
-            } catch (err) {
-                console.error("Erro ao carregar app_config:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        // SALVAR ATUALIZAÇÃO DO MULTIMÍDIA PRO (ID 2)
         document.getElementById('updateFormMultimedia')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSalvarUpdateMulti');
-            btn.disabled = true;
-            btn.innerText = "Salvando...";
+            btn.disabled = true; btn.innerText = "Salvando...";
 
-            const versaoMinima = parseInt(document.getElementById('updateVersaoMinimaMulti').value);
-            const urlApk = document.getElementById('updateUrlApkMulti').value.trim();
-            const mensagem = document.getElementById('updateMensagemMulti').value.trim();
-
-            await salvarConfiguracaoNoSupabase(2, "Multimídia Pro", versaoMinima, urlApk, mensagem, btn);
-        });
-
-        // SALVAR ATUALIZAÇÃO DO PENSOUND (ID 1)
-        document.getElementById('updateFormPensound')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSalvarUpdatePen');
-            btn.disabled = true;
-            btn.innerText = "Salvando...";
-
-            const versaoMinima = parseInt(document.getElementById('updateVersaoMinimaPen').value);
-            const urlApk = document.getElementById('updateUrlApkPen').value.trim();
-            const mensagem = document.getElementById('updateMensagemPen').value.trim();
-
-            await salvarConfiguracaoNoSupabase(1, "PenSound", versaoMinima, urlApk, mensagem, btn);
-        });
-
-        async function salvarConfiguracaoNoSupabase(idApp, nomeExibicao, versaoMinima, urlApk, mensagem, btnElement) {
             try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/app_config?id=eq.${idApp}`, {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/multimidia_config?id=eq.1`, {
                     method: 'PATCH',
                     headers: {
                         'apikey': SUPABASE_ANON_KEY,
                         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        versao_minima: versaoMinima,
-                        url_atualizacao: urlApk,
-                        mensagem_atualizacao: mensagem
+                        versao_minima: parseInt(document.getElementById('updateVersaoMinimaMulti').value),
+                        url_atualizacao: document.getElementById('updateUrlApkMulti').value.trim(),
+                        mensagem_atualizacao: document.getElementById('updateMensagemMulti').value.trim()
                     })
                 });
+                if (res.ok) alert("✅ Atualização do Multimídia Pro salva com sucesso!");
+                else alert("❌ Erro ao salvar atualização do Multimídia Pro.");
+            } catch (err) { alert("❌ Erro: " + err.message); }
+            finally { btn.disabled = false; btn.innerText = "SALVAR ATUALIZAÇÃO DO MULTIMÍDIA PRO"; }
+        });
 
-                if (response.ok) {
-                    alert(`✅ Atualização do (${nomeExibicao}) salva com sucesso!`);
-                } else {
-                    const err = await response.json();
-                    throw new Error(err.message || "Erro ao salvar no Supabase.");
+        // ==========================================
+        // PENSOUND (Tabela: app_config)
+        // ==========================================
+        async function carregarUpdatePensound() {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/app_config?id=eq.1&select=*`, {
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        document.getElementById('updateVersaoMinimaPen').value = data[0].versao_minima || 1;
+                        document.getElementById('updateUrlApkPen').value = data[0].url_atualizacao || '';
+                        document.getElementById('updateMensagemPen').value = data[0].mensagem_atualizacao || '';
+                    }
                 }
-            } catch (err) {
-                alert("❌ Erro ao salvar atualização: " + err.message);
-            } finally {
-                btnElement.disabled = false;
-                btnElement.innerText = "SALVAR ATUALIZAÇÃO";
-            }
+            } catch (err) { console.error(err); }
         }
+
+        document.getElementById('updateFormPensound')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarUpdatePen');
+            btn.disabled = true; btn.innerText = "Salvando...";
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/app_config?id=eq.1`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        versao_minima: parseInt(document.getElementById('updateVersaoMinimaPen').value),
+                        url_atualizacao: document.getElementById('updateUrlApkPen').value.trim(),
+                        mensagem_atualizacao: document.getElementById('updateMensagemPen').value.trim()
+                    })
+                });
+                if (res.ok) alert("✅ Atualização do PenSound salva com sucesso!");
+                else alert("❌ Erro ao salvar atualização do PenSound.");
+            } catch (err) { alert("❌ Erro: " + err.message); }
+            finally { btn.disabled = false; btn.innerText = "SALVAR ATUALIZAÇÃO DO PENSOUND"; }
+        });
     </script>
 </body>
 </html>
