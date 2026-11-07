@@ -514,7 +514,7 @@
             </div>
         </div>
 
-        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO MULTIMÍDIA PRO (Tabela: multimidia_config) -->
+        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO MULTIMÍDIA PRO -->
         <div id="tab-update-multimedia" class="tab-content">
             <div class="card card-update">
                 <h3>🎵 Controle de Atualização - Multimídia Pro</h3>
@@ -537,7 +537,7 @@
             </div>
         </div>
 
-        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO PENSOUND (Tabela: app_config) -->
+        <!-- TAB EXCLUSIVA: ATUALIZAÇÃO PENSOUND -->
         <div id="tab-update-pensound" class="tab-content">
             <div class="card card-update">
                 <h3>🎧 Controle de Atualização - PenSound</h3>
@@ -770,6 +770,8 @@
                 if (document.getElementById('bannerGhToken')) document.getElementById('bannerGhToken').value = tokenSalvo;
                 if (document.getElementById('ghToken')) document.getElementById('ghToken').value = tokenSalvo;
             }
+            // Carrega as chaves VIP logo no arranque do painel
+            carregarChavesSupabase();
         });
 
         function salvarTokenLocal(val) {
@@ -798,7 +800,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE ATUALIZAÇÃO PENSOUND & MULTIMÍDIA PRO (ISOLADAS)
+        // LÓGICA DE ATUALIZAÇÃO PENSOUND & MULTIMÍDIA PRO
         // ==========================================
 
         async function carregarUpdateMultimidia() {
@@ -884,7 +886,7 @@
         });
 
         // ==========================================
-        // LÓGICA DE CHAVES VIP SEPARADAS POR APP
+        // LÓGICA DE CHAVES VIP CORRIGIDA
         // ==========================================
         async function gerarChaveGenerica(appAlvo) {
             const isPensound = appAlvo === 'pensound';
@@ -944,7 +946,7 @@
                         chave: novaChave,
                         tipo: tipo,
                         utilizada: deviceIdInput ? true : false,
-                        device_id: deviceIdInput,
+                        device_id: deviceIdInput || null,
                         expira_em: expiraEmIso,
                         ativo: true,
                         app_alvo: appAlvo
@@ -953,13 +955,13 @@
 
                 if (!response.ok) {
                     const errData = await response.json();
-                    throw new Error(errData.message || "Erro ao salvar no Supabase.");
+                    throw new Error(errData.message || "Erro ao salvar chave no Supabase.");
                 }
 
                 document.getElementById(txtChave).innerText = novaChave;
                 document.getElementById(boxResult).style.display = 'block';
                 document.getElementById(inputId).value = '';
-                carregarChavesSupabase();
+                await carregarChavesSupabase();
             } catch (err) {
                 alert("Erro ao gerar chave: " + err.message);
             }
@@ -967,7 +969,8 @@
 
         async function carregarChavesSupabase() {
             try {
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*&order=created_at.desc`, {
+                // Consulta sem dependência direta do campo created_at para evitar erro HTTP 400
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/chaves_vip?select=*`, {
                     method: 'GET',
                     headers: {
                         'apikey': SUPABASE_ANON_KEY,
@@ -981,21 +984,30 @@
                     globalChavesVip = Array.isArray(data) ? data : [];
                     renderizarTabelaPensound();
                     renderizarTabelaMultimedia();
+                } else {
+                    throw new Error("Erro na requisição ao Supabase.");
                 }
             } catch (e) {
                 console.error("Erro ao carregar do Supabase:", e);
+                const pBody = document.getElementById('listaPensoundBody');
+                const mBody = document.getElementById('listaMultimediaBody');
+                if (pBody) pBody.innerHTML = '<tr><td colspan="4" style="color:var(--accent-red)">Erro ao carregar chaves.</td></tr>';
+                if (mBody) mBody.innerHTML = '<tr><td colspan="4" style="color:var(--accent-red)">Erro ao carregar chaves.</td></tr>';
             }
         }
 
         function renderizarTabelaPensound() {
             const body = document.getElementById('listaPensoundBody');
             if (!body) return;
-            const termo = document.getElementById('searchPensound').value.toLowerCase();
+            const searchInput = document.getElementById('searchPensound');
+            const termo = searchInput ? searchInput.value.toLowerCase() : '';
 
             const filtradas = globalChavesVip.filter(c => {
                 const appAlvo = (c.app_alvo || 'pensound').toLowerCase();
                 const ePensound = appAlvo === 'pensound';
-                const atendeTermo = c.chave.toLowerCase().includes(termo) || (c.device_id && c.device_id.toLowerCase().includes(termo));
+                const chaveStr = c.chave ? c.chave.toLowerCase() : '';
+                const deviceStr = c.device_id ? c.device_id.toLowerCase() : '';
+                const atendeTermo = chaveStr.includes(termo) || deviceStr.includes(termo);
                 return ePensound && atendeTermo;
             });
 
@@ -1005,12 +1017,15 @@
         function renderizarTabelaMultimedia() {
             const body = document.getElementById('listaMultimediaBody');
             if (!body) return;
-            const termo = document.getElementById('searchMultimedia').value.toLowerCase();
+            const searchInput = document.getElementById('searchMultimedia');
+            const termo = searchInput ? searchInput.value.toLowerCase() : '';
 
             const filtradas = globalChavesVip.filter(c => {
                 const appAlvo = (c.app_alvo || '').toLowerCase();
                 const eMultimedia = appAlvo === 'multimidia_pro';
-                const atendeTermo = c.chave.toLowerCase().includes(termo) || (c.device_id && c.device_id.toLowerCase().includes(termo));
+                const chaveStr = c.chave ? c.chave.toLowerCase() : '';
+                const deviceStr = c.device_id ? c.device_id.toLowerCase() : '';
+                const atendeTermo = chaveStr.includes(termo) || deviceStr.includes(termo);
                 return eMultimedia && atendeTermo;
             });
 
@@ -1020,7 +1035,7 @@
         function montarLinhasTabela(bodyElement, chaves) {
             bodyElement.innerHTML = '';
 
-            if (chaves.length === 0) {
+            if (!chaves || chaves.length === 0) {
                 bodyElement.innerHTML = '<tr><td colspan="4">Nenhuma chave VIP cadastrada.</td></tr>';
                 return;
             }
@@ -1256,7 +1271,6 @@
             let imagemUrlFinal = document.getElementById('cardSiteImagemUrl').value.trim();
 
             try {
-                // Se o usuário selecionou uma imagem local, faz upload para o Cloudinary
                 if (fileInput && fileInput.files && fileInput.files[0]) {
                     btn.innerText = "Enviando imagem...";
                     const formData = new FormData();
@@ -2169,7 +2183,6 @@
 
                 let pacotesAdicionados = 0;
                 let ultimosPacotes = [];
-                let novosBanners = [];
                 let loteNovosPacotes = [];
 
                 for (let i = 0; i < cards.length; i++) {
